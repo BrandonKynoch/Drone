@@ -1,16 +1,19 @@
 CC=cc
 
-headers_dir = ../headers
+headers_dir = ./headers
+global_headers_dir = ../Globals/headers
 obj_dir = obj
 
 #Include header dir - this allows us to include headers using <> instead of ""
-CFLAGS = -I$(headers_dir)
+CFLAGS = -I$(headers_dir) -I$(global_headers_dir)
 
-files = master socket
-header_files = socket
+files = d_master d_networking
+header_files = d_networking
+global_header_files = globals
 
 objects = $(patsubst %, $(obj_dir)/%.o, $(files))
 headers = $(patsubst %, $(headers_dir)/%.h, $(header_files))
+global_headers = $(patsubst %, $(global_headers_dir)/%.h, $(global_header_files))
 
 # Make executable
 output : $(objects)
@@ -18,7 +21,7 @@ output : $(objects)
 	$(CC) -o output $(objects) $(CFLAGS) -lm
 
 # Make objects
-$(obj_dir)/%.o : %.c $(headers)
+$(obj_dir)/%.o : %.c $(headers) $(global_headers)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 .PHONY : clean

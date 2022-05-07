@@ -7,6 +7,4 @@
 
 #include <netinet/in.h>
 
-void socket_test();
-
-void init_socket();
+void init_server_socket();
