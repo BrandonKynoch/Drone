@@ -27,12 +27,11 @@ public class MasterHandler : MonoBehaviour {
     }
 
     public void Start() {
-        isPlaying = false;
+        isPlaying = true;
     }
 
     public void Update() {
         isPlaying = true;
-        
     }
 }
 

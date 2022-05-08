@@ -6,6 +6,7 @@ public class UserPlayerController : MonoBehaviour {
     public GameObject explosionParticlesPrefab;
     public Rigidbody moveTarget;
     public Transform holdTransform;
+    public Transform smoothedHipsTransform;
 
     private UserPlayer logic;
 
@@ -14,11 +15,11 @@ public class UserPlayerController : MonoBehaviour {
 
     private static UserPlayerController staticInstance;
 
-    /// Constants ///
-    public const float INPUT_DIAMETER = 0.4f;
+    private Vector2 inputMoveVector;
 
+    /// Constants ///
     private const float MAX_VELOCITY = 5f;
-    private const float VELOCITY_LERP_SPEED = 8f;
+    private const float VELOCITY_LERP_SPEED = 15f;
 
     private const int RAYCAST_PLANE = 1 << 10;
 
@@ -45,8 +46,11 @@ public class UserPlayerController : MonoBehaviour {
             previousPositionData.Add(transform.position);
         }
         smoothedHipsPosition = transform.position;
+        smoothedHipsTransform.SetParent(null);
 
-        InputHandler.OnTouchUp += OnTouchUp;
+        //InputHandler.OnTouchUp += OnTouchUp;
+
+        inputMoveVector = Vector2.zero;
 
         logic = new UserPlayer(this, moveTarget, transform, holdTransform, explosionParticlesPrefab, MAX_VELOCITY, VELOCITY_LERP_SPEED);
     }
@@ -56,35 +60,40 @@ public class UserPlayerController : MonoBehaviour {
             logic.Update();
 
             /// Movement ///
-            Vector2 inputVector = Utilities.ClampVector01(InputHandler.HoldDeltaPos / (INPUT_DIAMETER * 0.5f)) * 0.1f;
-            Ray cameraProjection = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
-            Ray cameraInputProjection = Camera.main.ScreenPointToRay(
-                new Vector3(
-                    (Screen.width / 2f) - (inputVector.x * Screen.width),
-                    (Screen.height / 2f) - (inputVector.y * Screen.height),
-                    0f));
-
-            //Debug.DrawRay(cameraProjection.origin, cameraProjection.direction * 10f, Color.black);
-            //Debug.DrawRay(cameraInputProjection.origin, cameraInputProjection.direction * 10f, Color.green);
-
-            RaycastHit hitA = new RaycastHit();
-            RaycastHit hitB = new RaycastHit();
-            Physics.Raycast(cameraProjection, out hitA, 100f, RAYCAST_PLANE);
-            Physics.Raycast(cameraInputProjection, out hitB, 100f, RAYCAST_PLANE);
-
-            Vector2 inputVelocity = (new Vector2(
-                (hitA.point.x - hitB.point.x),
-                (hitA.point.z - hitB.point.z)
-                )).normalized * Utilities.ClampVector01(InputHandler.HoldDeltaPos / INPUT_DIAMETER).magnitude;
-
-            /*if (InputHandler.IsHolding && InputHandler.TouchDownPositionNormalized.y > CameraHandler.CAMERA_MOVE_INPUT_SCREEN_POS) {
-                logic.targetVelocity = inputVelocity * logic.MaxVelocity;
-                logic.targetLookVector = transform.position - Camera.main.transform.position;
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S)) {
+                if (Input.GetKey(KeyCode.W)) {
+                    inputMoveVector.y += VELOCITY_LERP_SPEED * TimeHandler.CorrectedDeltaTime;
+                }
+                if (Input.GetKey(KeyCode.S)) {
+                    inputMoveVector.y -= VELOCITY_LERP_SPEED * TimeHandler.CorrectedDeltaTime;
+                }
             } else {
-                logic.targetVelocity = Vector2.zero;
-                logic.targetLookVector = Utilities.ToVector3(inputVelocity, true);
-            }*/
+                inputMoveVector.y = Mathf.Lerp(inputMoveVector.y, 0, VELOCITY_LERP_SPEED * TimeHandler.CorrectedDeltaTime);
+            }
+
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) {
+                if (Input.GetKey(KeyCode.A)) {
+                    inputMoveVector.x -= VELOCITY_LERP_SPEED * TimeHandler.CorrectedDeltaTime;
+                }
+                if (Input.GetKey(KeyCode.D)) {
+                    inputMoveVector.x += VELOCITY_LERP_SPEED * TimeHandler.CorrectedDeltaTime;
+                }
+            } else {
+                inputMoveVector.x = Mathf.Lerp(inputMoveVector.x, 0, VELOCITY_LERP_SPEED * TimeHandler.CorrectedDeltaTime);
+            }
+
+            inputMoveVector.x = Mathf.Clamp(inputMoveVector.x, -MAX_VELOCITY, MAX_VELOCITY);
+            inputMoveVector.y = Mathf.Clamp(inputMoveVector.y, -MAX_VELOCITY, MAX_VELOCITY);
+
+            Vector2 rotatedVector = Vector2.zero;
+            float camera_theta = (-Camera.main.transform.parent.parent.eulerAngles.y + 180) * Mathf.Deg2Rad;
+            rotatedVector.x = (Mathf.Cos(camera_theta) * inputMoveVector.x) - (Mathf.Sin(camera_theta) * inputMoveVector.y);
+            rotatedVector.y = ((Mathf.Sin(camera_theta) * inputMoveVector.x) + (Mathf.Cos(camera_theta) * inputMoveVector.y));
+
+            logic.targetVelocity = rotatedVector;
+            logic.targetLookVector = Utilities.ToVector3(rotatedVector, true);
             ///
+
 
             /// Smoothed Position Data ///
             previousPositionData.RemoveAt(0);
@@ -94,6 +103,7 @@ public class UserPlayerController : MonoBehaviour {
                 smoothedHipsPosition += previousPositionData[i];
             }
             smoothedHipsPosition /= SMOOTHED_HIPS_POSITION_DATA_LENGTH;
+            smoothedHipsTransform.position = smoothedHipsPosition;
             ///
 
 
@@ -124,6 +134,7 @@ public class UserPlayerController : MonoBehaviour {
         logic.FixedUpdate();
     }
 
+    /*
     public void OnTouchUp() {
         if (logic.IsHolding) {
             if (InputHandler.HoldDeltaPos.magnitude >= 0.4f && InputHandler.HoldDuration < 0.2f) {
@@ -143,7 +154,7 @@ public class UserPlayerController : MonoBehaviour {
                 logic.ThrowInteractable(inputToWorldDir);
             }
         }
-    }
+    }*/
 
 
 
