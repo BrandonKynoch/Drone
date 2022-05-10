@@ -56,7 +56,7 @@ public class UserPlayerController : MonoBehaviour {
     }
 
     public void Update() {
-        if (MasterHandler.IsPlaying) {
+        if (MasterHandler.IsPlaying && MasterHandler.PlayerInputEnabled) {
             logic.Update();
 
             /// Movement ///
