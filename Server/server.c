@@ -11,7 +11,17 @@ struct s_drone_data* drones[MAX_DRONE_CONNECTIONS];
 char network_message[NETWORK_STD_MSG_LEN];
 
 int main() {
-    await_connections();
+    int fork_val = fork();
+    if (fork_val == -1) {
+        printf("Failed to fork while connecting to unity server\n");
+        return -1;
+    }
+
+    if (fork_val == 0) {
+        connect_to_unity_server();
+    } else {
+        await_connections(); // Wait for drones to connect
+    }
 }
 
 void await_connections () {
@@ -30,7 +40,7 @@ void await_connections () {
     listen(server_socket, MAX_DRONE_CONNECTIONS);
 
     // Wait for new drones to connect
-    while (TRUE) {
+    while (1) {
         // Second parameter can tell us where the client connection is coming from
         int client_socket = accept(server_socket, NULL, NULL);
 
@@ -77,6 +87,38 @@ int get_drone_count() {
 
 // ############################################################################################################
 // ######    END UTILS    #####################################################################################
+// ############################################################################################################
+
+
+// ############################################################################################################
+// ######    SEVER SIMULATION    ##############################################################################
+// ############################################################################################################
+
+void connect_to_unity_server() {
+    printf("Trying to connect to Unity Server\n");
+    fflush(stdout);
+
+    int fd;
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("cannot create socket");
+    }
+    
+    struct sockaddr_in servaddr;    /* server address */
+
+    /* fill in the server's address and data */
+    memset((char*)&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(SIMULATION_SERVER_SOCKET);
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    
+    /* connect to server */
+    if (connect(fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("connect failed");
+    }
+}
+
+// ############################################################################################################
+// ######    END SEVER SIMULATION    ##########################################################################
 // ############################################################################################################
 
 

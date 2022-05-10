@@ -14,3 +14,6 @@ void add_drone_to_server ();
 
 // Utils
 int get_drone_count();
+
+// Unity Sim
+void connect_to_unity_server();
