@@ -18,20 +18,20 @@ public class DroneServerHandler : MonoBehaviour {
     private Socket listener;
     private Socket handler;
 
+    private byte[] tcpData = new byte[NETWORK_MESSAGE_LENGTH];
+    StringBuilder tcpStrBuilder = new StringBuilder();
+
+    /// CONSTANTS ///
+    private const int NETWORK_MESSAGE_LENGTH = 256;
+    ///
+
     private void Start() {
         Application.runInBackground = true;
-
-        // Resolve Hostname and IP
-        string name = Dns.GetHostName();
-        try {
-            IPAddress[] addrs = Dns.Resolve(name).AddressList;
-            foreach (IPAddress addr in addrs)
-                print(name + "\t:\t" + addr.ToString());
-        } catch (Exception e) {
-            print(e.Message);
-        }
-
         startSimServer();
+    }
+
+    public void Update() {
+        HandleIncomingMessage();
     }
 
     void startSimServer() {
@@ -44,18 +44,44 @@ public class DroneServerHandler : MonoBehaviour {
         TcpListener listener = new TcpListener(1755);
         listener.Start();
 
-        print("TEST - Waiting for connection");
+        print("Waiting for C server to connect");
 
         Socket soc = listener.AcceptSocket(); // blocks
 
-        print("TEST - Connected");
+        print("C server connected");
 
         Stream s = new NetworkStream(soc);
+
+        while (true) {
+            s.Read(tcpData, 0, NETWORK_MESSAGE_LENGTH);
+        }
+    }
+
+    private void HandleIncomingMessage() {
+        // Cast byte array to string
+        foreach (byte b in tcpData) {
+            tcpStrBuilder.Append((char)b);
+        }
+        String message = tcpStrBuilder.ToString();
+        if (message != "")
+            print(message);
+        tcpStrBuilder.Clear();
+
+
     }
 
 
 
-
+    private void PrintIPAddrs() {
+        string name = Dns.GetHostName();
+        try {
+            IPAddress[] addrs = Dns.Resolve(name).AddressList;
+            foreach (IPAddress addr in addrs)
+                print(name + "\t:\t" + addr.ToString());
+        } catch (Exception e) {
+            print(e.Message);
+        }
+    }
 
 
 

@@ -17,3 +17,7 @@ int get_drone_count();
 
 // Unity Sim
 void connect_to_unity_server();
+int server_is_connected();
+
+void send_server_message(const char* msg);
+void receive_response_from_server();

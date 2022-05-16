@@ -16,6 +16,7 @@ public class DroneCamHandler : MonoBehaviour {
         originalFocus = freeLookCam.Target;
 
         MasterHandler.onUserModeChange += OnUserModeChange;
+        ChangeFocalPoint(0);
     }
 
     public void Update() {

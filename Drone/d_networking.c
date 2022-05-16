@@ -1,7 +1,7 @@
 ﻿#include <globals.h>
 #include <d_networking.h>
 
-void init_server_socket() {
+void init_server_socket(struct s_drone_data* drone_data) {
     // Create a socket
     // AF_INET -> inetnet socket (This parameter defines the domain of the socket)
     // SOCK_STREAM for TCP (Type of socket)
@@ -26,9 +26,12 @@ void init_server_socket() {
         return;
     }
 
-    // Receive data from the server
+    // Receive data from the server - First message should be debug message
     char server_response[NETWORK_STD_MSG_LEN];
     recv(network_socket, &server_response, sizeof(server_response), 0); // Last parameter is for flags, this is optional
+    printf(server_response);
 
-    printf("Server response: %s\n", server_response);
+    printf("\n\nUsing socket %d\n\n", network_socket);
+
+    init_drone_data(&drone_data, network_socket);
 }

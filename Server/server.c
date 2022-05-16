@@ -8,6 +8,7 @@
 
 struct s_drone_data* drones[MAX_DRONE_CONNECTIONS];
 
+int unity_socket = -1;
 char network_message[NETWORK_STD_MSG_LEN];
 
 int main() {
@@ -48,6 +49,7 @@ void await_connections () {
         add_drone_to_server(new_drone);
         printf("Drone %d connected on socket %d\n", get_drone_count(), client_socket);
 
+        // Debug message
         sprintf(network_message, "You are drone #%d\n", get_drone_count());
         send(new_drone->socket, network_message, sizeof(network_message), 0); // last param is optional flags
 
@@ -95,12 +97,11 @@ int get_drone_count() {
 // ############################################################################################################
 
 void connect_to_unity_server() {
-    printf("Trying to connect to Unity Server\n");
+    printf("Trying to connect to Unity server\n");
     fflush(stdout);
 
-    int fd;
-    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("cannot create socket");
+    if ((unity_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("cannot create socket\n");
     }
     
     struct sockaddr_in servaddr;    /* server address */
@@ -112,14 +113,68 @@ void connect_to_unity_server() {
     servaddr.sin_addr.s_addr = INADDR_ANY;
     
     /* connect to server */
-    if (connect(fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-        perror("connect failed");
+    if (connect(unity_socket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("Failed to connect to Unity server\n");
+        return;
     }
+
+    printf("Connected to Unity server\n\n");
+}
+
+int server_is_connected() {
+    return unity_socket != -1;
+}
+
+
+
+void send_server_message(const char* msg) {
+    if (unity_socket == -1) {
+        printf("Failed to send message, sim server not connected");
+        return;
+    }
+
+    sprintf(network_message, msg);
+    send(unity_socket, network_message, sizeof(network_message), 0);
+}
+
+void receive_response_from_server() {
+    // // Receive data from the server
+    // char server_response[NETWORK_STD_MSG_LEN];
+    // recv(fd, &server_response, sizeof(server_response), 0); // Last parameter is for flags, this is optional
 }
 
 // ############################################################################################################
 // ######    END SEVER SIMULATION    ##########################################################################
 // ############################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*
