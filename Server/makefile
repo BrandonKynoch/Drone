@@ -1,33 +1,34 @@
 CC=cc
 
 headers_dir = ./headers
-global_headers_dir = ../Globals/headers
 obj_dir = obj
+
+global_files_dir = ../Globals
+global_headers_dir = ../Globals/headers
 global_obj_dir = ../Globals/obj
 
 #Include header dir - this allows us to include headers using <> instead of ""
-CFLAGS = -I$(headers_dir) -I$(global_headers_dir) -w # -w suppresses warnings
+CFLAGS = -I$(headers_dir) -I$(global_headers_dir) -w
 
-files = server
-global_files = s_drone_data
-header_files = server
-global_header_files = globals s_drone_data
+files := $(shell find . -name '*.c')
+headers := $(shell find $(headers_dir) -name '*.h')
+objects := $(patsubst %.c, $(obj_dir)/%.o, $(notdir $(files)))
 
-objects = $(patsubst %, $(obj_dir)/%.o, $(files))
-global_objects = $(patsubst %, $(global_obj_dir)/%.o, $(global_files))
-headers = $(patsubst %, $(headers_dir)/%.h, $(header_files))
-global_headers = $(patsubst %, $(global_headers_dir)/%.h, $(global_header_files))
+global_files := $(shell find $(global_files_dir) -name '*.c')
+global_headers := $(shell find $(global_headers_dir) -name '*.h')
+global_objects := $(patsubst %.c, $(global_obj_dir)/%.o, $(notdir $(global_files)))
 
 # Make executable
 output : $(objects) $(global_objects)
 	mkdir -p obj
-	$(CC) -o output $(objects) $(CFLAGS) -lm
+	$(CC) -o output $(objects) $(global_objects) $(CFLAGS) -lm
 
 # Make objects
 $(obj_dir)/%.o : %.c $(headers) $(global_headers)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(global_obj_dir)/%.o : %.c $(headers) $(global_headers)
+# Make global objects
+$(global_obj_dir)/%.o : $(global_files_dir)/%.c $(headers) $(global_headers)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 .PHONY : clean

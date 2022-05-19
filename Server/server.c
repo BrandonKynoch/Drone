@@ -2,27 +2,24 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <globals.h>
 #include <server.h>
-#include <s_drone_data.h>
 
-struct s_drone_data* drones[MAX_DRONE_CONNECTIONS];
+static struct s_drone_data* drones[MAX_DRONE_CONNECTIONS];
 
-int unity_socket = -1;
-char network_message[NETWORK_STD_MSG_LEN];
+static int unity_socket = -1;
+char network_message[NETWORK_STD_MSG_LEN]; // implement locking here
+
+pthread_t threads[MAX_DRONE_CONNECTIONS];
+static int threads_index = 0;
 
 int main() {
-    int fork_val = fork();
-    if (fork_val == -1) {
-        printf("Failed to fork while connecting to unity server\n");
-        return -1;
-    }
+    connect_to_unity_server();
+    await_connections();
 
-    if (fork_val == 0) {
-        connect_to_unity_server();
-    } else {
-        await_connections(); // Wait for drones to connect
-    }
+    // NOTE:
+    //      This code is working as expected, sending messages to unity server
+    //      TODO: clean up code and remove test messages, use actual drone codes
+    //              implement message passing between drone and unity server
 }
 
 void await_connections () {
@@ -41,11 +38,14 @@ void await_connections () {
     listen(server_socket, MAX_DRONE_CONNECTIONS);
 
     // Wait for new drones to connect
-    while (1) {
+    while (TRUE) {
         // Second parameter can tell us where the client connection is coming from
         int client_socket = accept(server_socket, NULL, NULL);
 
-        struct s_drone_data* new_drone = init_drone_from_socket(client_socket);
+        // Send request for new unity/drone port
+
+        struct s_drone_data* new_drone = (struct s_drone_data*) calloc(1, sizeof(struct s_drone_data));
+        init_drone_from_socket(new_drone, client_socket);
         add_drone_to_server(new_drone);
         printf("Drone %d connected on socket %d\n", get_drone_count(), client_socket);
 
@@ -54,6 +54,11 @@ void await_connections () {
         send(new_drone->socket, network_message, sizeof(network_message), 0); // last param is optional flags
 
         fflush(stdout);
+
+        printf("Unity socket in await connections: %d\n", unity_socket);
+
+        threads_index++;
+        pthread_create(&threads[threads_index-1], NULL, listen_to_drone, new_drone);
     }
 }
 
@@ -70,6 +75,22 @@ void add_drone_to_server(struct s_drone_data* drone) {
 
     drones[i] = drone;
 }
+
+void listen_to_drone(struct s_drone_data* drone) {
+    while (TRUE) {
+        recv(drone->socket, &network_message, sizeof(network_message), 0);
+
+        switch (network_message[0]) {
+        case CODE_SPAWN_DRONE:
+            send_server_message(network_message);
+            break;
+        default:
+            printf("Network code not implemented\n");
+            break;
+        }
+    }
+}
+
 
 
 
@@ -118,7 +139,7 @@ void connect_to_unity_server() {
         return;
     }
 
-    printf("Connected to Unity server\n\n");
+    printf("Connected to Unity server with unity_socket fd = %d\n\n", unity_socket);
 }
 
 int server_is_connected() {
@@ -128,8 +149,9 @@ int server_is_connected() {
 
 
 void send_server_message(const char* msg) {
+    unity_socket = 3;
     if (unity_socket == -1) {
-        printf("Failed to send message, sim server not connected");
+        printf("Failed to send message, sim server not connected\n");
         return;
     }
 
@@ -137,7 +159,7 @@ void send_server_message(const char* msg) {
     send(unity_socket, network_message, sizeof(network_message), 0);
 }
 
-void receive_response_from_server() {
+void receive_server_messages() {
     // // Receive data from the server
     // char server_response[NETWORK_STD_MSG_LEN];
     // recv(fd, &server_response, sizeof(server_response), 0); // Last parameter is for flags, this is optional

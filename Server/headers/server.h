@@ -1,16 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 
 #include <netinet/in.h>
 
+#include <globals.h>
+#include <s_drone_data.h>
+
 #define MAX_DRONE_CONNECTIONS 25
 
 void await_connections ();
 void add_drone_to_server ();
+
+void listen_to_drone(struct s_drone_data* drone);
 
 // Utils
 int get_drone_count();
@@ -20,4 +26,4 @@ void connect_to_unity_server();
 int server_is_connected();
 
 void send_server_message(const char* msg);
-void receive_response_from_server();
+void receive_server_messages();

@@ -13,16 +13,14 @@ public class DroneServerHandler : MonoBehaviour {
     public Transform spawnPosition;
 
     private Thread serverSocketThread;
-    volatile bool keepReading = false;
-
-    private Socket listener;
-    private Socket handler;
 
     private byte[] tcpData = new byte[NETWORK_MESSAGE_LENGTH];
     StringBuilder tcpStrBuilder = new StringBuilder();
 
     /// CONSTANTS ///
     private const int NETWORK_MESSAGE_LENGTH = 256;
+
+    private const int CODE_SPAWN_DRONE = 0x1;
     ///
 
     private void Start() {
@@ -63,14 +61,17 @@ public class DroneServerHandler : MonoBehaviour {
             tcpStrBuilder.Append((char)b);
         }
         String message = tcpStrBuilder.ToString();
-        if (message != "")
-            print(message);
         tcpStrBuilder.Clear();
 
-
+        switch (tcpData[0]) {
+            case CODE_SPAWN_DRONE:
+                // Spawn Drone - Return drone coords here
+                break;
+            default:
+                Debug.LogError("Invalid socket code");
+                break;
+        }
     }
-
-
 
     private void PrintIPAddrs() {
         string name = Dns.GetHostName();
@@ -85,96 +86,8 @@ public class DroneServerHandler : MonoBehaviour {
 
 
 
-        /*
-        void stopServer() {
-            keepReading = false;
 
-            //stop thread
-            if (serverSocketThread != null) {
-                serverSocketThread.Abort();
-            }
+    private void SpawnDrone() {
 
-            if (handler != null && handler.Connected) {
-                handler.Disconnect(false);
-                Debug.Log("Disconnected!");
-            }
-        }
-
-        private void SimServerLogic() {
-            string data;
-
-            // Data buffer for incoming data
-            byte[] bytes = new byte[256];
-
-            // host running the application.
-            Debug.Log("Ip " + getIPAddress().ToString());
-            IPAddress[] ipArray = Dns.GetHostAddresses(getIPAddress());
-            IPEndPoint localEndPoint = new IPEndPoint(ipArray[0], 8042);
-
-            // Create a TCP/IP socket.
-            listener = new Socket(ipArray[0].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            // Bind the socket to the local endpoint and 
-            // listen for incoming connections.
-
-            try {
-                listener.Bind(localEndPoint);
-                listener.Listen(1755);
-
-                // Start listening for connections.
-                while (true) {
-                    keepReading = true;
-
-                    // Program is suspended while waiting for an incoming connection.
-                    Debug.Log("Waiting for Connection");
-
-                    handler = listener.Accept();
-                    Debug.Log("Client Connected");
-                    data = null;
-
-                    // An incoming connection needs to be processed.
-                    while (keepReading) {
-                        bytes = new byte[256];
-                        int bytesRec = handler.Receive(bytes);
-                        Debug.Log("Received from Server");
-
-                        if (bytesRec <= 0) {
-                            keepReading = false;
-                            handler.Disconnect(true);
-                            break;
-                        }
-
-                        data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                        if (data.IndexOf("<EOF>") > -1) {
-                            break;
-                        } else {
-                            print("Received data: " + data);
-                        }
-
-                        System.Threading.Thread.Sleep(1);
-                    }
-
-                    System.Threading.Thread.Sleep(1);
-                }
-            } catch (Exception e) {
-                Debug.Log(e.ToString());
-            }
-        }
-
-        void OnDisable() {
-            stopServer();
-        }
-
-        private string getIPAddress() {
-            IPHostEntry host;
-            string localIP = "";
-            host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in host.AddressList) {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) {
-                    localIP = ip.ToString();
-                }
-
-            }
-            return localIP;
-        }*/
     }
+}

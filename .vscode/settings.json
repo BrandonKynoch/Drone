@@ -1,6 +1,7 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
     "files.associations": {
-        "socket.h": "c"
+        "socket.h": "c",
+        "s_drone_data.h": "c"
     }
 }
