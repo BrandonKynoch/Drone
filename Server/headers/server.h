@@ -5,9 +5,11 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
 #include <netinet/in.h>
 
+#include <json-c/json.h>
+
+// Local code
 #include <globals.h>
 #include <s_drone_data.h>
 
@@ -17,6 +19,7 @@ void await_connections ();
 void add_drone_to_server ();
 
 void listen_to_drone(struct s_drone_data* drone);
+void send_drone_message(struct s_drone_data* drone, char* message);
 
 // Utils
 int get_drone_count();
@@ -26,4 +29,5 @@ void connect_to_unity_server();
 int server_is_connected();
 
 void send_server_message(const char* msg);
+void send_server_fixed_message();
 void receive_server_messages();

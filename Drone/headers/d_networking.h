@@ -1,15 +1,19 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include <globals.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
-
 #include <netinet/in.h>
 
+// Project code
+#include <globals.h>
+
 #include <s_drone_data.h>
+
+// Libs
+#include <json-c/json.h>
 
 // Connect to socket on server
 void init_server_socket(struct s_drone_data* drone_data);

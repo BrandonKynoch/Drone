@@ -28,24 +28,43 @@ void init_server_socket(struct s_drone_data* drone_data) {
         return;
     }
 
-    // Receive data from the server - First message should be debug message
+    // Unpack server response
     recv(network_socket, &network_message, sizeof(network_message), 0); // Last parameter is for flags, this is optional
-    printf(network_message);
+    printf("\nServer Response:\n%s\n\n", network_message);
+    
+    struct json_object* json_in = json_tokener_parse(network_message);
+    struct json_object* json_id;
+    json_object_object_get_ex(json_in, "id", &json_id);
+    uint64_t response_id  = json_object_get_uint64(json_id);
+    json_object_put(json_in);
+    json_object_put(json_id);
 
-    printf("\n\nUsing socket %d\n\n", network_socket);
+    drone_data->socket = network_socket;
+    drone_data->id = response_id;
 
-    init_drone_from_socket(drone_data, network_socket);
+    printf("Using socket: %d\n", drone_data->socket);
+    printf("Drone ID: %d\n", drone_data->id);
 
-    // Get x, y, z coords 
     spawn_in_unity_server(drone_data);
 }
 
 void spawn_in_unity_server(struct s_drone_data* drone_data) {
-    network_message[0] = (char) CODE_SPAWN_DRONE;
-    network_message[1] = '\0';
-    send_server_fixed_message(drone_data);
+    // Format message
+    struct json_object* json = json_object_new_object();
+    json_object_object_add(json, "opcode", json_object_new_int(CODE_SPAWN_DRONE));
+    json_object_object_add(json, "id", json_object_new_uint64(drone_data->id));
+    char* json_string = json_object_to_json_string_ext(json, JSON_C_TO_STRING_PLAIN);
+
+    send_server_message(drone_data, json_string);
     receive_server_message(drone_data);
-    printf("Received message from unity sim:\n\t%s\n", network_message);
+
+    json_object_put(json);
+
+    json = json_tokener_parse(network_message);
+    char* json_string_receiveived = json_object_to_json_string_ext(json, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY);
+    printf("Received message from unity sim:\n%s\n", json_string_receiveived);
+
+    json_object_put(json);
 }
 
 

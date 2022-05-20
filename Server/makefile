@@ -8,7 +8,7 @@ global_headers_dir = ../Globals/headers
 global_obj_dir = ../Globals/obj
 
 #Include header dir - this allows us to include headers using <> instead of ""
-CFLAGS = -I$(headers_dir) -I$(global_headers_dir) -w
+CFLAGS = -I$(headers_dir) -I$(global_headers_dir) -ljson-c -w
 
 files := $(shell find . -name '*.c')
 headers := $(shell find $(headers_dir) -name '*.h')

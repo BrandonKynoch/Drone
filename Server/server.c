@@ -22,6 +22,7 @@ int main() {
     //              implement message passing between drone and unity server
 }
 
+// When a drone connects the server responds by sending the drone its droneID
 void await_connections () {
     // Create the server socket
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,20 +43,22 @@ void await_connections () {
         // Second parameter can tell us where the client connection is coming from
         int client_socket = accept(server_socket, NULL, NULL);
 
-        // Send request for new unity/drone port
-
         struct s_drone_data* new_drone = (struct s_drone_data*) calloc(1, sizeof(struct s_drone_data));
-        init_drone_from_socket(new_drone, client_socket);
         add_drone_to_server(new_drone);
-        printf("Drone %d connected on socket %d\n", get_drone_count(), client_socket);
+        new_drone->socket = client_socket;
+        printf("Drone %d connected on socket %d with id %d\n", get_drone_count(), new_drone->socket, new_drone->id);
 
-        // Debug message
-        sprintf(network_message, "You are drone #%d\n", get_drone_count());
+        // Respond with drone id
+        struct json_object* json_out = json_object_new_object();
+        json_object_object_add(json_out, "id", json_object_new_uint64(new_drone->id));
+        char* json_string = json_object_to_json_string_ext(json_out, JSON_C_TO_STRING_PLAIN);
+
+        strcpy(network_message, json_string);
         send(new_drone->socket, network_message, sizeof(network_message), 0); // last param is optional flags
 
         fflush(stdout);
 
-        printf("Unity socket in await connections: %d\n", unity_socket);
+        json_object_put(json_out);
 
         threads_index++;
         pthread_create(&threads[threads_index-1], NULL, listen_to_drone, new_drone);
@@ -63,7 +66,7 @@ void await_connections () {
 }
 
 void add_drone_to_server(struct s_drone_data* drone) {
-    /// 1: find free index ///
+    // find free index
     int i = 0;
     while (i < MAX_DRONE_CONNECTIONS) {
         if (drones[i] == NULL) {
@@ -71,24 +74,22 @@ void add_drone_to_server(struct s_drone_data* drone) {
         }
         i++;
     }
-    /// 1
 
     drones[i] = drone;
+    drone->id = i;
 }
 
+// Listen to the c-drone code and forward data to unity simulation
 void listen_to_drone(struct s_drone_data* drone) {
     while (TRUE) {
         recv(drone->socket, &network_message, sizeof(network_message), 0);
-
-        switch (network_message[0]) {
-        case CODE_SPAWN_DRONE:
-            send_server_message(network_message);
-            break;
-        default:
-            printf("Network code not implemented\n");
-            break;
-        }
+        send_server_fixed_message();
     }
+}
+
+// Send a message to the c-drone
+void send_drone_message(struct s_drone_data* drone, char* message) {
+    send(drone->socket, message, NETWORK_STD_MSG_LEN, 0);
 }
 
 
@@ -139,7 +140,10 @@ void connect_to_unity_server() {
         return;
     }
 
-    printf("Connected to Unity server with unity_socket fd = %d\n\n", unity_socket);
+    printf("Connected to Unity server with unity_socket fd: %d\n\n", unity_socket);
+
+    threads_index++;
+    pthread_create(&threads[threads_index-1], NULL, receive_server_messages, NULL);
 }
 
 int server_is_connected() {
@@ -149,7 +153,6 @@ int server_is_connected() {
 
 
 void send_server_message(const char* msg) {
-    unity_socket = 3;
     if (unity_socket == -1) {
         printf("Failed to send message, sim server not connected\n");
         return;
@@ -159,72 +162,30 @@ void send_server_message(const char* msg) {
     send(unity_socket, network_message, sizeof(network_message), 0);
 }
 
+void send_server_fixed_message() {
+    send(unity_socket, network_message, sizeof(network_message), 0);
+}
+
 void receive_server_messages() {
-    // // Receive data from the server
-    // char server_response[NETWORK_STD_MSG_LEN];
-    // recv(fd, &server_response, sizeof(server_response), 0); // Last parameter is for flags, this is optional
+    char unity_received_message[NETWORK_STD_MSG_LEN];
+
+    // First byte of message is drone ID
+    while (TRUE) {
+        recv(unity_socket, &unity_received_message, sizeof(unity_received_message), 0);
+
+        struct json_object* json_in = json_tokener_parse(unity_received_message);
+        struct json_object* json_id;
+        json_object_object_get_ex(json_in, "id", &json_id);
+
+        int target_drone_id = json_object_get_int(json_id);
+        // Check that target drone id is valid before dereferrencing
+        send_drone_message(drones[target_drone_id], &unity_received_message);
+
+        json_object_put(json_in);
+        json_object_put(json_id);
+    }
 }
 
 // ############################################################################################################
 // ######    END SEVER SIMULATION    ##########################################################################
 // ############################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-void old_server_test() {
-    char server_message[256] = "Hello Dingus\n";
-
-    // Create the server socket
-    int server_socket;
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-    // define the server address
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8060);
-    server_address.sin_addr.s_addr = INADDR_ANY;
-
-    // bind the socket to our specified IP and port
-    bind(server_socket, (struct socketaddr *) &server_address, sizeof(server_address));
-
-    listen(server_socket, 5); // Number of available connections
-
-    int client_socket;
-    // Second parameter can tell us where the client connection is coming from
-    client_socket = accept(server_socket, NULL, NULL);
-
-    send(client_socket, server_message, sizeof(server_message), 0); // last param is optional flags
-
-    close(server_socket);
-
-    return 0;
-}*/
