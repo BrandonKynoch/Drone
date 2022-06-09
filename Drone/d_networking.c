@@ -78,6 +78,11 @@ void send_server_message(struct s_drone_data* drone, const char* msg) {
     send(drone->socket, network_message, sizeof(network_message), 0);
 }
 
+void send_server_json(struct s_drone_data* drone, struct json_object* json) {
+    char* json_string = json_object_to_json_string_ext(json, JSON_C_TO_STRING_PLAIN);
+    send_server_message(drone, json_string);
+}
+
 void receive_server_message(struct s_drone_data* drone) {
     recv(drone->socket, &network_message, sizeof(network_message), 0);
 }

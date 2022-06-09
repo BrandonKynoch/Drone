@@ -13,7 +13,9 @@ public class DroneServerHandler : MonoBehaviour {
     public GameObject dronePrefab;
     public Transform spawnTransform;
 
-    private List<Drone> drones = new List<Drone>();
+    //private List<Drone> drones = new List<Drone>();
+    private Drone[] drones = new Drone[MAX_DRONE_COUNT];
+    private int droneCount = 0;
 
     /// C Server interface ///
     private Thread serverSocketThread;
@@ -27,8 +29,11 @@ public class DroneServerHandler : MonoBehaviour {
     /// CONSTANTS ///
     private const int NETWORK_MESSAGE_LENGTH = 256;
 
+    private const int MAX_DRONE_COUNT = 25;
+
     // Socket opcodes
     private const int CODE_SPAWN_DRONE = 0x1;
+    private const int CODE_MOTOR_OUTPUT = 0x2;
 
 
     private const int SPAWN_ROWS_COUNT = 6;
@@ -91,11 +96,20 @@ public class DroneServerHandler : MonoBehaviour {
                 case CODE_SPAWN_DRONE:
                     Drone newDrone = SpawnDrone(jsonIn);
 
-                    JObject jsonOut = JObject.FromObject(newDrone.GetDroneData);
+                    JObject jsonOut = JObject.FromObject(newDrone.dData);
 
                     WriteDataToTCPData(jsonOut.ToString());
                     networkStream.Write(tcpData, 0, NETWORK_MESSAGE_LENGTH);
                     NullifyTCPData();
+                    break;
+                case CODE_MOTOR_OUTPUT:
+                    Drone drone = drones[jsonIn.GetValue("id").Value<int>()];
+                    drone.UpdateMotorOutputs(
+                        fl: jsonIn.GetValue("motor_fl").Value<double>(),
+                        fr: jsonIn.GetValue("motor_fr").Value<double>(),
+                        br: jsonIn.GetValue("motor_br").Value<double>(),
+                        bl: jsonIn.GetValue("motor_bl").Value<double>()
+                        );
                     break;
                 default:
                     Debug.LogError("Invalid socket code");
@@ -139,12 +153,14 @@ public class DroneServerHandler : MonoBehaviour {
         Drone newDrone = newDroneGO.GetComponent<Drone>();
         newDroneGO.transform.position =
             spawnTransform.position +
-            (Vector3.right * (drones.Count % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
-            (Vector3.forward * Mathf.FloorToInt(drones.Count / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
+            (Vector3.right * (droneCount % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
+            (Vector3.forward * Mathf.FloorToInt(droneCount / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
 
-        newDrone.GetDroneData.id = fromJson.GetValue("id").Value<UInt64>();
+        newDrone.dData.id = fromJson.GetValue("id").Value<UInt64>();
 
-        drones.Add(newDrone);
+        drones[newDrone.dData.id] = newDrone;
+        droneCount++;
+
         return newDrone;
     }
 }
