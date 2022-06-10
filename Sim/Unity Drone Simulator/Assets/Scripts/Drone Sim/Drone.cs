@@ -4,9 +4,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Drone : MonoBehaviour, IEqualityComparer {
-    private DroneData data = new DroneData();
+    // Simulation variables
+    public float motorStrength = 1f;
 
+    private DroneData data = new DroneData();
     public DroneData dData { get { return data; } }
+
+    private Rigidbody rb;
+
+    [SerializeField]
+    private Transform bladesTransform;
+    private Transform bladeFL, bladeFR, bladeBR, bladeBL;
 
     public void UpdateMotorOutputs(double fl, double fr, double br, double bl) {
         data.motorOutputs[DroneData.FL] = fl;
@@ -15,13 +23,27 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         data.motorOutputs[DroneData.BL] = bl;
     }
 
+    public void Start() {
+        rb = GetComponent<Rigidbody>();
 
+        bladeFL = bladesTransform.Find("FL");
+        bladeFR = bladesTransform.Find("FR");
+        bladeBR = bladesTransform.Find("BR");
+        bladeBL = bladesTransform.Find("BL");
+    }
 
 
     public void Update() {
         // Apply forces to rigidbody
 
         print("Motors: " + data.motorOutputs[0] + " : " + data.motorOutputs[1] + " : " + data.motorOutputs[2] + " : " + data.motorOutputs[3]);
+    }
+
+    public void FixedUpdate() {
+        rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FL]) * motorStrength, bladeFL.position);
+        rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FR]) * motorStrength, bladeFR.position);
+        rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.BR]) * motorStrength, bladeBR.position);
+        rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.BL]) * motorStrength, bladeBL.position);
     }
 
     /// Object overrides /// 

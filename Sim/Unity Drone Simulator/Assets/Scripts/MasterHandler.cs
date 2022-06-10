@@ -39,7 +39,7 @@ public class MasterHandler : MonoBehaviour {
 
         metricSystem = MetricSystem.Metric;
 
-        SetUserMode(UserMode.DroneCam);
+        SetUserMode(UserMode.Player);
     }
 
     public void Start() {
