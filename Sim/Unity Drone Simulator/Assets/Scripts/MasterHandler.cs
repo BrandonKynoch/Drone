@@ -18,6 +18,9 @@ public class MasterHandler : MonoBehaviour {
 
     /// Static ///
     private static MasterHandler staticInstance;
+    public static MasterHandler StaticInstance {
+        get { return staticInstance; }
+    }
 
     public static MetricSystem metricSystem;
     ///

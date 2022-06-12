@@ -124,8 +124,8 @@ public class UserPlayerController : MonoBehaviour {
 
         /// Gizmos ///
 #if UNITY_EDITOR
-        Debug.DrawLine(new Vector3(transform.position.x, 0.1f, transform.position.z), new Vector3(transform.position.x, 0.1f, transform.position.z) + Vector3.up, Color.red);
-        Debug.DrawLine(new Vector3(transform.position.x, 0.1f, transform.position.z), new Vector3(transform.position.x, 0.1f, transform.position.z) + (Utilities.ToVector3(logic.targetVelocity, true)).normalized * 2f, Color.black);
+        //Debug.DrawLine(new Vector3(transform.position.x, 0.1f, transform.position.z), new Vector3(transform.position.x, 0.1f, transform.position.z) + Vector3.up, Color.red);
+        //Debug.DrawLine(new Vector3(transform.position.x, 0.1f, transform.position.z), new Vector3(transform.position.x, 0.1f, transform.position.z) + (Utilities.ToVector3(logic.targetVelocity, true)).normalized * 2f, Color.black);
 #endif
         ///
     }

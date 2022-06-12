@@ -17,12 +17,10 @@ int main() {
 }
 
 void drone_logic_loop() {
-    int i = 10;
     while (TRUE) {
         // Calculate motor values based on drone sensor data
 
-        motor_output(i, 2, 3, 4, &drone_data);
-        //i++;
+        motor_output(1.0, 1.0, 1.0, 1.0, &drone_data);
 
         // Receive respone from server - position, distance sensors etc.
         receive_server_message(&drone_data);

@@ -175,6 +175,7 @@ public class DroneServerHandler : MonoBehaviour {
 
     private Drone SpawnDrone(JObject fromJson) {
         GameObject newDroneGO = GameObject.Instantiate(dronePrefab) as GameObject;
+        newDroneGO.transform.SetParent(spawnTransform);
         Drone newDrone = newDroneGO.GetComponent<Drone>();
         newDroneGO.transform.position =
             spawnTransform.position +
@@ -185,6 +186,9 @@ public class DroneServerHandler : MonoBehaviour {
 
         drones[newDrone.dData.id] = newDrone;
         droneCount++;
+
+        DroneCamHandler.StaticInstance.SetFocalPoint(newDroneGO.GetComponent<FocalPointObject>());
+        MasterHandler.StaticInstance.SetUserMode(MasterHandler.UserMode.DroneCam);
 
         return newDrone;
     }
