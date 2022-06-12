@@ -24,9 +24,13 @@ public class DroneServerHandler : MonoBehaviour {
 
     private byte[] tcpData = new byte[NETWORK_MESSAGE_LENGTH];
     StringBuilder tcpStrBuilder = new StringBuilder();
+
+    private Queue<JObject> inboundMessages = new Queue<JObject>();
     ///
 
     /// CONSTANTS ///
+    private const int SERVER_SOCKET = 1755;
+
     private const int NETWORK_MESSAGE_LENGTH = 256;
 
     private const int MAX_DRONE_COUNT = 25;
@@ -46,7 +50,11 @@ public class DroneServerHandler : MonoBehaviour {
     }
 
     public void Update() {
-        HandleIncomingMessage();
+        HandleInboundMessages();
+    }
+
+    private void OnApplicationQuit() {
+        serverSocketThread.Abort();
     }
 
     void startSimServer() {
@@ -56,7 +64,7 @@ public class DroneServerHandler : MonoBehaviour {
     }
 
     private void SimServerLogic() {
-        TcpListener listener = new TcpListener(1755);
+        TcpListener listener = new TcpListener(SERVER_SOCKET);
         listener.Start();
 
         print("Waiting for C server to connect");
@@ -69,32 +77,48 @@ public class DroneServerHandler : MonoBehaviour {
         networkStream = new NetworkStream(soc);
 
         while (true) {
-            networkStream.Read(tcpData, 0, NETWORK_MESSAGE_LENGTH);
+            int bytesRead = networkStream.Read(tcpData, 0, NETWORK_MESSAGE_LENGTH);
+            //if ((char)tcpData[bytesRead-1] == '\0') {
+            // If null terminator is found then a complete message was parsed
+            // MARK: Todo: if bytes read == NETWORK_MESSAGE_LENGTH
+            //          then message was probably clipped, we should copy the data
+            //          received to a larger buffer and read again, and the concatenate
+            //          the data once null terminator is found
+
+            if (bytesRead > 0) {
+                tcpStrBuilder.Clear();
+                // Cast byte array to string
+                foreach (byte b in tcpData)
+                {
+                    tcpStrBuilder.Append((char)b);
+                }
+                string message = tcpStrBuilder.ToString();
+                JObject jsonIn = null;
+
+                try {
+                    jsonIn = JObject.Parse(message);
+                }
+                catch (Exception e) { }
+
+                if (jsonIn != null) {
+                    inboundMessages.Enqueue(jsonIn);
+                }
+
+                NullifyTCPData();
+            }
+            //}
         }
     }
 
-    private void HandleIncomingMessage() {
+    private void HandleInboundMessages() {
         if (!serverConnected)
             return;
 
-        // Cast byte array to string
-        foreach (byte b in tcpData) {
-            tcpStrBuilder.Append((char)b);
-        }
-        String message = tcpStrBuilder.ToString();
-        tcpStrBuilder.Clear();
-        JObject jsonIn = null;
-
-        try {
-            jsonIn = JObject.Parse(message);
-        } catch (Exception e) {}
-
-        bool printMessage = false;
-        if (jsonIn != null) {
-            printMessage = true;
-            switch (jsonIn.GetValue("opcode").Value<int>()) {
+        while (inboundMessages.Count > 0) {
+            JObject message = inboundMessages.Dequeue();
+            switch (message.GetValue("opcode").Value<int>()) {
                 case CODE_SPAWN_DRONE:
-                    Drone newDrone = SpawnDrone(jsonIn);
+                    Drone newDrone = SpawnDrone(message);
 
                     JObject jsonOut = JObject.FromObject(newDrone.dData);
 
@@ -103,22 +127,23 @@ public class DroneServerHandler : MonoBehaviour {
                     NullifyTCPData();
                     break;
                 case CODE_MOTOR_OUTPUT:
-                    Drone drone = drones[jsonIn.GetValue("id").Value<int>()];
+                    Drone drone = drones[message.GetValue("id").Value<int>()];
                     drone.UpdateMotorOutputs(
-                        fl: jsonIn.GetValue("motor_fl").Value<double>(),
-                        fr: jsonIn.GetValue("motor_fr").Value<double>(),
-                        br: jsonIn.GetValue("motor_br").Value<double>(),
-                        bl: jsonIn.GetValue("motor_bl").Value<double>()
+                        fl: message.GetValue("motor_fl").Value<double>(),
+                        fr: message.GetValue("motor_fr").Value<double>(),
+                        br: message.GetValue("motor_br").Value<double>(),
+                        bl: message.GetValue("motor_bl").Value<double>()
                         );
+                    JObject jsonM = JObject.FromObject(drone.dData);
+
+                    WriteDataToTCPData(jsonM.ToString());
+                    networkStream.Write(tcpData, 0, NETWORK_MESSAGE_LENGTH);
+                    NullifyTCPData();
                     break;
                 default:
                     Debug.LogError("Invalid socket code");
                     break;
             }
-        }
-
-        if (printMessage) {
-            print(message);
         }
     }
 
@@ -143,7 +168,7 @@ public class DroneServerHandler : MonoBehaviour {
 
     private void NullifyTCPData() {
         for (int i = 0; i < tcpData.Length; i++) {
-            tcpData[i] = 0x0;
+            tcpData[i] = 0;
         }
     }
 

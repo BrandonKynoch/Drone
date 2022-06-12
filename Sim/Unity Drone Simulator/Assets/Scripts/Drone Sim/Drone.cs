@@ -36,7 +36,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     public void Update() {
         // Apply forces to rigidbody
 
-        print("Motors: " + data.motorOutputs[0] + " : " + data.motorOutputs[1] + " : " + data.motorOutputs[2] + " : " + data.motorOutputs[3]);
+        //print("Motors: " + data.motorOutputs[0] + " : " + data.motorOutputs[1] + " : " + data.motorOutputs[2] + " : " + data.motorOutputs[3]);
     }
 
     public void FixedUpdate() {

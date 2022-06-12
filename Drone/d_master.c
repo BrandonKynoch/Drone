@@ -1,13 +1,13 @@
 ﻿#include <d_master.h>
 
-struct s_drone_data drone_data;
+struct drone_data drone_data;
 
 int main() {
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);
-
     init_server_socket(&drone_data);
+    pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
 
     drone_logic_loop();
 
@@ -17,18 +17,21 @@ int main() {
 }
 
 void drone_logic_loop() {
+    int i = 10;
     while (TRUE) {
         // Calculate motor values based on drone sensor data
 
-        motor_output(1, 2, 3, 4, &drone_data);
-        
+        motor_output(i, 2, 3, 4, &drone_data);
+        //i++;
+
         // Receive respone from server - position, distance sensors etc.
+        receive_server_message(&drone_data);
 
         usleep(16000); // sleep for 16 milliseconds - 60HZ
     }
 }
 
-void motor_output(double fl, double fr, double br, double bl, struct s_drone_data* drone) {
+void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone) {
     struct json_object* json_fl;
     struct json_object* json_fr;
     struct json_object* json_br;
