@@ -85,6 +85,9 @@ void send_server_json(struct drone_data* drone, struct json_object* json) {
     send_server_message(drone, json_string);
 }
 
-void receive_server_message(struct drone_data* drone) {
+char* receive_server_message(struct drone_data* drone) {
+    printf("Pre rec\n");
     recv(drone->socket, &network_message, sizeof(network_message), 0);
+    printf("Post rec\n");
+    return &network_message;
 }

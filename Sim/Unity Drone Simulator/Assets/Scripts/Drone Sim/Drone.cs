@@ -17,8 +17,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     private Rigidbody rb;
 
-    [SerializeField]
-    private Transform bladesTransform;
+    public Transform bladesTransform;
     private Transform bladeFL, bladeFR, bladeBR, bladeBL;
 
     public void UpdateMotorOutputs(double fl, double fr, double br, double bl) {

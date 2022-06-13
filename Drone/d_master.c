@@ -1,4 +1,5 @@
 ﻿#include <d_master.h>
+#include <assert.h>
 
 struct drone_data drone_data;
 
@@ -17,16 +18,57 @@ int main() {
 }
 
 void drone_logic_loop() {
-    while (TRUE) {
-        // Calculate motor values based on drone sensor data
+    double motor_fl, motor_fr, motor_br, motor_bl;
+    motor_fl = 0;
+    motor_fr = 0;
+    motor_br = 0;
+    motor_bl = 0;
 
-        motor_output(1.0, 1.0, 1.0, 1.0, &drone_data);
+    while (TRUE) {
+        motor_output(motor_fl, motor_fr, motor_br, motor_bl, &drone_data);
 
         // Receive respone from server - position, distance sensors etc.
-        receive_server_message(&drone_data);
+        char* json_in = receive_server_message(&drone_data);
 
-        usleep(16000); // sleep for 16 milliseconds - 60HZ
+        usleep(32000); // sleep for 32 milliseconds - 30HZ
+
+        // Calculate motor values based on drone sensor data
+        read_sensor_data(&drone_data, json_in);
+
+        printf("\nSensor Data: \t");
+        printf("%f", drone_data.sensor_array[0]);
+        for (int i = 1; i < DRONE_SENSOR_COUNT; i++) {
+            printf(", %f", drone_data.sensor_array[i]);
+        }
+        printf("\n");
+
+        fflush(NULL);
+
+        motor_bl = DRONE_SENSOR_RANGE - drone_data.sensor_array[7];
+        motor_br = DRONE_SENSOR_RANGE - drone_data.sensor_array[1];
+        motor_fr = DRONE_SENSOR_RANGE - drone_data.sensor_array[3];
+        motor_fl = DRONE_SENSOR_RANGE - drone_data.sensor_array[5];
     }
+}
+
+void read_sensor_data(struct drone_data* drone, char* json_string) {
+    struct json_object* json_in = json_tokener_parse(json_string);
+
+    struct json_object* sensor_data_array;
+    struct json_object* sensor_data;
+    json_object_object_get_ex(json_in, "sensorData", &sensor_data_array);
+    
+    size_t sensor_data_count = json_object_array_length(sensor_data_array);
+
+    ASSERT(sensor_data_count == DRONE_SENSOR_COUNT);
+
+
+    for (int i = 0; i < DRONE_SENSOR_COUNT; i++) {
+        sensor_data = json_object_array_get_idx(sensor_data_array, i);
+        drone->sensor_array[i] = json_object_get_double(sensor_data);
+    }
+
+    json_object_put(json_in);
 }
 
 void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone) {

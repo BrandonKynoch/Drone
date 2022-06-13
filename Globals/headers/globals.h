@@ -1,9 +1,15 @@
-#define NETWORK_STD_MSG_LEN 256
+#define TRUE 1
+#define FALSE 0
+#define bool int
+#define ASSERT assert
+
+#define NETWORK_STD_MSG_LEN 1024
 #define IS_SIMULATION TRUE
 
 #define SIMULATION_SERVER_SOCKET 1755
 #define DRONE_SERVER_SOCKET 8060
 
-#define TRUE 1
-#define FALSE 0
-#define bool int
+// DRONE CONSTS
+#define DRONE_SENSOR_COUNT 8
+
+#define DRONE_SENSOR_RANGE 2.0

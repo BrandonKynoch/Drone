@@ -20,6 +20,7 @@ public class DroneServerHandler : MonoBehaviour {
     /// C Server interface ///
     private Thread serverSocketThread;
     Stream networkStream;
+    Socket socket;
     private bool serverConnected = false;
 
     private byte[] tcpData = new byte[NETWORK_MESSAGE_LENGTH];
@@ -31,7 +32,7 @@ public class DroneServerHandler : MonoBehaviour {
     /// CONSTANTS ///
     private const int SERVER_SOCKET = 1755;
 
-    private const int NETWORK_MESSAGE_LENGTH = 256;
+    private const int NETWORK_MESSAGE_LENGTH = 1024;
 
     private const int MAX_DRONE_COUNT = 25;
 
@@ -46,6 +47,8 @@ public class DroneServerHandler : MonoBehaviour {
 
     private void Start() {
         Application.runInBackground = true;
+        Application.targetFrameRate = 60;
+
         startSimServer();
     }
 
@@ -69,12 +72,12 @@ public class DroneServerHandler : MonoBehaviour {
 
         print("Waiting for C server to connect");
 
-        Socket soc = listener.AcceptSocket(); // blocks
+        socket = listener.AcceptSocket(); // blocks
 
         serverConnected = true;
         print("C server connected");
 
-        networkStream = new NetworkStream(soc);
+        networkStream = new NetworkStream(socket);
 
         while (true) {
             int bytesRead = networkStream.Read(tcpData, 0, NETWORK_MESSAGE_LENGTH);
@@ -91,6 +94,9 @@ public class DroneServerHandler : MonoBehaviour {
                 foreach (byte b in tcpData)
                 {
                     tcpStrBuilder.Append((char)b);
+                    if ((char)b == '\0') {
+                        break;
+                    }
                 }
                 string message = tcpStrBuilder.ToString();
                 JObject jsonIn = null;
@@ -121,10 +127,7 @@ public class DroneServerHandler : MonoBehaviour {
                     Drone newDrone = SpawnDrone(message);
 
                     JObject jsonOut = JObject.FromObject(newDrone.dData);
-
-                    WriteDataToTCPData(jsonOut.ToString());
-                    networkStream.Write(tcpData, 0, NETWORK_MESSAGE_LENGTH);
-                    NullifyTCPData();
+                    sendCServerData(jsonOut);
                     break;
                 case CODE_MOTOR_OUTPUT:
                     Drone drone = drones[message.GetValue("id").Value<int>()];
@@ -136,9 +139,7 @@ public class DroneServerHandler : MonoBehaviour {
                         );
                     JObject jsonM = JObject.FromObject(drone.dData);
 
-                    WriteDataToTCPData(jsonM.ToString());
-                    networkStream.Write(tcpData, 0, NETWORK_MESSAGE_LENGTH);
-                    NullifyTCPData();
+                    sendCServerData(jsonM);
                     break;
                 default:
                     Debug.LogError("Invalid socket code");
@@ -191,5 +192,22 @@ public class DroneServerHandler : MonoBehaviour {
         MasterHandler.StaticInstance.SetUserMode(MasterHandler.UserMode.DroneCam);
 
         return newDrone;
+    }
+
+
+
+
+
+
+    private void sendCServerData(JObject data) {
+        WriteDataToTCPData(data.ToString());
+        networkStream.Write(tcpData, 0, NETWORK_MESSAGE_LENGTH);
+        //networkStream.EndWrite(null);
+
+        //// Blocks until send returns.
+        //int byteCount = socket.Send(tcpData, 0, tcpData.Length, SocketFlags.None);
+        //print("Sent {" + byteCount + "} bytes.");
+
+        NullifyTCPData();
     }
 }

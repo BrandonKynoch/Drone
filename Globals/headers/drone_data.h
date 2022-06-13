@@ -3,14 +3,16 @@
 // Libs
 #include <json-c/json.h>
 
+#include <globals.h>
+
 #define CODE_SPAWN_DRONE 0x1
 #define CODE_MOTOR_OUTPUT 0x2
 
 struct drone_data {
     uint64_t id;
-
-    int x, y, z;
     int socket;
+
+    double sensor_array[DRONE_SENSOR_COUNT];
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs
     struct json_object* m_json; // Motor json for unity sim
