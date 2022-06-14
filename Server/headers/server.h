@@ -28,8 +28,8 @@ int get_drone_count();
 void connect_to_unity_server();
 int server_is_connected();
 
-void send_server_message(const char* msg);
+void send_server_message(const char* msg, size_t msg_len);
 void send_server_fixed_message();
 void receive_server_messages();
 
-void clear_message_buffer();
+void clear_message_buffer(char msg[]);

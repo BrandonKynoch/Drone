@@ -23,7 +23,7 @@ public class DroneServerHandler : MonoBehaviour {
     Socket socket;
     private bool serverConnected = false;
 
-    private byte[] tcpData = new byte[NETWORK_MESSAGE_LENGTH];
+    private byte[] tcpData = new byte[NETWORK_MESSAGE_LENGTH * 10];
     StringBuilder tcpStrBuilder = new StringBuilder();
 
     private Queue<JObject> inboundMessages = new Queue<JObject>();
@@ -34,7 +34,7 @@ public class DroneServerHandler : MonoBehaviour {
 
     private const int NETWORK_MESSAGE_LENGTH = 1024;
 
-    private const int MAX_DRONE_COUNT = 25;
+    private const int MAX_DRONE_COUNT = 40;
 
     // Socket opcodes
     private const int CODE_SPAWN_DRONE = 0x1;
@@ -67,7 +67,8 @@ public class DroneServerHandler : MonoBehaviour {
     }
 
     private void SimServerLogic() {
-        TcpListener listener = new TcpListener(SERVER_SOCKET);
+        IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, SERVER_SOCKET);
+        TcpListener listener = new TcpListener(endPoint);
         listener.Start();
 
         print("Waiting for C server to connect");
@@ -78,41 +79,47 @@ public class DroneServerHandler : MonoBehaviour {
         print("C server connected");
 
         networkStream = new NetworkStream(socket);
+        MemoryStream ms = new MemoryStream();
+        int numBytesRead;
 
         while (true) {
-            int bytesRead = networkStream.Read(tcpData, 0, NETWORK_MESSAGE_LENGTH);
-            //if ((char)tcpData[bytesRead-1] == '\0') {
-            // If null terminator is found then a complete message was parsed
-            // MARK: Todo: if bytes read == NETWORK_MESSAGE_LENGTH
-            //          then message was probably clipped, we should copy the data
-            //          received to a larger buffer and read again, and the concatenate
-            //          the data once null terminator is found
+            // UNPACK MESSAGES AND ENQUEUE
 
-            if (bytesRead > 0) {
-                tcpStrBuilder.Clear();
-                // Cast byte array to string
-                foreach (byte b in tcpData)
-                {
-                    tcpStrBuilder.Append((char)b);
-                    if ((char)b == '\0') {
-                        break;
-                    }
-                }
-                string message = tcpStrBuilder.ToString();
-                JObject jsonIn = null;
-
-                try {
-                    jsonIn = JObject.Parse(message);
-                }
-                catch (Exception e) { }
-
-                if (jsonIn != null) {
-                    inboundMessages.Enqueue(jsonIn);
-                }
-
-                NullifyTCPData();
+            // Get package size
+            ms.SetLength(0);
+            numBytesRead = 0;
+            while ((numBytesRead = networkStream.Read(tcpData, 0, 4 - numBytesRead)) > 0) {
+                ms.Write(tcpData, 0, numBytesRead);
             }
-            //}
+            byte[] packageSizeArray = ms.ToArray();
+
+            if (packageSizeArray.Length < 4) {
+                continue; // Invalid packet header, try again
+            }
+
+            UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
+
+            ms.SetLength(0);
+            numBytesRead = 0;
+            while ((numBytesRead = networkStream.Read(tcpData, 0, (int) packageSize - numBytesRead)) > 0) {
+                ms.Write(tcpData, 0, numBytesRead);
+            }
+
+            String streamMsg = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
+
+            JObject jsonIn = null;
+
+            try {
+                jsonIn = JObject.Parse(streamMsg);
+            } catch (Exception e) {
+                Debug.Log("Could not parse JSON:\n" + streamMsg);
+            }
+
+            if (jsonIn != null) {
+                inboundMessages.Enqueue(jsonIn);
+            }
+
+            //NullifyTCPData();
         }
     }
 
@@ -200,14 +207,16 @@ public class DroneServerHandler : MonoBehaviour {
 
 
     private void sendCServerData(JObject data) {
-        WriteDataToTCPData(data.ToString());
-        networkStream.Write(tcpData, 0, NETWORK_MESSAGE_LENGTH);
-        //networkStream.EndWrite(null);
+        byte[] buffer = packageString(data.ToString());
+        networkStream.Write(buffer, 0, buffer.Length);
+    }
 
-        //// Blocks until send returns.
-        //int byteCount = socket.Send(tcpData, 0, tcpData.Length, SocketFlags.None);
-        //print("Sent {" + byteCount + "} bytes.");
-
-        NullifyTCPData();
+    private byte[] packageString(string s) {
+        byte[] asciiBuffer = Encoding.ASCII.GetBytes(s);
+        byte[] packageBuffer = new byte[asciiBuffer.Length + sizeof(UInt32)];
+        byte[] sizeOfString = BitConverter.GetBytes(s.Length);
+        Buffer.BlockCopy(sizeOfString, 0, packageBuffer, 0, sizeOfString.Length);
+        Buffer.BlockCopy(asciiBuffer, 0, packageBuffer, sizeOfString.Length, asciiBuffer.Length);
+        return packageBuffer;
     }
 }

@@ -16,6 +16,9 @@ struct drone_data {
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs
     struct json_object* m_json; // Motor json for unity sim
+
+    // Used strictly in server.c
+    char unity_received_message[NETWORK_STD_MSG_LEN];
 };
 
 void init_drone_data(struct drone_data* d);

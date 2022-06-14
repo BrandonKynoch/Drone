@@ -1,0 +1,15 @@
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/bin/Release/net6.0/SimServer
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/bin/Release/net6.0/SimServer.deps.json
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/bin/Release/net6.0/SimServer.runtimeconfig.json
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/bin/Release/net6.0/SimServer.dll
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/bin/Release/net6.0/SimServer.pdb
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.csproj.AssemblyReference.cache
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.GeneratedMSBuildEditorConfig.editorconfig
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.AssemblyInfoInputs.cache
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.AssemblyInfo.cs
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.csproj.CoreCompileInputs.cache
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.dll
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/refint/SimServer.dll
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.pdb
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.genruntimeconfig.cache
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/ref/SimServer.dll

@@ -77,8 +77,20 @@ void add_drone_to_c_server(struct drone_data* drone) {
 // Listen to the c-drone code and forward data to unity simulation
 void listen_to_drone(struct drone_data* drone) {
     while (TRUE) {
-        recv(drone->socket, &network_message, sizeof(network_message), 0);
-        send_server_fixed_message();
+        // printf("Listening to drone \t%d\n",drone->id);
+
+        size_t received_total = 0;
+        while (received_total < NETWORK_STD_MSG_LEN) {
+            received_total += recv(drone->socket, drone->unity_received_message + received_total, NETWORK_STD_MSG_LEN - received_total, 0);
+        }
+        
+        printf("\nSending Messsage\n%s", drone->unity_received_message);
+        printf("\n\n");
+
+        // Problem is here !!!!
+        // TODO: Implement locking around this
+        send_server_message(drone->unity_received_message, sizeof(drone->unity_received_message));
+        clear_message_buffer(drone->unity_received_message);
     }
 }
 
@@ -147,20 +159,24 @@ int server_is_connected() {
 
 
 
-void send_server_message(const char* msg) {
+void send_server_message(const char* msg, size_t msg_len) {
     if (unity_socket == -1) {
         printf("Failed to send message, sim server not connected\n");
         return;
     }
 
-    sprintf(network_message, msg);
-    send(unity_socket, network_message, sizeof(network_message), 0);
-    clear_message_buffer();
+    size_t sent_total = 0;
+    while (sent_total < msg_len) {
+        sent_total += send(unity_socket, msg + sent_total, msg_len - sent_total, 0);
+    }
+    // clear_network_message_buffer();
 }
 
+
+// MARK: DON'T USE NETWORK MESSAGE IN DRONE THREADS
 void send_server_fixed_message() {
     send(unity_socket, network_message, sizeof(network_message), 0);
-    clear_message_buffer();
+    clear_message_buffer(network_message);
 }
 
 void receive_server_messages() {
@@ -175,16 +191,18 @@ void receive_server_messages() {
         json_object_object_get_ex(json_in, "id", &json_id);
 
         int target_drone_id = json_object_get_int(json_id);
-        // Check that target drone id is valid before dereferrencing
+
+        // printf("Received message for drone \t%d\n", target_drone_id);
+
         send_drone_message(drones[target_drone_id], &unity_received_message);
 
         json_object_put(json_in);
     }
 }
 
-void clear_message_buffer() {
-    for (int i = 0; i < NETWORK_STD_MSG_LEN; i++) {
-        network_message[i] = '\0';
+void clear_message_buffer(char msg[]) {
+    for (int i = 0; i < sizeof(msg); i++) {
+        msg[i] = '\0';
     }
 }
 
