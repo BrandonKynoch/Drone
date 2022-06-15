@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityStandardAssets.Cameras;
 
 public class MasterHandler : MonoBehaviour {
+    public FocalPointObject playerFocalPoint;
 
     private bool isPlaying;
 
@@ -76,6 +77,10 @@ public class MasterHandler : MonoBehaviour {
             //Camera.main.transform.GetComponent<SimpleCameraController>().enabled = false;
             Camera.main.transform.parent.parent.GetComponent<FreeLookCam>().enabled = true;
             Camera.main.transform.parent.parent.GetComponent<ProtectCameraFromWallClip>().enabled = true;
+
+            if (usermode == UserMode.Player) {
+                DroneCamHandler.StaticInstance.SetFocalPoint(playerFocalPoint);
+            }
         }
 
         if (onUserModeChange != null) {

@@ -16,13 +16,12 @@ public class DroneCamHandler : MonoBehaviour {
         get { return staticInstance; }
     }
 
-    public void Start() {
+    public void Awake() {
         staticInstance = this;
 
         freeLookCam = GetComponent<FreeLookCam>();
         originalFocus = freeLookCam.Target;
 
-        MasterHandler.onUserModeChange += OnUserModeChange;
         ChangeFocalPoint(0);
     }
 
@@ -67,14 +66,5 @@ public class DroneCamHandler : MonoBehaviour {
     public void SetFocalPoint(FocalPointObject focalPoint) {
         currentFocalPoint = focalPoint;
         freeLookCam.SetTarget(currentFocalPoint.transform);
-    }
-
-    private void OnUserModeChange() {
-        if (MasterHandler.CurrentUserMode != MasterHandler.UserMode.DroneCam) {
-            freeLookCam.SetTarget(originalFocus);
-        } else {
-            originalFocus = freeLookCam.Target;
-            ChangeFocalPoint(0);
-        }
     }
 }
