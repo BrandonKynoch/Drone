@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace SimServer {
     public class Networking {
@@ -14,7 +15,7 @@ namespace SimServer {
         /// Singleton pattern //////////////////////////////////////////////////
 
         /// CONSTANTS //////////////////////////////////////////////////////////
-        private const Int32 STD_MSG_LEN = 1024;
+        public const Int32 STD_MSG_LEN = 1024;
         private const int PACKAGE_HEADER_SIZE = 4; // 4 bytes for UInt32 to determine size of the payload
 
         private const Int32 SIM_SERVER_SOCKET_PORT = 1755;
@@ -25,33 +26,31 @@ namespace SimServer {
         private Thread simSendThread;       // Thread dedicated to sending simulation messages
         private Thread simReceiveThread;    // Thread dedicated to receiving messages from the simulation
         private NetworkStream simStream;    // Network stream connected to the simulation
-        private byte[] simBuffer = new byte[STD_MSG_LEN * 10];  // Network buffer for the simulation
+        private byte[] simReceiveBuffer = new byte[STD_MSG_LEN * 10];  // Network buffer for the simulation
 
 
         // Drone Variables
         private Thread awaitDroneConnectionsThread;     // Thread dedicated to receiving new drone connections
+
+        private Queue<DroneMessage> outgoingDroneMessageRequests = new Queue<DroneMessage>();
 
 
         public Networking() {
             if (staticInstance != null) {
                 return;
             }
-
-            /// TODO:
-            // Connect drones to server
-            // receive drone messages independently, create a list of drone request to send to sim and handle sequentially
-            // forward server responses to drones
+            staticInstance = this;
 
             /// Unity Connection ////////////////////////////////////////////////////////////////
-            //ConnectToUnity();
+            ConnectToUnity();
 
-            //simReceiveThread = new Thread(new ThreadStart(SimNetworkingReceiveLoop));
-            //simReceiveThread.Start();
+            simReceiveThread = new Thread(new ThreadStart(SimNetworkingReceiveLoop));
+            simReceiveThread.Start();
 
-            //while (!simReceiveThread.IsAlive) { }
+            while (!simReceiveThread.IsAlive) { }
 
-            //simSendThread = new Thread(new ThreadStart(SimNetworkingSendLoop));
-            //simSendThread.Start();
+            simSendThread = new Thread(new ThreadStart(SimNetworkingSendLoop));
+            simSendThread.Start();
             /// Unity Connection ////////////////////////////////////////////////////////////////
 
             awaitDroneConnectionsThread = new Thread(new ThreadStart(AwaitConnecetions));
@@ -72,13 +71,15 @@ namespace SimServer {
         /// As well as any other network requests that need to be sent to unity simulation
         /// </summary>
         private void SimNetworkingSendLoop() {
-            for (int i = 0; i < 25; i++) {
-                // TODO: Replace with actual drone requests
-
-                Console.WriteLine("Spawning Drone");
-                SendSimMessage("{\"opcode\":\"1\",\"id\":\"" + i + "\"}");
-
-                Thread.Sleep(100);
+            while (true) {
+                try {
+                    if (outgoingDroneMessageRequests.Count > 0) {
+                        DroneMessage msg = outgoingDroneMessageRequests.Dequeue();
+                        SendSimStreamMessage(msg.message);
+                    } else {
+                        Thread.Sleep(Timeout.Infinite);
+                    }
+                } catch (ThreadInterruptedException e) { }
             }
         }
 
@@ -88,26 +89,57 @@ namespace SimServer {
         /// </summary>
         private void SimNetworkingReceiveLoop() {
             while (true) {
-                // TODO: Forward messages to corresponding drone
-
-                string response = ReceiveSimMessage();
-                Console.WriteLine("\nReceived response from sim:\n" + response + "\n");
+                string response = ReceiveSimStreamMessage();
+                JObject responseJson = JObject.Parse(response);
+                ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
+                responseDrone.ReceiveMessageFromSimulation(responseJson);
             }
         }
 
-        /// <summary> Send simulation a message </summary>
-        private void SendSimMessage(string s) {
+        /// <summary>
+        /// Send simulation a message
+        /// This function actually sends data to the network stream
+        /// Should not be exposed outside of networking class
+        /// </summary>
+        private void SendSimStreamMessage(string s) {
             SendStringToNetworkStream(simStream, s);
         }
 
-        /// <summary> Receive a message from the simulation </summary>
-        private string ReceiveSimMessage() {
-            return readStringFromNetworkStream(simStream, simBuffer);
+        /// <summary>
+        /// Receive a message from the simulation
+        /// This function actually receives the message from the network stream and returns the string value
+        /// Should not be exposed outside of networking class
+        /// </summary>
+        private string ReceiveSimStreamMessage() {
+            lock (staticInstance.simReceiveBuffer) {
+                return ReadStringFromNetworkStream(simStream, simReceiveBuffer);
+            }
+        }
+
+        /// <summary>
+        /// Allows a drone to forward a message to the simulation through the simulation network stream
+        /// </summary>
+        /// <param name="s"></param>
+        public static void SendToSim(ConnectedDrone drone, string s) {
+            DroneMessage droneMessage = new DroneMessage(drone, s);
+            StaticInstance.outgoingDroneMessageRequests.Enqueue(droneMessage);
+            StaticInstance.simSendThread.Interrupt();
+        }
+
+        private struct DroneMessage {
+            public ConnectedDrone drone;
+            public string message;
+
+            public DroneMessage(ConnectedDrone _drone, string _message) {
+                this.drone = _drone;
+                this.message = _message;
+            }
         }
         #endregion
 
         #region DRONES
         private void AwaitConnecetions() {
+            Console.WriteLine("Started");
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, DRONE_CONNECTIONS_SOCKET_PORT);
             TcpListener listener = new TcpListener(endPoint);
             listener.Start();
@@ -138,7 +170,7 @@ namespace SimServer {
         /// <param name="tcpBuffer"> The TMP buffer to store the stream data in </param>
         /// <returns> The next message received on the network stream as a string </returns>
         /// <exception cref="Exception"></exception>
-        private string readStringFromNetworkStream(NetworkStream stream, byte[] tcpBuffer) {
+        public static string ReadStringFromNetworkStream(NetworkStream stream, byte[] tcpBuffer) {
             MemoryStream ms = new MemoryStream();
             int numBytesRead;
 
@@ -147,19 +179,29 @@ namespace SimServer {
             numBytesRead = 0;
             while ((numBytesRead = stream.Read(tcpBuffer, 0, PACKAGE_HEADER_SIZE - numBytesRead)) > 0) {
                 ms.Write(tcpBuffer, 0, numBytesRead);
-            }
-            byte[] packageSizeArray = ms.ToArray();
-
-            if (packageSizeArray.Length < PACKAGE_HEADER_SIZE) {
-                throw new Exception("Invalid network package header received");
+                if (PACKAGE_HEADER_SIZE - numBytesRead == 0) {
+                    break;
+                }
             }
 
-            UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
+            lock (stream) {
+                byte[] packageSizeArray = ms.ToArray();
 
-            ms.SetLength(0);
-            numBytesRead = 0;
-            while ((numBytesRead = stream.Read(tcpBuffer, 0, (int)packageSize - numBytesRead)) > 0) {
-                ms.Write(tcpBuffer, 0, numBytesRead);
+                if (packageSizeArray.Length < PACKAGE_HEADER_SIZE) {
+                    throw new Exception("Invalid network package header received");
+                }
+
+                UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
+
+                ms = new MemoryStream();
+                ms.SetLength(0);
+                numBytesRead = 0;
+                while ((numBytesRead = stream.Read(tcpBuffer, 0, (int)packageSize - numBytesRead)) > 0) {
+                    ms.Write(tcpBuffer, 0, numBytesRead);
+                    if ((int)packageSize - numBytesRead == 0) {
+                        break;
+                    }
+                }
             }
 
             return Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
@@ -170,9 +212,12 @@ namespace SimServer {
         /// </summary>
         /// <param name="stream"> The stream to send on </param>
         /// <param name="message"> The message to be sent </param>
-        private void SendStringToNetworkStream(NetworkStream stream, string message) {
-            byte[] buffer = packageString(message);
-            stream.Write(buffer, 0, buffer.Length);
+        public static void SendStringToNetworkStream(NetworkStream stream, string message) {
+            lock (stream) {
+                byte[] buffer = PackageString(message);
+                stream.Write(buffer, 0, buffer.Length);
+                stream.Flush();
+            }
         }
 
         /// <summary>
@@ -180,7 +225,7 @@ namespace SimServer {
         /// </summary>
         /// <param name="s"> The payload to be packaged </param>
         /// <returns> The packaged payload as an array of bytes </returns>
-        private byte[] packageString(string s) {
+        private static byte[] PackageString(string s) {
             byte[] asciiBuffer = Encoding.ASCII.GetBytes(s);
             byte[] packageBuffer = new byte[asciiBuffer.Length + sizeof(UInt32)];
             byte[] sizeOfString = BitConverter.GetBytes(s.Length);

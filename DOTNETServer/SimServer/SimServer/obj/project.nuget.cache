@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "J5n8Q6bTTkYiKWt1ZhAY68wb+E+r/6Ku9SG00cBBRuvNJv8FXLstxOYmNvOGgMXmsi1X+XscwQOu2Lz8fLNzjQ==",
+  "dgSpecHash": "hLqB76F22SG/qx/jMtycDvLj6PhijE1K2Vv2qPu+dIyXE27gmIbk+9HUSJgGcOa6utQv+2yIbn0QtFDN9DQEjA==",
   "success": true,
   "projectFilePath": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/brandonkynoch/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

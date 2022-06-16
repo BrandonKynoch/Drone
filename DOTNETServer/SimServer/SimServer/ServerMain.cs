@@ -12,6 +12,9 @@ namespace SimServer {
 
         /// CONSTANTS //////////////////////////////////////////////////////////
         private const int MAXIMUM_DRONE_CONNECTIONS = 50;
+
+        // OPCODES
+        public const int OPCODE_SPAWN_DRONE = 0x1;
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         private DroneThreadPair[] drones = new DroneThreadPair[MAXIMUM_DRONE_CONNECTIONS];
@@ -29,6 +32,7 @@ namespace SimServer {
             if (staticInstance != null) {
                 return;
             }
+            staticInstance = this;
         }
 
         /// <summary>
@@ -37,18 +41,31 @@ namespace SimServer {
         /// <param name="drone"></param>
         /// <returns></returns>
         public int AddDroneToServer(DroneThreadPair drone) {
-            int droneIndex;
+            int droneIndex = -1;
             lock (drones) {
-                // TODO: iterate through array and find free index
-                droneIndex = droneCount;
-                drones[droneCount] = drone;
+                // Iterate through array and find free index
+                for (int i = 0; i < drones.Length; i++) {
+                    if (drones[i] == null) {
+                        droneIndex = i;
+                        break;
+                    }
+                }
+                if (droneIndex == -1) {
+                    throw new Exception("Could not add drone to server. No free index available");
+                }
+
+                drones[droneIndex] = drone;
                 droneCount++;
             }
             return droneIndex;
         }
+
+        public static DroneThreadPair GetDrone(int droneID) {
+            return staticInstance.drones[droneID];
+        }
     }
 
-    class DroneThreadPair {
+    public class DroneThreadPair {
         private ConnectedDrone drone;
         private Thread droneThread;
 

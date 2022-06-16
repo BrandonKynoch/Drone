@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo Spawning swarm of 25 drones
+
+start_new_drone() {
+    osascript -e 'tell app "Terminal"
+        do script "/Users/brandonkynoch/desktop/projects/drone/drone/output"
+    end tell'
+}
+
+make clean
+make
+
+for i in {1..4}
+do
+    start_new_drone &
+done
+
+wait
+echo "done"

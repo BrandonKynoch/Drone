@@ -214,7 +214,7 @@ public class DroneServerHandler : MonoBehaviour {
     private byte[] packageString(string s) {
         byte[] asciiBuffer = Encoding.ASCII.GetBytes(s);
         byte[] packageBuffer = new byte[asciiBuffer.Length + sizeof(UInt32)];
-        byte[] sizeOfString = BitConverter.GetBytes(s.Length);
+        byte[] sizeOfString = BitConverter.GetBytes((UInt32) s.Length);
         Buffer.BlockCopy(sizeOfString, 0, packageBuffer, 0, sizeOfString.Length);
         Buffer.BlockCopy(asciiBuffer, 0, packageBuffer, sizeOfString.Length, asciiBuffer.Length);
         return packageBuffer;

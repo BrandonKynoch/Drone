@@ -1,5 +1,6 @@
 ﻿#include <globals.h>
 #include <d_networking.h>
+// #include <inttypes.h> // for printing UInt32
 
 char network_message[NETWORK_STD_MSG_LEN];
 
@@ -29,9 +30,12 @@ void init_server_socket(struct drone_data* drone_data) {
     }
 
     // Unpack server response
-    recv(network_socket, &network_message, sizeof(network_message), 0); // Last parameter is for flags, this is optional
-    // printf("\nServer Response:\n%s\n\n", network_message);
+    recv(network_socket, &network_message, PACKAGE_HEADER_SIZE, 0);
+    uint32_t package_size = *((uint32_t*) &network_message);
+    recv(network_socket, &network_message, package_size, 0); // Last parameter is for flags, this is optional
+    network_message[package_size] = '\0';
     
+    // Get drone id from response
     struct json_object* json_in = json_tokener_parse(network_message);
     struct json_object* json_id;
     json_object_object_get_ex(json_in, "id", &json_id);
@@ -71,13 +75,16 @@ void spawn_in_unity_server(struct drone_data* drone_data) {
 
 
 
-void send_server_fixed_message(struct drone_data* drone) {
-    send(drone->socket, network_message, sizeof(network_message), 0);
-}
 
 void send_server_message(struct drone_data* drone, const char* msg) {
-    sprintf(network_message, msg);
-    send(drone->socket, network_message, sizeof(network_message), 0);
+    // Package server header
+    sprintf(network_message + PACKAGE_HEADER_SIZE, msg);
+    int msg_len = strlen(msg);
+    *((uint32_t*) &network_message) = (uint32_t) msg_len;
+    int bytes_sent = 0;
+    while (bytes_sent <= msg_len + PACKAGE_HEADER_SIZE) {
+        bytes_sent += send(drone->socket, network_message, msg_len + PACKAGE_HEADER_SIZE, 0);
+    }
 }
 
 void send_server_json(struct drone_data* drone, struct json_object* json) {
@@ -86,8 +93,11 @@ void send_server_json(struct drone_data* drone, struct json_object* json) {
 }
 
 char* receive_server_message(struct drone_data* drone) {
-    printf("Pre rec\n");
-    recv(drone->socket, &network_message, sizeof(network_message), 0);
-    printf("Post rec\n");
-    return &network_message;
+    // Unpack package header
+    recv(drone->socket, &network_message, PACKAGE_HEADER_SIZE, 0);
+    uint32_t package_size = *((uint32_t*) &network_message);
+    recv(drone->socket, &network_message, package_size, 0);
+    network_message[package_size] = '\0';
+
+    return network_message + PACKAGE_HEADER_SIZE;
 }
