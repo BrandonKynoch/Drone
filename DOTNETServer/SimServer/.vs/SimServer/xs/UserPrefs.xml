@@ -1,12 +1,15 @@
 ﻿<Properties StartupConfiguration="{31E21F89-6C30-44D7-A681-4871B2CE752E}|Default">
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SimServer/ConnectedDrone.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimServer/Networking.cs">
     <Files>
       <File FileName="SimServer/ServerMain.cs" Line="42" Column="32" />
-      <File FileName="SimServer/Networking.cs" Line="97" Column="31" />
-      <File FileName="SimServer/ConnectedDrone.cs" Line="23" Column="1" />
+      <File FileName="SimServer/Networking.cs" Line="213" Column="14" />
+      <File FileName="SimServer/ConnectedDrone.cs" Line="68" Column="28" />
       <File FileName="SimServer/JSONFactory.cs" Line="10" Column="10" />
     </Files>
     <Pads>
@@ -14,7 +17,7 @@
         <State name="__root__">
           <Node name="SimServer" expanded="True">
             <Node name="SimServer" expanded="True">
-              <Node name="ConnectedDrone.cs" selected="True" />
+              <Node name="Networking.cs" selected="True" />
             </Node>
           </Node>
         </State>
@@ -24,8 +27,5 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

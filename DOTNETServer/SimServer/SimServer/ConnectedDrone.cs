@@ -67,27 +67,27 @@ namespace SimServer {
 
             Networking.SendToSim(this, response); // TODO: sleep thread after calling sendtosim
 
-            Console.WriteLine("A");
-
             Thread.Yield();
 
-            Console.WriteLine("B");
-
             while (true) {
-                //lock (pendingSimResponses) {
+                JObject simResponse = null;
+                lock (pendingSimResponses) {
                     if (pendingSimResponses.Count > 0) {
-                        JObject simResponse = pendingSimResponses.Dequeue();
-                        Console.WriteLine(simResponse.ToString());
-                        SendDroneMessage(simResponse.ToString());
-
-                        Console.WriteLine("C");
-
-                        Thread.Yield();
-
-                        JObject droneResponse = ReadDroneMessage();
-
-                        Networking.SendToSim(this, droneResponse.ToString());
+                        simResponse = pendingSimResponses.Dequeue();
                     }
+                }
+
+                //lock (pendingSimResponses) {
+                if (simResponse != null) {
+                    Console.WriteLine(simResponse.ToString());
+                    SendDroneMessage(simResponse.ToString());
+
+                    Thread.Yield();
+
+                    JObject droneResponse = ReadDroneMessage();
+
+                    Networking.SendToSim(this, droneResponse.ToString());
+                }
                 //}
 
                 Thread.Yield();
@@ -105,9 +105,9 @@ namespace SimServer {
         }
 
         public void ReceiveMessageFromSimulation(JObject json) {
-            //lock (pendingSimResponses) {
+            lock (pendingSimResponses) {
                 pendingSimResponses.Enqueue(json);
-            //}
+            }
         }
     }
 }

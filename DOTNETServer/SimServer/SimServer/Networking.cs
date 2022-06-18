@@ -23,7 +23,6 @@ namespace SimServer {
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         // Simulation Variables
-        private Object simMutex = new Object();
         private Thread simSendThread;       // Thread dedicated to sending simulation messages
         private Thread simReceiveThread;    // Thread dedicated to receiving messages from the simulation
         private NetworkStream simStream;    // Network stream connected to the simulation
@@ -72,13 +71,22 @@ namespace SimServer {
         /// As well as any other network requests that need to be sent to unity simulation
         /// </summary>
         private void SimNetworkingSendLoop() {
+            DroneMessage nullMSG = new DroneMessage();
+            bool msgIsNull = true;
             while (true) {
-                //lock (simMutex) {
+                DroneMessage msg = nullMSG;
+                msgIsNull = true;
+
+                lock (outgoingDroneMessageRequests) {
                     if (outgoingDroneMessageRequests.Count > 0) {
-                        DroneMessage msg = outgoingDroneMessageRequests.Dequeue();
-                        SendSimStreamMessage(msg.message);
+                        msg = outgoingDroneMessageRequests.Dequeue();
+                        msgIsNull = false;
                     }
-                //}
+                }
+
+                if (!msgIsNull) {
+                    SendSimStreamMessage(msg.message);
+                }
 
                 Thread.Yield();
             }
@@ -90,12 +98,10 @@ namespace SimServer {
         /// </summary>
         private void SimNetworkingReceiveLoop() {
             while (true) {
-                //lock (simMutex) {
-                    string response = ReceiveSimStreamMessage();
-                    JObject responseJson = JObject.Parse(response);
-                    ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
-                    responseDrone.ReceiveMessageFromSimulation(responseJson);
-                //}
+                string response = ReceiveSimStreamMessage();
+                JObject responseJson = JObject.Parse(response);
+                ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
+                responseDrone.ReceiveMessageFromSimulation(responseJson);
 
                 Thread.Yield();
             }
@@ -125,7 +131,9 @@ namespace SimServer {
         /// <param name="s"></param>
         public static void SendToSim(ConnectedDrone drone, string s) {
             DroneMessage droneMessage = new DroneMessage(drone, s);
-            StaticInstance.outgoingDroneMessageRequests.Enqueue(droneMessage);
+            lock (staticInstance.outgoingDroneMessageRequests) {
+                StaticInstance.outgoingDroneMessageRequests.Enqueue(droneMessage);
+            }
         }
 
         private struct DroneMessage {

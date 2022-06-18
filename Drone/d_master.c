@@ -30,7 +30,7 @@ void drone_logic_loop() {
         // Receive respone from server - position, distance sensors etc.
         char* json_in = receive_server_message(&drone_data);
 
-        // usleep(32000); // sleep for 32 milliseconds - 30HZ
+        usleep(32000); // sleep for 32 milliseconds - 30HZ
 
         // Calculate motor values based on drone sensor data
         // read_sensor_data(&drone_data, json_in);

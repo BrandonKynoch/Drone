@@ -129,11 +129,20 @@ public class DroneServerHandler : MonoBehaviour {
 
         while (inboundMessages.Count > 0) {
             JObject message = inboundMessages.Dequeue();
-            switch (message.GetValue("opcode").Value<int>()) {
+            int opCode = -1;
+
+            try {
+                opCode = message.GetValue("opcode").Value<int>();
+            } catch {
+                print("Recieved corrupt packet");
+            }
+
+            JObject jsonOut = null;
+            switch (opCode) {
                 case CODE_SPAWN_DRONE:
                     Drone newDrone = SpawnDrone(message);
 
-                    JObject jsonOut = JObject.FromObject(newDrone.dData);
+                    jsonOut = JObject.FromObject(newDrone.dData);
                     sendCServerData(jsonOut);
                     break;
                 case CODE_MOTOR_OUTPUT:
@@ -144,9 +153,15 @@ public class DroneServerHandler : MonoBehaviour {
                         br: message.GetValue("motor_br").Value<double>(),
                         bl: message.GetValue("motor_bl").Value<double>()
                         );
-                    JObject jsonM = JObject.FromObject(drone.dData);
 
-                    sendCServerData(jsonM);
+                    jsonOut = JObject.FromObject(drone.dData);
+                    sendCServerData(jsonOut);
+                    break;
+                case -1:
+                    // TODO: Send server message to handle broken request
+                    // server needs to find drone that couldn't send message and reply with empty reponse
+                    //JObject jsonM = JObject.FromObject(drone.dData);
+                    //sendCServerData(jsonM);
                     break;
                 default:
                     Debug.LogError("Invalid socket code");
