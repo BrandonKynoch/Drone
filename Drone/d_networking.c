@@ -82,9 +82,10 @@ void send_server_message(struct drone_data* drone, const char* msg) {
     int msg_len = strlen(msg);
     *((uint32_t*) &network_message) = (uint32_t) msg_len;
     int bytes_sent = 0;
-    while (bytes_sent <= msg_len + PACKAGE_HEADER_SIZE) {
-        bytes_sent += send(drone->socket, network_message, msg_len + PACKAGE_HEADER_SIZE, 0);
-    }
+    //while (bytes_sent <= msg_len + PACKAGE_HEADER_SIZE) {
+     ///   bytes_sent += send(drone->socket, network_message, msg_len + PACKAGE_HEADER_SIZE, 0);
+    //}
+    send(drone->socket, network_message, msg_len + PACKAGE_HEADER_SIZE, 0);
 }
 
 void send_server_json(struct drone_data* drone, struct json_object* json) {

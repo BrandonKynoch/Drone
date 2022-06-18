@@ -23,6 +23,7 @@ namespace SimServer {
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         // Simulation Variables
+        private Object simMutex = new Object();
         private Thread simSendThread;       // Thread dedicated to sending simulation messages
         private Thread simReceiveThread;    // Thread dedicated to receiving messages from the simulation
         private NetworkStream simStream;    // Network stream connected to the simulation
@@ -72,14 +73,14 @@ namespace SimServer {
         /// </summary>
         private void SimNetworkingSendLoop() {
             while (true) {
-                try {
+                //lock (simMutex) {
                     if (outgoingDroneMessageRequests.Count > 0) {
                         DroneMessage msg = outgoingDroneMessageRequests.Dequeue();
                         SendSimStreamMessage(msg.message);
-                    } else {
-                        Thread.Sleep(Timeout.Infinite);
                     }
-                } catch (ThreadInterruptedException e) { }
+                //}
+
+                Thread.Yield();
             }
         }
 
@@ -89,10 +90,14 @@ namespace SimServer {
         /// </summary>
         private void SimNetworkingReceiveLoop() {
             while (true) {
-                string response = ReceiveSimStreamMessage();
-                JObject responseJson = JObject.Parse(response);
-                ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
-                responseDrone.ReceiveMessageFromSimulation(responseJson);
+                //lock (simMutex) {
+                    string response = ReceiveSimStreamMessage();
+                    JObject responseJson = JObject.Parse(response);
+                    ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
+                    responseDrone.ReceiveMessageFromSimulation(responseJson);
+                //}
+
+                Thread.Yield();
             }
         }
 
@@ -111,9 +116,7 @@ namespace SimServer {
         /// Should not be exposed outside of networking class
         /// </summary>
         private string ReceiveSimStreamMessage() {
-            lock (staticInstance.simReceiveBuffer) {
-                return ReadStringFromNetworkStream(simStream, simReceiveBuffer);
-            }
+            return ReadStringFromNetworkStream(simStream, simReceiveBuffer);
         }
 
         /// <summary>
@@ -123,7 +126,6 @@ namespace SimServer {
         public static void SendToSim(ConnectedDrone drone, string s) {
             DroneMessage droneMessage = new DroneMessage(drone, s);
             StaticInstance.outgoingDroneMessageRequests.Enqueue(droneMessage);
-            StaticInstance.simSendThread.Interrupt();
         }
 
         private struct DroneMessage {
@@ -184,23 +186,21 @@ namespace SimServer {
                 }
             }
 
-            lock (stream) {
-                byte[] packageSizeArray = ms.ToArray();
+            byte[] packageSizeArray = ms.ToArray();
 
-                if (packageSizeArray.Length < PACKAGE_HEADER_SIZE) {
-                    throw new Exception("Invalid network package header received");
-                }
+            if (packageSizeArray.Length < PACKAGE_HEADER_SIZE) {
+                throw new Exception("Invalid network package header received");
+            }
 
-                UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
+            UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
 
-                ms = new MemoryStream();
-                ms.SetLength(0);
-                numBytesRead = 0;
-                while ((numBytesRead = stream.Read(tcpBuffer, 0, (int)packageSize - numBytesRead)) > 0) {
-                    ms.Write(tcpBuffer, 0, numBytesRead);
-                    if ((int)packageSize - numBytesRead == 0) {
-                        break;
-                    }
+            ms = new MemoryStream();
+            ms.SetLength(0);
+            numBytesRead = 0;
+            while ((numBytesRead = stream.Read(tcpBuffer, 0, (int)packageSize - numBytesRead)) > 0) {
+                ms.Write(tcpBuffer, 0, numBytesRead);
+                if ((int)packageSize - numBytesRead == 0) {
+                    break;
                 }
             }
 
@@ -213,11 +213,9 @@ namespace SimServer {
         /// <param name="stream"> The stream to send on </param>
         /// <param name="message"> The message to be sent </param>
         public static void SendStringToNetworkStream(NetworkStream stream, string message) {
-            lock (stream) {
-                byte[] buffer = PackageString(message);
-                stream.Write(buffer, 0, buffer.Length);
-                stream.Flush();
-            }
+            byte[] buffer = PackageString(message);
+            stream.Write(buffer, 0, buffer.Length);
+            stream.Flush();
         }
 
         /// <summary>

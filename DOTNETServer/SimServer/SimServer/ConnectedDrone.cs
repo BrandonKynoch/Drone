@@ -7,6 +7,7 @@ namespace SimServer {
     public class ConnectedDrone {
         // Networking
         private Socket socket;
+        private Thread thread;
         private NetworkStream netStream;
         private byte[] tcpBuffer = new byte[Networking.STD_MSG_LEN * 10];
 
@@ -18,6 +19,8 @@ namespace SimServer {
         DateTime startTime;
 
         /// Properties ////////////////////////////////////////////////////////////////////////////
+        public Thread DroneThread { get { return thread; }}
+
         public TimeSpan UpTime { get { return DateTime.Now - startTime; } }
         /// Properties ////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +42,7 @@ namespace SimServer {
         public static void InitializeDrone(Socket fromSocket) {
             ConnectedDrone drone = new ConnectedDrone(fromSocket);
             Thread droneThread = new Thread(new ThreadStart(drone.DroneMain));
+            drone.thread = droneThread;
             DroneThreadPair droneThreadPair = new DroneThreadPair(drone, droneThread);
 
             drone.id = Master.StaticInstance.AddDroneToServer(droneThreadPair);
@@ -63,20 +67,30 @@ namespace SimServer {
 
             Networking.SendToSim(this, response); // TODO: sleep thread after calling sendtosim
 
+            Console.WriteLine("A");
+
+            Thread.Yield();
+
+            Console.WriteLine("B");
+
             while (true) {
-                lock (pendingSimResponses) {
+                //lock (pendingSimResponses) {
                     if (pendingSimResponses.Count > 0) {
                         JObject simResponse = pendingSimResponses.Dequeue();
                         Console.WriteLine(simResponse.ToString());
                         SendDroneMessage(simResponse.ToString());
 
+                        Console.WriteLine("C");
+
+                        Thread.Yield();
+
                         JObject droneResponse = ReadDroneMessage();
 
                         Networking.SendToSim(this, droneResponse.ToString());
                     }
-                }
+                //}
 
-                //Console.Write("A");
+                Thread.Yield();
             }
         }
 
@@ -91,11 +105,9 @@ namespace SimServer {
         }
 
         public void ReceiveMessageFromSimulation(JObject json) {
-            lock (pendingSimResponses) {
+            //lock (pendingSimResponses) {
                 pendingSimResponses.Enqueue(json);
-            }
-            // TODO: wake up thread here
-            //Master.GetDrone(id).DroneThread.Resume();
+            //}
         }
     }
 }

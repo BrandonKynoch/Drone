@@ -13,3 +13,5 @@
 /Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.pdb
 /Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.genruntimeconfig.cache
 /Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/ref/SimServer.dll
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/bin/Release/net6.0/Newtonsoft.Json.dll
+/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/Release/net6.0/SimServer.csproj.CopyComplete
