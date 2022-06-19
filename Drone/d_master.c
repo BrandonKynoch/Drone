@@ -33,17 +33,13 @@ void drone_logic_loop() {
         usleep(32000); // sleep for 32 milliseconds - 30HZ
 
         // Calculate motor values based on drone sensor data
-        // read_sensor_data(&drone_data, json_in);
+        read_sensor_data(&drone_data, json_in);
 
-        // printf("\nSensor Data: \t");
-        // printf("%f", drone_data.sensor_array[0]);
-        // for (int i = 1; i < DRONE_SENSOR_COUNT; i++) {
-        //     printf(", %f", drone_data.sensor_array[i]);
-        // }
-        // printf("\n");
-
-        printf(json_in);
-        fflush(NULL);
+        printf("%f", drone_data.sensor_array[0]);
+        for (int i = 1; i < DRONE_SENSOR_COUNT; i++) {
+            printf(", %f", drone_data.sensor_array[i]);
+        }
+        printf("\n");
 
         motor_bl = DRONE_SENSOR_RANGE - drone_data.sensor_array[7];
         motor_br = DRONE_SENSOR_RANGE - drone_data.sensor_array[1];

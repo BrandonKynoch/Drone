@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Spawning swarm of 25 drones
+echo SPAWNING SWARM
 
 start_new_drone() {
     osascript -e 'tell app "Terminal"

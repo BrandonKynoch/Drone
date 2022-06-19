@@ -7,12 +7,12 @@ using Newtonsoft.Json.Linq;
 
 namespace SimServer {
     public class Networking {
-        /// Singleton pattern //////////////////////////////////////////////////
+        /// SINGLETON PATTERN //////////////////////////////////////////////////
         private static Networking staticInstance;
         public static Networking StaticInstance {
             get { return staticInstance; }
         }
-        /// Singleton pattern //////////////////////////////////////////////////
+        /// SINGLETON PATTERN //////////////////////////////////////////////////
 
         /// CONSTANTS //////////////////////////////////////////////////////////
         public const Int32 STD_MSG_LEN = 1024;
@@ -22,18 +22,16 @@ namespace SimServer {
         private const Int32 DRONE_CONNECTIONS_SOCKET_PORT = 8060;
         /// CONSTANTS //////////////////////////////////////////////////////////
 
-        // Simulation Variables
-        private Thread simSendThread;       // Thread dedicated to sending simulation messages
-        private Thread simReceiveThread;    // Thread dedicated to receiving messages from the simulation
-        private NetworkStream simStream;    // Network stream connected to the simulation
+        /// SIMULATION VARIABLES ///////////////////////////////////////////////
+        private Thread simSendThread;           // Thread dedicated to sending simulation messages
+        private Thread simReceiveThread;        // Thread dedicated to receiving messages from the simulation
+        private NetworkStream simStream;        // Network stream connected to the simulation
         private byte[] simReceiveBuffer = new byte[STD_MSG_LEN * 10];  // Network buffer for the simulation
-
-
-        // Drone Variables
-        private Thread awaitDroneConnectionsThread;     // Thread dedicated to receiving new drone connections
-
         private Queue<DroneMessage> outgoingDroneMessageRequests = new Queue<DroneMessage>();
 
+        private Thread awaitDroneConnectionsThread;     // Thread dedicated to receiving new drone connections
+        /// SIMULATION VARIABLES ///////////////////////////////////////////////
+        
 
         public Networking() {
             if (staticInstance != null) {
@@ -45,11 +43,14 @@ namespace SimServer {
             ConnectToUnity();
 
             simReceiveThread = new Thread(new ThreadStart(SimNetworkingReceiveLoop));
+            simReceiveThread.Priority = ThreadPriority.AboveNormal;
             simReceiveThread.Start();
+
 
             while (!simReceiveThread.IsAlive) { }
 
             simSendThread = new Thread(new ThreadStart(SimNetworkingSendLoop));
+            simSendThread.Priority = ThreadPriority.AboveNormal;
             simSendThread.Start();
             /// Unity Connection ////////////////////////////////////////////////////////////////
 
@@ -149,16 +150,15 @@ namespace SimServer {
 
         #region DRONES
         private void AwaitConnecetions() {
-            Console.WriteLine("Started");
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, DRONE_CONNECTIONS_SOCKET_PORT);
             TcpListener listener = new TcpListener(endPoint);
             listener.Start();
 
-            Console.WriteLine("\nAwaiting drone connections\n");
+            Console.WriteLine("\n##########################################");
+            Console.WriteLine("###    AWAITING DRONE CONNECTIONS      ###");
+            Console.WriteLine("##########################################\n");
             while (true) {
                 Socket newDroneSocket = listener.AcceptSocket(); // blocks thread
-                Console.WriteLine("Drone connected on endpoint: " + newDroneSocket.ToString());
-
                 ConnectedDrone.InitializeDrone(newDroneSocket);
             }
         }

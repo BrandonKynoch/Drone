@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo SPAWNING DRONE
+echo
+
+make clean
+make
+osascript -e 'tell app "Terminal"
+        do script "/Users/brandonkynoch/desktop/projects/drone/drone/output"
+    end tell'

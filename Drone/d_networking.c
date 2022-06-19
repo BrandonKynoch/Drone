@@ -99,5 +99,5 @@ char* receive_server_message(struct drone_data* drone) {
     recv(drone->socket, &network_message, package_size, 0);
     network_message[package_size] = '\0';
 
-    return network_message + PACKAGE_HEADER_SIZE;
+    return network_message;
 }

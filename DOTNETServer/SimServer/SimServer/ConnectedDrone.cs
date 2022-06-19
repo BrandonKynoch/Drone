@@ -5,13 +5,13 @@ using Newtonsoft.Json.Linq;
 
 namespace SimServer {
     public class ConnectedDrone {
-        // Networking
-        private Socket socket;
+        /// NETWORKING /////////////////////////////////////////////////////////////////////////////
+        private readonly Socket socket;
+        private readonly NetworkStream netStream;
         private Thread thread;
-        private NetworkStream netStream;
         private byte[] tcpBuffer = new byte[Networking.STD_MSG_LEN * 10];
-
         private Queue<JObject> pendingSimResponses = new Queue<JObject>();
+        /// NETWORKING /////////////////////////////////////////////////////////////////////////////
 
         public int id;
 
@@ -46,7 +46,7 @@ namespace SimServer {
             DroneThreadPair droneThreadPair = new DroneThreadPair(drone, droneThread);
 
             drone.id = Master.StaticInstance.AddDroneToServer(droneThreadPair);
-            Console.WriteLine("Drone ID: " + drone.id);
+            Console.WriteLine("Drone connected:\n\tEndpoint: " + fromSocket.RemoteEndPoint.ToString() + "\n\tID: " + drone.id);
 
             droneThread.Start();
         }
@@ -65,7 +65,7 @@ namespace SimServer {
                 throw new Exception("Invalid opcode while establishing connetion");
             }
 
-            Networking.SendToSim(this, response); // TODO: sleep thread after calling sendtosim
+            Networking.SendToSim(this, response);
 
             Thread.Yield();
 
@@ -77,9 +77,7 @@ namespace SimServer {
                     }
                 }
 
-                //lock (pendingSimResponses) {
                 if (simResponse != null) {
-                    Console.WriteLine(simResponse.ToString());
                     SendDroneMessage(simResponse.ToString());
 
                     Thread.Yield();
@@ -88,7 +86,6 @@ namespace SimServer {
 
                     Networking.SendToSim(this, droneResponse.ToString());
                 }
-                //}
 
                 Thread.Yield();
             }
