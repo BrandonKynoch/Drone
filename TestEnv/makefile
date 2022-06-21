@@ -7,8 +7,10 @@ global_files_dir = ../Globals
 global_headers_dir = ../Globals/headers
 global_obj_dir = ../Globals/obj
 
+libraries = -I../Libs/CBLAS/include/cblas.h
+
 #Include header dir - this allows us to include headers using <> instead of ""
-CFLAGS = -I$(headers_dir) -I$(global_headers_dir) -ljson-c -w
+CFLAGS = -I$(headers_dir) -I$(global_headers_dir) $(libraries) -ljson-c -w
 
 files := $(shell find . -name '*.c')
 headers := $(shell find $(headers_dir) -name '*.h')

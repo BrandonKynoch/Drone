@@ -30,6 +30,7 @@ void drone_logic_loop() {
         // Receive respone from server - position, distance sensors etc.
         char* json_in = receive_server_message(&drone_data);
 
+        // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
         usleep(32000); // sleep for 32 milliseconds - 30HZ
 
         // Calculate motor values based on drone sensor data

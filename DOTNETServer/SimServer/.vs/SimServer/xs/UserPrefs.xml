@@ -3,13 +3,11 @@
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="SimServer/Networking.cs">
     <Files>
       <File FileName="SimServer/ServerMain.cs" Line="42" Column="32" />
-      <File FileName="SimServer/Networking.cs" Line="213" Column="14" />
-      <File FileName="SimServer/ConnectedDrone.cs" Line="68" Column="28" />
+      <File FileName="SimServer/Networking.cs" Line="176" Column="22" />
+      <File FileName="SimServer/ConnectedDrone.cs" Line="33" Column="35" />
       <File FileName="SimServer/JSONFactory.cs" Line="10" Column="10" />
     </Files>
     <Pads>
@@ -28,4 +26,6 @@
     </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
 </Properties>

@@ -1,0 +1,9 @@
+- Download reference blas (Fortran code)
+- Download cblas (Wrapper class to access blas subroutines)
+- Compile fortran code using:
+	gfortran -c 03 *.f
+- Create static library using the following command:
+	ar rv libblas *.o
+- Ensure that 'BLLIB' points to location of static library in Makefile.IN and Makefile.LINUX (Inside of CBLAS folder makefiles)
+- Execute Make in terminal
+- Ensure to include 'Include' folder in makefiles when using cblas
