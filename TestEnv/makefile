@@ -7,11 +7,6 @@ global_files_dir = ../Globals
 global_headers_dir = ../Globals/headers
 global_obj_dir = ../Globals/obj
 
-libraries = -I../Libs/CBLAS/include/cblas.h
-
-#Include header dir - this allows us to include headers using <> instead of ""
-CFLAGS = -I$(headers_dir) -I$(global_headers_dir) $(libraries) -ljson-c -w
-
 files := $(shell find . -name '*.c')
 headers := $(shell find $(headers_dir) -name '*.h')
 objects := $(patsubst %.c, $(obj_dir)/%.o, $(notdir $(files)))
@@ -19,6 +14,24 @@ objects := $(patsubst %.c, $(obj_dir)/%.o, $(notdir $(files)))
 global_files := $(shell find $(global_files_dir) -name '*.c')
 global_headers := $(shell find $(global_headers_dir) -name '*.h')
 global_objects := $(patsubst %.c, $(global_obj_dir)/%.o, $(notdir $(global_files)))
+
+
+###################################################################################
+#####       LIBRARIES          ####################################################
+###################################################################################
+lib_Json_C = -ljson-c
+
+lib_CBLAS = \
+		../Libs/CBLAS/lib/cblas_LINUX.a \
+		../Libs/CBLAS/lib/libblas.a \
+		-I../Libs/CBLAS/include
+
+libraries = $(lib_Json_C) $(lib_CBLAS)
+###################################################################################
+#####       LIBRARIES          ####################################################
+###################################################################################
+
+CFLAGS = -I$(headers_dir) -I$(global_headers_dir) $(libraries) -w
 
 # Make executable
 output : $(objects) $(global_objects)
@@ -43,3 +56,7 @@ clean :
 .PHONY : remove
 remove :
 	rm output
+
+.PHONY : libs
+libs:
+	$(MAKE) -C ../Libs/CBLAS

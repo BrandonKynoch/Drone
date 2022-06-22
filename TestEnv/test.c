@@ -20,7 +20,7 @@ void print(const char * name, const double* matrix, int row, int column)
   printf("Matrix %s has %d rows and %d columns:\n", name, row, column);
   for (int i = 0; i < row; i++){
     for (int j = 0; j < column; j++){
-      printf("%.3f ", matrix[j*row + i]);
+      printf("%.3f\t", matrix[j*row + i]);
     }
     printf("\n");
   }
