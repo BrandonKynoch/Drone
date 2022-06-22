@@ -1,0 +1,16 @@
+root = true
+
+[*.{c++,c,cc,cpp,cxx,h,h++,hh,hpp,hxx,inl,ipp,tlh,tli}]
+
+cpp_indent_case_contents_when_block = true
+cpp_new_line_before_open_brace_namespace = same_line
+cpp_new_line_before_open_brace_type = same_line
+cpp_new_line_before_open_brace_function = same_line
+cpp_new_line_before_open_brace_block = same_line
+cpp_new_line_before_open_brace_lambda = same_line
+cpp_new_line_scope_braces_on_separate_lines = same_line
+cpp_new_line_close_brace_same_line_empty_type = same_line
+cpp_new_line_close_brace_same_line_empty_function = same_line
+cpp_new_line_before_catch = same_line
+cpp_new_line_before_else = same_line
+cpp_new_line_before_while_in_do_while = same_line
