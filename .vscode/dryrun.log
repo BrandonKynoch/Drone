@@ -1,19 +1,23 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory `/Users/brandonkynoch/Desktop/Repositories/Drone'
 cd Drone && /Applications/Xcode.app/Contents/Developer/usr/bin/make clean && /Applications/Xcode.app/Contents/Developer/usr/bin/make
+ 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Drone'
 rm -r obj
 mkdir obj
 rm -r ../Globals/obj
 mkdir ../Globals/obj
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Drone'
+ 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Drone'
 cc -c -o obj/d_master.o d_master.c -g -I./headers -I../Globals/headers -ljson-c -w
 cc -c -o obj/d_networking.o d_networking.c -g -I./headers -I../Globals/headers -ljson-c -w
+ 
 cc -c -o ../Globals/obj/drone_data.o ../Globals/drone_data.c -g -I./headers -I../Globals/headers -ljson-c -w
 cc -c -o ../Globals/obj/utilities.o ../Globals/utilities.c -g -I./headers -I../Globals/headers -ljson-c -w
 mkdir -p obj
 cc -o output  obj/d_master.o  obj/d_networking.o  ../Globals/obj/drone_data.o  ../Globals/obj/utilities.o -g -I./headers -I../Globals/headers -ljson-c -w -lm
+ 
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Drone'
 cd ..
 cd Server && /Applications/Xcode.app/Contents/Developer/usr/bin/make clean && /Applications/Xcode.app/Contents/Developer/usr/bin/make
@@ -27,12 +31,10 @@ make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Serv
  
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Server'
 cc -c -o obj/server.o server.c -g -I./headers -I../Globals/headers -ljson-c -w
- 
 cc -c -o ../Globals/obj/drone_data.o ../Globals/drone_data.c -g -I./headers -I../Globals/headers -ljson-c -w
 cc -c -o ../Globals/obj/utilities.o ../Globals/utilities.c -g -I./headers -I../Globals/headers -ljson-c -w
 mkdir -p obj
 cc -o output  obj/server.o  ../Globals/obj/drone_data.o  ../Globals/obj/utilities.o -g -I./headers -I../Globals/headers -ljson-c -w -lm
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Repositories/Drone/Server'
- 
 make: Leaving directory `/Users/brandonkynoch/Desktop/Repositories/Drone'
  

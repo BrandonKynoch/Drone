@@ -1,9 +1,12 @@
 ﻿#include <d_master.h>
 #include <assert.h>
+#include <time.h>
 
 struct drone_data drone_data;
 
 int main() {
+    srand (time(NULL)); // Initalize seed for random numbers
+
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);

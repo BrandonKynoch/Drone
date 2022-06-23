@@ -21,12 +21,7 @@ global_objects := $(patsubst %.c, $(global_obj_dir)/%.o, $(notdir $(global_files
 ###################################################################################
 lib_Json_C = -ljson-c
 
-lib_CBLAS = \
-		../Libs/CBLAS/lib/cblas_LINUX.a \
-		../Libs/CBLAS/lib/libblas.a \
-		-I../Libs/CBLAS/include
-
-libraries = $(lib_Json_C) $(lib_CBLAS)
+libraries = $(lib_Json_C)
 ###################################################################################
 #####       LIBRARIES          ####################################################
 ###################################################################################

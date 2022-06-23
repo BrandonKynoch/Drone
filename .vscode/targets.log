@@ -6,6 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
 cd Drone && /Applications/Xcode.app/Contents/Developer/usr/bin/make clean && /Applications/Xcode.app/Contents/Developer/usr/bin/make
  
 # GNU Make 3.81
@@ -15,9 +16,8 @@ cd Drone && /Applications/Xcode.app/Contents/Developer/usr/bin/make clean && /Ap
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
- 
 
-# Make data base, printed on Tue Jun 21 22:58:19 2022
+# Make data base, printed on Wed Jun 22 21:58:08 2022
 
 # Variables
 
@@ -54,7 +54,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/tn/xhqj_5qj1fv2scx9pzwnkh5w0000gn/T/vscode-ipc-84bcf013-cb0a-48f4-9e41-1a5f7022364d.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/tn/xhqj_5qj1fv2scx9pzwnkh5w0000gn/T/vscode-ipc-47cea3eb-5322-4b04-ae90-b2a90693a271.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -172,7 +172,7 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 5316
+VSCODE_PID = 11409
 # variable set hash-table stats:
 # Load=76/1024=7%, Rehash=0, Collisions=1/133=1%
 
@@ -253,7 +253,6 @@ clean:
 #  Phony target (prerequisite of .PHONY).
 #  Command-line target.
 #  Implicit rule search has not been done.
- 
 #  Implicit/static pattern stem: `'
 #  File does not exist.
 #  File has been updated.
@@ -306,6 +305,7 @@ output: obj/d_master.o obj/d_networking.o ../Globals/obj/drone_data.o ../Globals
 
 # files hash-table stats:
 # Load=11/1024=1%, Rehash=0, Collisions=1/32=3%
+ 
 # VPATH Search Paths
 
 # No `vpath' search paths.
@@ -317,13 +317,10 @@ output: obj/d_master.o obj/d_networking.o ../Globals/obj/drone_data.o ../Globals
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Tue Jun 21 22:58:19 2022
-
- 
-make: *** [all] Error 1
+# Finished Make data base on Wed Jun 22 21:58:08 2022
 
 
-# Make data base, printed on Tue Jun 21 22:58:19 2022
+# Make data base, printed on Wed Jun 22 21:58:08 2022
 
 # Variables
 
@@ -354,7 +351,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/tn/xhqj_5qj1fv2scx9pzwnkh5w0000gn/T/vscode-ipc-84bcf013-cb0a-48f4-9e41-1a5f7022364d.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/tn/xhqj_5qj1fv2scx9pzwnkh5w0000gn/T/vscode-ipc-47cea3eb-5322-4b04-ae90-b2a90693a271.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -430,7 +427,6 @@ XPC_SERVICE_NAME = application.com.microsoft.VSCode.50701544.50701550
 # automatic
 +F = $(notdir $+)
 # environment
- 
 __CF_USER_TEXT_ENCODING = 0x1F5:0x0:0x0
 # environment
 COMMAND_MODE = unix2003
@@ -451,7 +447,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 5316
+VSCODE_PID = 11409
 # variable set hash-table stats:
 # Load=62/1024=6%, Rehash=0, Collisions=1/96=1%
 
@@ -536,6 +532,8 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Tue Jun 21 22:58:19 2022
+# Finished Make data base on Wed Jun 22 21:58:08 2022
 
  
+make: *** [all] Error 1
+
