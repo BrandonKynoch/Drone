@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include <d_networking.h>
+#include <d_neural.h>
 
 void drone_logic_loop();
 

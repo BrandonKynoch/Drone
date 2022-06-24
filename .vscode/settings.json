@@ -15,6 +15,7 @@
         "random": "c",
         "*.tcc": "c",
         "unordered_map": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "stdlib.h": "c"
     }
 }

@@ -1,22 +1,11 @@
+// Author: Brandon Kynoch
+// 23 June 2022
+
 #include <custom_BLAS.h>
 
-int main() {
-  printf("CUSTOM BLAS WRAPPER TESTING SUITE:\n\n");
-
- // Load matrices from file
- // First 4 bytes of file should indicate hidden layer count (l)
- // The next (l * 4) bytes tell us the size of each layer
- // Read through data and initialize arrays
-
-   int rowsA = 3;
-  int colsB = 3;
-  int common = 2;
- double* H1 = calloc(rowsA * common, sizeof(double)); // A = 2x3
-
- // Feed forward using
- // WV + B   : where V is vector in, and num rows in W determines size of output vector
- // TODO: Make function to copy C before calling dgemm to keep original, then set back after
-}
+// int main() {
+//   printf("CUSTOM BLAS WRAPPER TESTING SUITE:\n\n");
+// }
 
 // ############################################################################
 // #######      INITIALIZERS      #############################################
@@ -92,7 +81,6 @@ void mat_dgemm(double* A, double* B, double* C, int rowsA, int colsB, int common
     colsB); // The size of the first dimension of C
 }
 
-
 void mat_set(double* A, int rowSize, int row, int col, double val) {
   A[(row * rowSize) + col] = val;
 }
@@ -109,7 +97,7 @@ void mat_set(double* A, int rowSize, int row, int col, double val) {
 // ############################################################################
 #pragma region UTILITIES
 
-void print(const char* name, const double* matrix, int row_size, int column_size) {
+void print_matrix(const char* name, const double* matrix, int row_size, int column_size) {
   printf("Matrix %s has %d rows and %d columns:\n", name, row_size, column_size);
   for (int i = 0; i < row_size; i++) {
     for (int j = 0; j < column_size; j++) {

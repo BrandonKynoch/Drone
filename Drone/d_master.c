@@ -10,14 +10,30 @@ int main() {
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);
-    init_server_socket(&drone_data);
-    pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
 
-    drone_logic_loop();
+    int neural_design[] = {4, 2, 8, 3, 2, 10, 9};
+    struct network_data* network = init_matrices_from_network_design(7, neural_design);
 
-    while (TRUE) {
-        ;
+    for (int i = 0; i < network->weights_matrix_count; i++) {
+        char name[10];
+        sprintf(name, "%d", i);
+
+        print_matrix(
+            name,
+            network->weights_layers[i],
+            network->weights_row_count[i],
+            network->weights_col_count[i]
+            );
     }
+
+    // init_server_socket(&drone_data);
+    // pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
+
+    // drone_logic_loop();
+
+    // while (TRUE) {
+    //     ;
+    // }
 }
 
 void drone_logic_loop() {

@@ -1,3 +1,6 @@
+// Author: Brandon Kynoch
+// 23 June 2022
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -38,6 +41,9 @@ void init_mat_random(double* matrix, int rows, int columns, double min_val, doub
 // The result is stored in C
 void mat_dgemm(double* A, double* B, double* C, int rowsA, int colsB, int common);
 
+// This method should not be used for initializing the entire matrix, rather use
+// one of the matrix initializers
+// Set the value of a sigle element in a matrix
 void mat_set(double* A, int rowSize, int row, int col, double val);
 
 // ############################################################################
@@ -53,7 +59,7 @@ void mat_set(double* A, int rowSize, int row, int col, double val);
 // ############################################################################
 
 // Debug print matrix
-void print(const char* name, const double* matrix, int row_size, int column_size);
+void print_matrix(const char* name, const double* matrix, int row_size, int column_size);
 
 // ############################################################################
 // #######      UTILITIES      ################################################
