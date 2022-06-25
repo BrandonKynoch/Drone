@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <time.h>
 
+#define LOAD_NN_FILE "test.NN"
+
 struct drone_data drone_data;
 
 int main() {
@@ -11,14 +13,11 @@ int main() {
 
     init_drone_data(&drone_data);
 
-    int neural_size = 4;
-    int neural_shape[] = {8, 8, 8, 4};
-    int neural_activations[] = {
-        ACTIVATION_RELU,
-        ACTIVATION_RELU,
-        ACTIVATION_SIGMOID
-    };
-    drone_data.neural = init_matrices_from_network_design(neural_size, neural_shape, neural_activations);
+    init_neural_data(LOAD_NN_FILE, &drone_data.neural);
+
+    feed_forward_network(drone_data.neural);
+
+    print_matrix("Output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
 
     init_server_socket(&drone_data);
     pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);

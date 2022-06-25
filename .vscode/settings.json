@@ -19,6 +19,7 @@
         "stdlib.h": "c",
         "d_master.h": "c",
         "typeinfo": "c",
-        "d_neural.h": "c"
+        "d_neural.h": "c",
+        "globals.h": "c"
     }
 }

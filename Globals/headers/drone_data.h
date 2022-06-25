@@ -11,7 +11,7 @@ struct drone_data {
     uint64_t id;
     int socket;
 
-    struct network_data* neural;
+    struct neural_data* neural;
 
     double sensor_array[DRONE_SENSOR_COUNT];
 
