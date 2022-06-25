@@ -46,6 +46,10 @@ void mat_dgemm(double* A, double* B, double* C, int rowsA, int colsB, int common
 // Set the value of a sigle element in a matrix
 void mat_set(double* A, int rowSize, int row, int col, double val);
 
+// Copy the values in one matrix to another
+// Both matrices must share the same dimensions
+void mat_copy(double* from, double* to, int row, int col);
+
 // ############################################################################
 // #######      OPERATIONS      ###############################################
 // ############################################################################

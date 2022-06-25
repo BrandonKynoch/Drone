@@ -16,6 +16,8 @@
         "*.tcc": "c",
         "unordered_map": "c",
         "sstream": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "d_master.h": "c",
+        "typeinfo": "c"
     }
 }

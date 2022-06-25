@@ -5,25 +5,43 @@
 struct drone_data drone_data;
 
 int main() {
-    srand (time(NULL)); // Initalize seed for random numbers
+    // srand (time(NULL)); // Initalize seed for random numbers
+    srand (0); // Initalize seed for random numbers
 
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);
 
-    int neural_design[] = {4, 2, 8, 3, 2, 10, 9};
-    struct network_data* network = init_matrices_from_network_design(7, neural_design);
+    int neural_design[] = {4, 3, 2, 6};
+    struct network_data* network = init_matrices_from_network_design(4, neural_design);
+    init_mat_const(network->input_layer, network->weights_col_count[0], 1, 1);
+    feed_forward_network(network);
 
     for (int i = 0; i < network->weights_matrix_count; i++) {
-        char name[10];
-        sprintf(name, "%d", i);
+        char name_weights[20];
+        sprintf(name_weights, "%d weights\t\t", i);
+        char name_bias[20];
+        sprintf(name_bias, "%d bias\t\t", i);
+        char name_output[20];
+        sprintf(name_output, "%d output\t\t", i);
 
         print_matrix(
-            name,
+            name_weights,
             network->weights_layers[i],
             network->weights_row_count[i],
-            network->weights_col_count[i]
-            );
+            network->weights_col_count[i]);
+
+        print_matrix(
+            name_bias,
+            network->biases_layers_original[i],
+            network->weights_row_count[i],
+            1);
+
+        print_matrix(
+            name_output,
+            network->biases_layers[i],
+            network->weights_row_count[i],
+            1);
     }
 
     // init_server_socket(&drone_data);

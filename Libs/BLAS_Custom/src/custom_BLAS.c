@@ -85,6 +85,13 @@ void mat_set(double* A, int rowSize, int row, int col, double val) {
   A[(row * rowSize) + col] = val;
 }
 
+void mat_copy(double* from, double* to, int row, int col) {
+  int size = row * col;
+  for (int i = 0; i < size; i++) {
+    to[i] = from[i];
+  }
+}
+
 #pragma endregion
 // ############################################################################
 // #######      OPERATIONS      ###############################################
