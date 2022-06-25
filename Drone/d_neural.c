@@ -115,6 +115,17 @@ double apply_activation(double val, int activation) {
     return -1;
 }
 
+
+
+
+
+
+
+
+int network_input_layer_size(struct network_data* network) {
+    return network->weights_col_count[0];
+}
+
 // TODO:
 // Load matrices from file
 // First 4 bytes of file should indicate hidden layer count (l)

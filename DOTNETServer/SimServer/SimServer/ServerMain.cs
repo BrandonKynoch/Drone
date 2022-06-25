@@ -26,6 +26,7 @@ namespace SimServer {
 
             // Initialize Networking
             Networking networkingInstance = new Networking();
+            NeuralTrainer neuralTrainerInstance = new NeuralTrainer();
         }
 
         private Master() {

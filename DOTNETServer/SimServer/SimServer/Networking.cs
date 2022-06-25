@@ -199,7 +199,7 @@ namespace SimServer {
             if (packageSizeArray.Length < PACKAGE_HEADER_SIZE) {
                 throw new Exception("Invalid network package header received");
             }
-
+            
             UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
 
             ms = new MemoryStream();

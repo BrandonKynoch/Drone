@@ -50,6 +50,9 @@ struct network_data* init_matrices_from_network_design(int layer_count, int neur
 // Output is stored in network_data->output_layer
 void feed_forward_network(struct network_data* network);
 
+// Applies the specified activation function and returns the result
+double apply_activation(double val, int activation);
+
 // ############################################################################
 // #######      OPERATIONS      ###############################################
 // ############################################################################
@@ -61,11 +64,11 @@ void feed_forward_network(struct network_data* network);
 
 
 // ############################################################################
-// #######      ACTIVATION FUNCTIONS      #####################################
+// #######      UTILITIES      ################################################
 // ############################################################################
 
-double apply_activation(double val, int activation);
+int network_input_layer_size(struct network_data* network);
 
 // ############################################################################
-// #######      ACTIVATION FUNCTIONS      #####################################
+// #######      UTILITIES      ################################################
 // ############################################################################

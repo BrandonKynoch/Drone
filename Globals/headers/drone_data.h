@@ -1,9 +1,8 @@
 #include <stdlib.h>
+#include <globals.h>
 
 // Libs
 #include <json-c/json.h>
-
-#include <globals.h>
 
 #define CODE_SPAWN_DRONE 0x1
 #define CODE_MOTOR_OUTPUT 0x2
@@ -11,6 +10,8 @@
 struct drone_data {
     uint64_t id;
     int socket;
+
+    struct network_data* neural;
 
     double sensor_array[DRONE_SENSOR_COUNT];
 

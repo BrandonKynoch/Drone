@@ -5,31 +5,25 @@
 struct drone_data drone_data;
 
 int main() {
-    // srand (time(NULL)); // Initalize seed for random numbers
-    srand (0); // Initalize seed for random numbers
+    srand (time(NULL)); // Initalize seed for random numbers
 
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);
 
-    int neural_shape[] = {4, 3, 2, 6};
+    int neural_size = 4;
+    int neural_shape[] = {8, 8, 8, 4};
     int neural_activations[] = {
         ACTIVATION_RELU,
         ACTIVATION_RELU,
         ACTIVATION_SIGMOID
     };
-    struct network_data* network = init_matrices_from_network_design(4, neural_shape, neural_activations);
-    init_mat_const(network->input_layer, network->weights_col_count[0], 1, 1); // Set all elements in input to 1
-    feed_forward_network(network);
+    drone_data.neural = init_matrices_from_network_design(neural_size, neural_shape, neural_activations);
 
-    // init_server_socket(&drone_data);
-    // pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
+    init_server_socket(&drone_data);
+    pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
 
-    // drone_logic_loop();
-
-    // while (TRUE) {
-    //     ;
-    // }
+    drone_logic_loop();
 }
 
 void drone_logic_loop() {
@@ -39,28 +33,39 @@ void drone_logic_loop() {
     motor_br = 0;
     motor_bl = 0;
 
+    ASSERT(DRONE_SENSOR_COUNT == network_input_layer_size(drone_data.neural));
+
     while (TRUE) {
         motor_output(motor_fl, motor_fr, motor_br, motor_bl, &drone_data);
 
-        // Receive respone from server - position, distance sensors etc.
+        // Receive sensore data respone from server - position, distance sensors etc.
         char* json_in = receive_server_message(&drone_data);
 
         // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
         usleep(32000); // sleep for 32 milliseconds - 30HZ
 
-        // Calculate motor values based on drone sensor data
+        // Read sensor data from server response
         read_sensor_data(&drone_data, json_in);
 
-        printf("%f", drone_data.sensor_array[0]);
-        for (int i = 1; i < DRONE_SENSOR_COUNT; i++) {
-            printf(", %f", drone_data.sensor_array[i]);
+        // Set input layer to neural network
+        for (int i = 0; i < network_input_layer_size(drone_data.neural); i++) {
+            drone_data.neural->input_layer[i] = drone_data.sensor_array[i];
+            printf(", %f", drone_data.neural->input_layer[i]);
         }
         printf("\n");
 
-        motor_bl = DRONE_SENSOR_RANGE - drone_data.sensor_array[7];
-        motor_br = DRONE_SENSOR_RANGE - drone_data.sensor_array[1];
-        motor_fr = DRONE_SENSOR_RANGE - drone_data.sensor_array[3];
-        motor_fl = DRONE_SENSOR_RANGE - drone_data.sensor_array[5];
+        // Feed forward data
+        feed_forward_network(drone_data.neural);
+
+        // Set motors from output
+        // TODO: Create motor controller to convert neural output to motor values
+        motor_bl = drone_data.neural->output_layer[0];
+        motor_br = drone_data.neural->output_layer[1];
+        motor_fr = drone_data.neural->output_layer[2];
+        motor_fl = drone_data.neural->output_layer[3];
+        printf("motors: %f, %f, %f, %f", motor_bl, motor_br, motor_fr, motor_fl);
+
+        printf("\n\n\n\n");
     }
 }
 
