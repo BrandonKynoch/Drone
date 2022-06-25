@@ -18,6 +18,7 @@
         "sstream": "c",
         "stdlib.h": "c",
         "d_master.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "d_neural.h": "c"
     }
 }

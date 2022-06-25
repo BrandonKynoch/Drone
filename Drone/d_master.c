@@ -12,37 +12,15 @@ int main() {
 
     init_drone_data(&drone_data);
 
-    int neural_design[] = {4, 3, 2, 6};
-    struct network_data* network = init_matrices_from_network_design(4, neural_design);
-    init_mat_const(network->input_layer, network->weights_col_count[0], 1, 1);
+    int neural_shape[] = {4, 3, 2, 6};
+    int neural_activations[] = {
+        ACTIVATION_RELU,
+        ACTIVATION_RELU,
+        ACTIVATION_SIGMOID
+    };
+    struct network_data* network = init_matrices_from_network_design(4, neural_shape, neural_activations);
+    init_mat_const(network->input_layer, network->weights_col_count[0], 1, 1); // Set all elements in input to 1
     feed_forward_network(network);
-
-    for (int i = 0; i < network->weights_matrix_count; i++) {
-        char name_weights[20];
-        sprintf(name_weights, "%d weights\t\t", i);
-        char name_bias[20];
-        sprintf(name_bias, "%d bias\t\t", i);
-        char name_output[20];
-        sprintf(name_output, "%d output\t\t", i);
-
-        print_matrix(
-            name_weights,
-            network->weights_layers[i],
-            network->weights_row_count[i],
-            network->weights_col_count[i]);
-
-        print_matrix(
-            name_bias,
-            network->biases_layers_original[i],
-            network->weights_row_count[i],
-            1);
-
-        print_matrix(
-            name_output,
-            network->biases_layers[i],
-            network->weights_row_count[i],
-            1);
-    }
 
     // init_server_socket(&drone_data);
     // pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
