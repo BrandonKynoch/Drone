@@ -101,3 +101,9 @@ char* receive_server_message(struct drone_data* drone) {
 
     return network_message;
 }
+
+struct json_object* receive_server_json(struct drone_data* drone) {
+    char* message_in = receive_server_message(drone);
+    struct json_object* json_in = json_tokener_parse(message_in);
+    return json_in;
+}

@@ -15,6 +15,7 @@ namespace SimServer {
 
         // OPCODES
         public const int OPCODE_SPAWN_DRONE = 0x1;
+        public const int OPCODE_REQUEST_TARGET_NN_FROM_SERVER = 0x3;
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         private DroneThreadPair[] drones = new DroneThreadPair[MAXIMUM_DRONE_CONNECTIONS];

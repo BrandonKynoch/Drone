@@ -17,10 +17,20 @@ int main() {
 
     feed_forward_network(drone_data.neural);
 
-    print_matrix("Output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
 
     init_server_socket(&drone_data);
     pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
+
+#if IS_SIMULATION
+    // Request target NN from server
+    char* target_NN_file = request_target_NN_from_server();
+    init_neural_data(target_NN_file, &drone_data.neural);
+    feed_forward_network(drone_data.neural);
+    printf("NN feedforward check\n");
+    print_matrix("Output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
+#else
+    // TODO: load NN directly from file on device
+#endif
 
     drone_logic_loop();
 }
@@ -107,3 +117,35 @@ void motor_output(double fl, double fr, double br, double bl, struct drone_data*
     // Send server message
     send_server_json(drone, drone->m_json);
 }
+
+
+
+
+
+
+#if IS_SIMULATION
+char* request_target_NN_from_server() {
+    // Send request to server
+    struct json_object* request_json = json_object_new_object();
+    pack_msg_with_standard_header(request_json, &drone_data, CODE_REQUEST_TARGET_NN_FROM_SERVER);
+    send_server_json(&drone_data, request_json);
+    
+    // Receive response from server
+    struct json_object* response_json = receive_server_json(&drone_data);
+
+    // Decode response
+    struct json_object* json_file_addr;
+    json_object_object_get_ex(response_json, "file", &json_file_addr);
+    char* target_file = json_object_get_string(json_file_addr);
+
+    // Reallocate and copy result
+    char* target_file_copy = malloc(strlen(target_file));
+    sprintf(target_file_copy, target_file);
+
+    // Free memory
+    json_object_put(request_json);
+    json_object_put(response_json);
+
+    return target_file_copy;
+}
+#endif

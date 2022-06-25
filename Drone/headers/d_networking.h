@@ -21,3 +21,4 @@ void spawn_in_unity_server(struct drone_data* drone_data);
 void send_server_message(struct drone_data* drone, const char* msg);
 void send_server_json(struct drone_data* drone, struct json_object* json);
 char* receive_server_message(struct drone_data* drone);
+struct json_object* receive_server_json(struct drone_data* drone);

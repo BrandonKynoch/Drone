@@ -1,8 +1,6 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using Newtonsoft.Json.Linq;
 
 namespace SimServer {
@@ -15,11 +13,18 @@ namespace SimServer {
         /// SINGLETON PATTERN //////////////////////////////////////////////////
 
         /// CONSTANTS //////////////////////////////////////////////////////////
+        // When true the DOTNET server will emulate responses from the server so that unity doesn't have to be running
+        // NOTE: FAKE SIMULATION DOES NOT SUPPORT MULTIPLE DRONES!!!
+        public const bool USE_FAKE_SIM = true;
+
         public const Int32 STD_MSG_LEN = 1024;
         private const int PACKAGE_HEADER_SIZE = 4; // 4 bytes for UInt32 to determine size of the payload
 
         private const Int32 SIM_SERVER_SOCKET_PORT = 1755;
         private const Int32 DRONE_CONNECTIONS_SOCKET_PORT = 8060;
+
+
+        private const string FAKE_SIM_RESPONSE = "{\"id\":0,\"motorOutputs\":[0.0,0.0,0.0,0.0],\"sensorData\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}";
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
@@ -40,14 +45,19 @@ namespace SimServer {
             staticInstance = this;
 
             /// Unity Connection ////////////////////////////////////////////////////////////////
-            ConnectToUnity();
+            if (!USE_FAKE_SIM) {
+                ConnectToUnity();
 
-            simReceiveThread = new Thread(new ThreadStart(SimNetworkingReceiveLoop));
-            simReceiveThread.Priority = ThreadPriority.AboveNormal;
-            simReceiveThread.Start();
+                simReceiveThread = new Thread(new ThreadStart(SimNetworkingReceiveLoop));
+                simReceiveThread.Priority = ThreadPriority.AboveNormal;
+                simReceiveThread.Start();
 
-
-            while (!simReceiveThread.IsAlive) { }
+                while (!simReceiveThread.IsAlive) { }
+            } else {
+                Console.WriteLine("\n##########################################");
+                Console.WriteLine("###          FAKE SIM ACTIVE           ###");
+                Console.WriteLine("##########################################\n\n");
+            }
 
             simSendThread = new Thread(new ThreadStart(SimNetworkingSendLoop));
             simSendThread.Priority = ThreadPriority.AboveNormal;
@@ -86,7 +96,32 @@ namespace SimServer {
                 }
 
                 if (!msgIsNull) {
-                    SendSimStreamMessage(msg.message);
+                    JObject responseJson = JObject.Parse(msg.message);
+
+                    int opCode = responseJson.GetValue("opcode").Value<int>();
+                    ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
+
+                    bool forwardToServer;
+                    switch (opCode) {
+                        case Master.OPCODE_REQUEST_TARGET_NN_FROM_SERVER:
+                            forwardToServer = false;
+                            NeuralTrainer.StaticInstance.dronesWaitingToReceiveNN.Enqueue(responseDrone);
+                            break;
+                        default:
+                            forwardToServer = true;
+                            break;
+                    }
+
+                    if (forwardToServer) {
+                        // No action needed from server -> forward message directly to simulation
+                        if (!USE_FAKE_SIM) {
+                            SendSimStreamMessage(msg.message);
+                        } else {
+                            // Immediately forward to drone for emulated simulation
+                            JObject forwardMessageJson = JObject.Parse(FAKE_SIM_RESPONSE);
+                            responseDrone.ReceiveMessageFromSimulation(forwardMessageJson);
+                        }
+                    }
                 }
 
                 Thread.Yield();

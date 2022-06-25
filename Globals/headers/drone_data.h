@@ -6,6 +6,7 @@
 
 #define CODE_SPAWN_DRONE 0x1
 #define CODE_MOTOR_OUTPUT 0x2
+#define CODE_REQUEST_TARGET_NN_FROM_SERVER 0x3
 
 struct drone_data {
     uint64_t id;
