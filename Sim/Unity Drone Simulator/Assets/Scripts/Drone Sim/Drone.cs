@@ -148,9 +148,7 @@ public class DroneData {
     // Sensors start from directly in front and rotate around clockwise when viewed from above drone
     public double[] sensorData = new double[CIRCLE_SENSOR_ARRAY_COUNT];
 
-    // MARK: todo: Implement sensors and return to c-drone
-    // sensor gizmos
-    // fix player camera after spawning drones
+    public double fitness;
 
     public int HashFunction() {
         return id.GetHashCode();

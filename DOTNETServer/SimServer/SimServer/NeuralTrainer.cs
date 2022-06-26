@@ -14,6 +14,7 @@ namespace SimServer {
         /// CONSTANTS //////////////////////////////////////////////////////////
         private const string ROOT_TRAINING_DIR = "/Users/brandonkynoch/Desktop/Projects/Drone/Training Data";
         private const string NN_FILE_EXTENSION = ".NN";
+        private const string NN_META_FILE_EXTENSION = ".NNM";
 
         private const double EPOCH_RUN_TIME = 15;   // Time for a single epoch to execute in seconds
         /// CONSTANTS //////////////////////////////////////////////////////////
@@ -132,21 +133,28 @@ namespace SimServer {
             lock (dronesWaitingToReceiveNN) {
                 while (dronesWaitingToReceiveNN.Count > 0) {
                     ConnectedDrone drone = dronesWaitingToReceiveNN.Dequeue();
-                    string nnDir = targetFolder + "/" + drone.id + NN_FILE_EXTENSION;
+                    string nnPath = targetFolder + "/" + drone.id + NN_FILE_EXTENSION;
 
                     JObject responseToDrone = new JObject(
                         new JProperty("id", drone.id),
                         new JProperty("opcode", Master.RESPONSE_OPCODE_LOAD_NN),
-                        new JProperty("file", nnDir));
+                        new JProperty("file", nnPath));
+
+                    // Write drone fitness to meta file
+                    if (!continueFrom.Equals("")) {
+                        string nnMetaPath = continueFrom + "/" + drone.id + NN_META_FILE_EXTENSION;
+                        JObject droneMetaData = new JObject(new JProperty("fitness", drone.Fitness));
+                        File.WriteAllTextAsync(nnMetaPath, droneMetaData.ToString());
+                    }
 
                     drone.ReceiveMessageFromSimulation(responseToDrone);
-
-                    // TODO:
-                    //send message to server telling that drone to reset
 
                     Thread.Yield();
                 }
             }
+
+            // TODO:
+            //send message to server telling all drones to reset
         }
 
         /// <summary>

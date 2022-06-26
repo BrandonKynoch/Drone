@@ -14,6 +14,7 @@ namespace SimServer {
         /// NETWORKING /////////////////////////////////////////////////////////////////////////////
 
         public int id;
+        private double fitness; // For genetic algorithm
 
         // Debug vars
         DateTime startTime;
@@ -22,6 +23,7 @@ namespace SimServer {
         public Thread DroneThread { get { return thread; }}
 
         public TimeSpan UpTime { get { return DateTime.Now - startTime; } }
+        public double Fitness { get { return fitness; } }
         /// Properties ////////////////////////////////////////////////////////////////////////////
 
         /// <summary>
@@ -78,6 +80,11 @@ namespace SimServer {
                 }
 
                 if (simResponse != null) {
+                    int responseOpCode = simResponse.GetValue("opcode").Value<int>();
+                    if (responseOpCode == Master.RESPONSE_OPCODE_SENSOR_DATA) {
+                        fitness = simResponse.GetValue("fitness").Value<double>();
+                    }
+
                     SendDroneMessage(simResponse.ToString());
 
                     Thread.Yield();
