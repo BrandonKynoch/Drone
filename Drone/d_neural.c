@@ -79,7 +79,7 @@ void init_neural_data_from_file(const char* file, struct neural_data** nd) {
 
 void init_neural_data_from_design(const char* file, struct neural_data** nd) {
     int neural_size = 4;
-    int neural_shape[] = {8, 8, 8, 4};
+    int neural_shape[] = {10, 10, 8, 4};
     int neural_activations[] = {
         ACTIVATION_RELU,
         ACTIVATION_RELU,

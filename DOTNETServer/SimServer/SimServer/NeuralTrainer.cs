@@ -16,7 +16,7 @@ namespace SimServer {
         private const string NN_FILE_EXTENSION = ".NN";
         private const string NN_META_FILE_EXTENSION = ".NNM";
 
-        private const double EPOCH_RUN_TIME = 15;   // Time for a single epoch to execute in seconds
+        private const double EPOCH_RUN_TIME = 7;   // Time for a single epoch to execute in seconds
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// TRAINING DATA //////////////////////////////////////////////////////
@@ -266,8 +266,7 @@ namespace SimServer {
 
                 JObject resetRequestJSON = new JObject(new JProperty("opcode", Master.CODE_RESET_ALL_DRONES));
 
-                // TODO: Make sim stream private again
-                Networking.SendStringToNetworkStream(Networking.StaticInstance.simStream, resetRequestJSON.ToString());
+                Networking.SendStringToNetworkStream(Networking.SimStream, resetRequestJSON.ToString());
 
                 Thread.Yield();
             }
@@ -312,8 +311,6 @@ namespace SimServer {
                     (1 + // neural size
                     neuralSize + // neural shape
                     (neuralSize - 1)); // activations
-
-                Console.WriteLine("Genetic index: " + geneticDataIndex + " --- " + originalData.Length);
 
                 modifiedData = new byte[originalData.Length];
                 for (int i = 0; i < originalData.Length; i++) {

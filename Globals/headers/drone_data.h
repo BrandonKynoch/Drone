@@ -19,7 +19,9 @@ struct drone_data {
 
     struct neural_data* neural;
 
-    double sensor_array[DRONE_SENSOR_COUNT];
+    double circle_sensor_array[DRONE_CIRCLE_SENSOR_COUNT];
+    double sensor_top;
+    double sensor_bottom;
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs
     struct json_object* m_json; // Motor json for unity sim

@@ -30,13 +30,18 @@ namespace SimServer {
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
         private Thread simSendThread;           // Thread dedicated to sending simulation messages
         private Thread simReceiveThread;        // Thread dedicated to receiving messages from the simulation
-        public NetworkStream simStream;        // Network stream connected to the simulation
+        private NetworkStream simStream;        // Network stream connected to the simulation
         private byte[] simReceiveBuffer = new byte[STD_MSG_LEN * 10];  // Network buffer for the simulation
         private Queue<DroneMessage> outgoingDroneMessageRequests = new Queue<DroneMessage>();
 
         private Thread awaitDroneConnectionsThread;     // Thread dedicated to receiving new drone connections
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
-        
+
+        /// PROPERTIES /////////////////////////////////////////////////////////
+        // WARNING!! SIM STREAM SHOULD ONLY BE ACCESS OUTSIDE OF THIS CLASS WHEN THERE ARE NO DRONES TRYING TO COMMUNICATE
+        public static NetworkStream SimStream { get { return staticInstance.simStream; } }
+        /// PROPERTIES /////////////////////////////////////////////////////////
+
 
         public Networking() {
             if (staticInstance != null) {

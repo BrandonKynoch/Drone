@@ -51,9 +51,6 @@ public class DroneServerHandler : MonoBehaviour {
     // Server response opcodes
     public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
     public const int REPONSE_OPCODE_RESET_DRONES = 0x7;
-
-    private const int SPAWN_ROWS_COUNT = 6;
-    private const float SPAWN_SPACING = 0.3f;
     ///
 
     /// Neural network fitness variables ///
@@ -262,28 +259,16 @@ public class DroneServerHandler : MonoBehaviour {
         DroneCamHandler.StaticInstance.SetFocalPoint(newDroneGO.GetComponent<FocalPointObject>());
         MasterHandler.StaticInstance.SetUserMode(MasterHandler.UserMode.DroneCam);
 
-        ResetDrone(newDrone);
+        newDrone.ResetDrone(spawnTransform.position);
 
         return newDrone;
     }
 
     private void ResetAllDrones() {
         foreach (Drone d in drones) {
-            ResetDrone(d);
-        }
-    }
-
-    private void ResetDrone(Drone d) {
-        d.transform.position =
-            spawnTransform.position +
-            (Vector3.right * (d.dData.id % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
-            (Vector3.forward * Mathf.FloorToInt(d.dData.id / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
-
-        d.transform.rotation = Quaternion.identity;
-
-        if (d.RB != null) {
-            d.RB.velocity = Vector3.zero;
-            d.RB.angularVelocity = Vector3.zero;
+            if (d != null) {
+                d.ResetDrone(spawnTransform.position);
+            }
         }
     }
 

@@ -42,7 +42,7 @@ void drone_logic_loop() {
     motor_br = 0;
     motor_bl = 0;
 
-    ASSERT(DRONE_SENSOR_COUNT == network_input_layer_size(drone_data.neural));
+    ASSERT(DRONE_CIRCLE_SENSOR_COUNT == network_input_layer_size(drone_data.neural) - 2);
 
     while (TRUE) {
         motor_output(motor_fl, motor_fr, motor_br, motor_bl, &drone_data);
@@ -77,10 +77,13 @@ void drone_logic_loop() {
                 read_sensor_data(&drone_data, json_response);
 
                 // Set input layer to neural network
-                for (int i = 0; i < network_input_layer_size(drone_data.neural); i++) {
-                    drone_data.neural->input_layer[i] = drone_data.sensor_array[i];
+                //network_input_layer_size(drone_data.neural)
+                for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
+                    drone_data.neural->input_layer[i] = drone_data.circle_sensor_array[i];
                     printf(", %f", drone_data.neural->input_layer[i]);
                 }
+                drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
+                drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
                 printf("\n");
 
                 // Feed forward data
@@ -108,17 +111,25 @@ void drone_logic_loop() {
 void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     struct json_object* sensor_data_array;
     struct json_object* sensor_data;
-    json_object_object_get_ex(json_in, "sensorData", &sensor_data_array);
+    json_object_object_get_ex(json_in, "circleSensorData", &sensor_data_array);
     
-    size_t sensor_data_count = json_object_array_length(sensor_data_array);
+    size_t cirlce_sensor_data_count = json_object_array_length(sensor_data_array);
 
-    ASSERT(sensor_data_count == DRONE_SENSOR_COUNT);
+    ASSERT(cirlce_sensor_data_count == DRONE_CIRCLE_SENSOR_COUNT);
 
-
-    for (int i = 0; i < DRONE_SENSOR_COUNT; i++) {
+    for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
         sensor_data = json_object_array_get_idx(sensor_data_array, i);
-        drone->sensor_array[i] = json_object_get_double(sensor_data);
+        drone->circle_sensor_array[i] = json_object_get_double(sensor_data);
     }
+
+
+    struct json_object* sensor_top;
+    json_object_object_get_ex(json_in, "sensorTop", &sensor_top);
+    drone->sensor_top = json_object_get_double(sensor_top);
+
+    struct json_object* sensor_bottom;
+    json_object_object_get_ex(json_in, "sensorBottom", &sensor_bottom);
+    drone->sensor_bottom = json_object_get_double(sensor_bottom);
 }
 
 void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone) {
