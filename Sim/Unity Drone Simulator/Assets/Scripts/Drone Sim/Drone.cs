@@ -16,6 +16,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     public DroneData dData { get { return data; } }
 
     private Rigidbody rb;
+    public Rigidbody RB { get { return rb; } }
 
     public Transform bladesTransform;
     private Transform bladeFL, bladeFR, bladeBR, bladeBL;
@@ -48,6 +49,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FR]) * motorStrength, bladeFR.position);
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.BR]) * motorStrength, bladeBR.position);
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.BL]) * motorStrength, bladeBL.position);
+
+        CalculateFitness();
     }
 
     public void GetSensorData() {
@@ -67,6 +70,17 @@ public class Drone : MonoBehaviour, IEqualityComparer {
                 data.sensorData[i] = SENSOR_MAX_RANGE;
             }
         }
+    }
+
+    public void CalculateFitness() {
+        float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
+        float distFitness = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
+
+        // Subtract for collisions
+        // Subtract for not being airborne
+        // 
+
+        data.fitness += distFitness * Time.deltaTime;
     }
 
     #region MISC

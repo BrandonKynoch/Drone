@@ -29,6 +29,13 @@ public class DroneServerHandler : MonoBehaviour {
     private Queue<JObject> inboundMessages = new Queue<JObject>();
     ///
 
+    /// Static ///
+    private static DroneServerHandler staticInstance;
+    public static DroneServerHandler StaticInstance {
+        get { return staticInstance; }
+    }
+    /// 
+
     /// CONSTANTS ///
     private const int SERVER_SOCKET = 1755;
 
@@ -39,19 +46,47 @@ public class DroneServerHandler : MonoBehaviour {
     // drone opcodes
     private const int CODE_SPAWN_DRONE = 0x1;
     private const int CODE_MOTOR_OUTPUT = 0x2;
+    private const int CODE_RESET_ALL_DRONES = 0x6;
 
     // Server response opcodes
     public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
+    public const int REPONSE_OPCODE_RESET_DRONES = 0x7;
 
     private const int SPAWN_ROWS_COUNT = 6;
     private const float SPAWN_SPACING = 0.3f;
     ///
+
+    /// Neural network fitness variables ///
+    private float maximumDroneDistFromTarget = 100;
+    ///
+
+    /// Properties ///
+    public static float MaximumDroneDistFromTarget {
+        get { return staticInstance.maximumDroneDistFromTarget; }
+    }
+    /// 
+
+    private void Awake() {
+        staticInstance = this;
+    }
 
     private void Start() {
         Application.runInBackground = true;
         Application.targetFrameRate = 60;
 
         startSimServer();
+    }
+
+    public void FixedUpdate() {
+        maximumDroneDistFromTarget = 0;
+        foreach (Drone d in drones) {
+            if (d != null) {
+                float dist = Vector3.Distance(d.transform.position, MasterHandler.DroneTarget.position);
+                if (dist > maximumDroneDistFromTarget) {
+                    maximumDroneDistFromTarget = dist;
+                }
+            }
+        }
     }
 
     public void Update() {
@@ -165,6 +200,15 @@ public class DroneServerHandler : MonoBehaviour {
                     jsonOut.Add(new JProperty("opcode", RESPONSE_OPCODE_SENSOR_DATA));
                     sendCServerData(jsonOut);
                     break;
+                case CODE_RESET_ALL_DRONES:
+                    print("Resetting all drones for next epoch");
+
+                    ResetAllDrones();
+
+                    jsonOut = new JObject();
+                    jsonOut.Add(new JProperty("opcode", REPONSE_OPCODE_RESET_DRONES));
+                    sendCServerData(jsonOut);
+                    break;
                 case -1:
                     // TODO: Send server message to handle broken request
                     // server needs to find drone that couldn't send message and reply with empty reponse
@@ -208,10 +252,7 @@ public class DroneServerHandler : MonoBehaviour {
         GameObject newDroneGO = GameObject.Instantiate(dronePrefab) as GameObject;
         newDroneGO.transform.SetParent(spawnTransform);
         Drone newDrone = newDroneGO.GetComponent<Drone>();
-        newDroneGO.transform.position =
-            spawnTransform.position +
-            (Vector3.right * (droneCount % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
-            (Vector3.forward * Mathf.FloorToInt(droneCount / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
+        
 
         newDrone.dData.id = fromJson.GetValue("id").Value<UInt64>();
 
@@ -221,7 +262,29 @@ public class DroneServerHandler : MonoBehaviour {
         DroneCamHandler.StaticInstance.SetFocalPoint(newDroneGO.GetComponent<FocalPointObject>());
         MasterHandler.StaticInstance.SetUserMode(MasterHandler.UserMode.DroneCam);
 
+        ResetDrone(newDrone);
+
         return newDrone;
+    }
+
+    private void ResetAllDrones() {
+        foreach (Drone d in drones) {
+            ResetDrone(d);
+        }
+    }
+
+    private void ResetDrone(Drone d) {
+        d.transform.position =
+            spawnTransform.position +
+            (Vector3.right * (d.dData.id % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
+            (Vector3.forward * Mathf.FloorToInt(d.dData.id / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
+
+        d.transform.rotation = Quaternion.identity;
+
+        if (d.RB != null) {
+            d.RB.velocity = Vector3.zero;
+            d.RB.angularVelocity = Vector3.zero;
+        }
     }
 
 

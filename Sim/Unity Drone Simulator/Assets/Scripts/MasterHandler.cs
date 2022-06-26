@@ -5,6 +5,7 @@ using UnityStandardAssets.Cameras;
 
 public class MasterHandler : MonoBehaviour {
     public FocalPointObject playerFocalPoint;
+    public Transform droneTarget;
 
     private bool isPlaying;
 
@@ -22,6 +23,8 @@ public class MasterHandler : MonoBehaviour {
     public static MasterHandler StaticInstance {
         get { return staticInstance; }
     }
+
+    public static Transform DroneTarget { get { return staticInstance.droneTarget; } }
 
     public static MetricSystem metricSystem;
     ///

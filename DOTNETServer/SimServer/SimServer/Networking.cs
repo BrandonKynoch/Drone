@@ -30,7 +30,7 @@ namespace SimServer {
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
         private Thread simSendThread;           // Thread dedicated to sending simulation messages
         private Thread simReceiveThread;        // Thread dedicated to receiving messages from the simulation
-        private NetworkStream simStream;        // Network stream connected to the simulation
+        public NetworkStream simStream;        // Network stream connected to the simulation
         private byte[] simReceiveBuffer = new byte[STD_MSG_LEN * 10];  // Network buffer for the simulation
         private Queue<DroneMessage> outgoingDroneMessageRequests = new Queue<DroneMessage>();
 
@@ -144,8 +144,17 @@ namespace SimServer {
             while (true) {
                 string response = ReceiveSimStreamMessage();
                 JObject responseJson = JObject.Parse(response);
-                ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
-                responseDrone.ReceiveMessageFromSimulation(responseJson);
+
+                int responseOpcode = responseJson.GetValue("opcode").Value<int>();
+                switch (responseOpcode) {
+                    case Master.REPONSE_OPCODE_RESET_DRONES:
+
+                        break;
+                    default:
+                        ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
+                        responseDrone.ReceiveMessageFromSimulation(responseJson);
+                        break;
+                }
 
                 Thread.Yield();
             }

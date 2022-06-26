@@ -16,10 +16,12 @@ namespace SimServer {
         // DRONE OPCODES
         public const int OPCODE_SPAWN_DRONE = 0x1;
         public const int OPCODE_REQUEST_TARGET_NN_FROM_SERVER = 0x3;
+        public const int CODE_RESET_ALL_DRONES = 0x6;
 
         // SIMULATION RESPONSE OPCODES
         public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
         public const int RESPONSE_OPCODE_LOAD_NN = 0x5;
+        public const int REPONSE_OPCODE_RESET_DRONES = 0x7;
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////

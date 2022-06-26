@@ -111,6 +111,16 @@ namespace SimServer {
 
             continueSimulation = true;
 
+            // Create NNMeta files saving current fitness score
+            for (int i = 0; i < Master.GetDroneCount; i++) {
+                ConnectedDrone d = Master.GetDrone(i).Drone;
+
+                // Write drone fitness to meta file
+                string nnMetaPath = targetFolder + "/" + d.id + NN_META_FILE_EXTENSION;
+                JObject droneMetaData = new JObject(new JProperty("fitness", d.Fitness));
+                File.WriteAllTextAsync(nnMetaPath, droneMetaData.ToString());
+            }
+
             bool createNew = continueFrom.Equals("");
             if (!createNew) {
                 // Copy files over to target folder for new epoch
@@ -119,6 +129,9 @@ namespace SimServer {
                 foreach (var fileNN in previousNNs) {
                     string file = fileNN.ToString();
                     string copyTo = file.Replace(continueFrom, targetFolder);
+                    if (File.Exists(copyTo)) {
+                        File.Delete(copyTo);
+                    }
                     File.Copy(file, copyTo);
                 }
 
@@ -140,13 +153,6 @@ namespace SimServer {
                         new JProperty("opcode", Master.RESPONSE_OPCODE_LOAD_NN),
                         new JProperty("file", nnPath));
 
-                    // Write drone fitness to meta file
-                    if (!continueFrom.Equals("")) {
-                        string nnMetaPath = continueFrom + "/" + drone.id + NN_META_FILE_EXTENSION;
-                        JObject droneMetaData = new JObject(new JProperty("fitness", drone.Fitness));
-                        File.WriteAllTextAsync(nnMetaPath, droneMetaData.ToString());
-                    }
-
                     drone.ReceiveMessageFromSimulation(responseToDrone);
 
                     Thread.Yield();
@@ -155,32 +161,83 @@ namespace SimServer {
 
             // TODO:
             //send message to server telling all drones to reset
+
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
         }
 
         /// <summary>
         /// Applies the genetic algorithm and evolves the contents of a given directory.
         /// </summary>
         public void EvolveDirectoryContents(string targetDirectory) {
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+            string[] fileNames = Directory.GetFiles(targetDirectory);
+            List<NNData> nns = new List<NNData>();
+            for (int i = 0; i < fileNames.Length; i++) {
+                if (fileNames[i].Contains(NN_FILE_EXTENSION) && !fileNames[i].Contains(NN_META_FILE_EXTENSION)) {
+                    nns.Add(new NNData(fileNames[i], fileNames[i].Replace(NN_FILE_EXTENSION, NN_META_FILE_EXTENSION)));
+                }
+            }
+
+            nns.Sort();
+
+            int totalCount = nns.Count;
+            double keep = 0.1; // Keep the top percentage completely unmodified
+            double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
+            double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
+            double crossOverPercentile = 0.7; 
+            double mutationProbability = 0.2; // Likelyhood that a specimin will have any mutation
+            double mutationAmount = 0.2f; // When a specimin is mutating, what amount of genes should change
+
+            int keepCount = (int)Math.Ceiling(((double)totalCount) * keep);
+            int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
+
+            // Discard bottom
+            for (int i = 0; i < discardCount; i++) {
+                nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, keepCount)]);
+            }
+
+            // Perform crossovers
+            for (int i = keepCount; i < totalCount; i++) {
+                int a = (int) Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
+                int b = (int)Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
+
+                //Console.WriteLine("Cross over: " + a + ":" + b);
+
+                if (a != b) {
+                    NNData.CrossOver(nns[a], nns[b], crossOverPercentile);
+                }
+            }
+
+            // Mutation
+            for (int i = keepCount; i < totalCount; i++) {
+                if (Utils.Random01Double() < mutationProbability) {
+                    nns[i].Mutate(mutationAmount);
+                }
+            }
+
+            // Write changes to NN file
+            foreach (NNData nd in nns) {
+                File.Delete(nd.nnFile);
+                File.WriteAllBytes(nd.nnFile, nd.modifiedData);
+            }
         }
 
 
@@ -207,6 +264,11 @@ namespace SimServer {
 
                 GeneticNNUpdates(currentTrainingDir.ToString() + "/" + (currentEpoch-1), currentTrainingDir.ToString());
 
+                JObject resetRequestJSON = new JObject(new JProperty("opcode", Master.CODE_RESET_ALL_DRONES));
+
+                // TODO: Make sim stream private again
+                Networking.SendStringToNetworkStream(Networking.StaticInstance.simStream, resetRequestJSON.ToString());
+
                 Thread.Yield();
             }
         }
@@ -218,6 +280,89 @@ namespace SimServer {
         public static void AddDroneToNNWaitingQueue(ConnectedDrone d) {
             lock (staticInstance.dronesWaitingToReceiveNN) {
                 staticInstance.dronesWaitingToReceiveNN.Enqueue(d);
+            }
+        }
+
+
+
+
+
+        public class NNData: IComparable<NNData> {
+            public string nnFile;
+
+            public byte[] originalData;
+            public byte[] modifiedData;
+            public int geneticDataIndex; // The start index of data that should be modified (i.e. after header)
+
+            double fitness; // Higher is better
+
+            public NNData(string fromNNFile, string metaFile) {
+                nnFile = fromNNFile;
+
+                originalData = File.ReadAllBytes(fromNNFile);
+
+                byte[] neuralSizeRawBytes = new byte[4];
+                for (int i = 0; i < 4; i++) {
+                    neuralSizeRawBytes[i] = originalData[i];
+                }
+
+                Int32 neuralSize = BitConverter.ToInt32(neuralSizeRawBytes, 0);
+
+                geneticDataIndex = 4 * // size of int
+                    (1 + // neural size
+                    neuralSize + // neural shape
+                    (neuralSize - 1)); // activations
+
+                Console.WriteLine("Genetic index: " + geneticDataIndex + " --- " + originalData.Length);
+
+                modifiedData = new byte[originalData.Length];
+                for (int i = 0; i < originalData.Length; i++) {
+                    modifiedData[i] = originalData[i];
+                }
+
+
+                // Get fitness from meta file
+                string meta = File.ReadAllText(metaFile);
+                JObject metaJson = JObject.Parse(meta);
+                fitness = metaJson.GetValue("fitness").Value<double>();
+            }
+
+            public void CopyData(NNData from, bool useOriginal = true) {
+                if (useOriginal) {
+                    for (int i = geneticDataIndex; i < modifiedData.Length; i++) {
+                        modifiedData[i] = from.originalData[i];
+                    }
+                } else {
+                    for (int i = geneticDataIndex; i < modifiedData.Length; i++) {
+                        modifiedData[i] = from.modifiedData[i];
+                    }
+                }
+            }
+
+            public static void CrossOver(NNData left, NNData right, double crossOverProbability) {
+                bool useLeft = false;
+                for (int i = left.geneticDataIndex; i < left.modifiedData.Length; i++) {
+                    if (Utils.Random01Double() < crossOverProbability) {
+                        if (useLeft) {
+                            right.modifiedData[i] = left.modifiedData[i];
+                        } else {
+                            left.modifiedData[i] = right.modifiedData[i];
+                        }
+                    }
+                }
+            }
+
+            public void Mutate(double mutationAmount) {
+                for (int i = geneticDataIndex; i < modifiedData.Length - 1; i++) {
+                    if (Utils.Random01Double() < mutationAmount) {
+                        modifiedData[i] = (byte) ~modifiedData[i];
+                    }
+                }
+            }
+
+            // Sort in descending order of fitness
+            public int CompareTo(NNData other) {
+                return other.fitness.CompareTo(this.fitness);
             }
         }
     }

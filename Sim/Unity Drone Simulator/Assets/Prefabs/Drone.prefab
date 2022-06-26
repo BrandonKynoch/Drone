@@ -255,7 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2ce821b19584196ac4831b3ae05ae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  motorStrength: 1
+  motorStrength: 4
   bladesTransform: {fileID: 2282108832137225285}
 --- !u!54 &3801286038611135215
 Rigidbody:
