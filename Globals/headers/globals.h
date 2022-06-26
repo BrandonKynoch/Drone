@@ -3,9 +3,9 @@
 #define bool int
 #define ASSERT assert
 
-#define NETWORK_STD_MSG_LEN 1024
 #define IS_SIMULATION TRUE
 
+#define NETWORK_STD_MSG_LEN 1024
 #define SIMULATION_SERVER_SOCKET 1755
 #define DRONE_SERVER_SOCKET 8060
 

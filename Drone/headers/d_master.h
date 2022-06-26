@@ -8,7 +8,7 @@
 // ############################################################################
 
 void drone_logic_loop();
-void read_sensor_data(struct drone_data* drone, char* json_string);
+void read_sensor_data(struct drone_data* drone, struct json_object* json_in);
 void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone);
 
 // ############################################################################
@@ -21,6 +21,9 @@ void motor_output(double fl, double fr, double br, double bl, struct drone_data*
 // ############################################################################
 // #######      SIMULATION      ###############################################
 // ############################################################################
+
+// Initialize and attempt to load the given NN file
+void init_and_test_NN_from_file(char* file);
 
 // Send a request to the server to provide the drone with a NN file to load
 // returns the file address of the NN to load

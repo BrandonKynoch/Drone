@@ -7,33 +7,32 @@
 struct drone_data drone_data;
 
 int main() {
-    srand (time(NULL)); // Initalize seed for random numbers
+    srand (time(NULL) + getpid()); // Initalize seed for random numbers
 
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);
-
-    init_neural_data(LOAD_NN_FILE, &drone_data.neural);
-
-    feed_forward_network(drone_data.neural);
-
-
     init_server_socket(&drone_data);
     pack_msg_with_standard_header(drone_data.m_json, &drone_data, CODE_MOTOR_OUTPUT);
 
 #if IS_SIMULATION
     // Request target NN from server
     char* target_NN_file = request_target_NN_from_server();
-    init_neural_data(target_NN_file, &drone_data.neural);
-    printf("NN init check\n");
-    feed_forward_network(drone_data.neural);
-    printf("NN feedforward check\n");
-    print_matrix("NN output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
+    init_and_test_NN_from_file(target_NN_file);
 #else
     // TODO: load NN directly from file on device
 #endif
 
     drone_logic_loop();
+}
+
+void init_and_test_NN_from_file(char* file) {
+    init_neural_data(file, &drone_data.neural);
+    printf("NN init check\n");
+    feed_forward_network(drone_data.neural);
+    printf("NN feedforward check\n");
+    print_matrix("NN output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
+    printf("\n\n");
 }
 
 void drone_logic_loop() {
@@ -49,39 +48,64 @@ void drone_logic_loop() {
         motor_output(motor_fl, motor_fr, motor_br, motor_bl, &drone_data);
 
         // Receive sensore data respone from server - position, distance sensors etc.
-        char* json_in = receive_server_message(&drone_data);
+        char* server_response = receive_server_message(&drone_data);
 
         // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
         usleep(32000); // sleep for 32 milliseconds - 30HZ
 
-        // Read sensor data from server response
-        read_sensor_data(&drone_data, json_in);
+        // Decode server response
+        struct json_object* json_response = json_tokener_parse(server_response);
 
-        // Set input layer to neural network
-        for (int i = 0; i < network_input_layer_size(drone_data.neural); i++) {
-            drone_data.neural->input_layer[i] = drone_data.sensor_array[i];
-            printf(", %f", drone_data.neural->input_layer[i]);
+        struct json_object* response_opcode_json;
+        json_object_object_get_ex(json_response, "opcode", &response_opcode_json);
+        
+        int32_t response_opcode = json_object_get_int(response_opcode_json);
+
+        switch (response_opcode) {
+            case RESPONSE_CODE_LOAD_NN:
+                free(drone_data.neural);
+
+                struct json_object* response_NN_file_json;
+                json_object_object_get_ex(json_response, "file", &response_NN_file_json);
+                
+                char* response_NN_file = json_object_get_string(response_NN_file_json);
+
+                init_and_test_NN_from_file(response_NN_file);
+                break;
+            case RESPONSE_CODE_SENSOR_DATA:
+                // Read sensor data from server response
+                read_sensor_data(&drone_data, json_response);
+
+                // Set input layer to neural network
+                for (int i = 0; i < network_input_layer_size(drone_data.neural); i++) {
+                    drone_data.neural->input_layer[i] = drone_data.sensor_array[i];
+                    printf(", %f", drone_data.neural->input_layer[i]);
+                }
+                printf("\n");
+
+                // Feed forward data
+                feed_forward_network(drone_data.neural);
+
+                // Set motors from output
+                // TODO: Create motor controller to convert neural output to motor values
+                motor_bl = drone_data.neural->output_layer[0];
+                motor_br = drone_data.neural->output_layer[1];
+                motor_fr = drone_data.neural->output_layer[2];
+                motor_fl = drone_data.neural->output_layer[3];
+                printf("motors: %f, %f, %f, %f", motor_bl, motor_br, motor_fr, motor_fl);
+
+                printf("\n\n\n\n");
+                break;
+            default:
+                fprintf(stderr, "Unhandled server response");
+                return;
         }
-        printf("\n");
 
-        // Feed forward data
-        feed_forward_network(drone_data.neural);
-
-        // Set motors from output
-        // TODO: Create motor controller to convert neural output to motor values
-        motor_bl = drone_data.neural->output_layer[0];
-        motor_br = drone_data.neural->output_layer[1];
-        motor_fr = drone_data.neural->output_layer[2];
-        motor_fl = drone_data.neural->output_layer[3];
-        printf("motors: %f, %f, %f, %f", motor_bl, motor_br, motor_fr, motor_fl);
-
-        printf("\n\n\n\n");
+        json_object_put(json_response);
     }
 }
 
-void read_sensor_data(struct drone_data* drone, char* json_string) {
-    struct json_object* json_in = json_tokener_parse(json_string);
-
+void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     struct json_object* sensor_data_array;
     struct json_object* sensor_data;
     json_object_object_get_ex(json_in, "sensorData", &sensor_data_array);
@@ -95,8 +119,6 @@ void read_sensor_data(struct drone_data* drone, char* json_string) {
         sensor_data = json_object_array_get_idx(sensor_data_array, i);
         drone->sensor_array[i] = json_object_get_double(sensor_data);
     }
-
-    json_object_put(json_in);
 }
 
 void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone) {

@@ -24,7 +24,7 @@ namespace SimServer {
         private const Int32 DRONE_CONNECTIONS_SOCKET_PORT = 8060;
 
 
-        private const string FAKE_SIM_RESPONSE = "{\"id\":0,\"motorOutputs\":[0.0,0.0,0.0,0.0],\"sensorData\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}";
+        private const string FAKE_SIM_RESPONSE = "{\"opcode\":4,\"id\":0,\"motorOutputs\":[0.0,0.0,0.0,0.0],\"sensorData\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}";
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
@@ -101,30 +101,33 @@ namespace SimServer {
                     int opCode = responseJson.GetValue("opcode").Value<int>();
                     ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
 
-                    bool forwardToServer;
+                    bool forwardToSim;
                     switch (opCode) {
                         case Master.OPCODE_REQUEST_TARGET_NN_FROM_SERVER:
-                            forwardToServer = false;
-                            NeuralTrainer.StaticInstance.dronesWaitingToReceiveNN.Enqueue(responseDrone);
+                            forwardToSim = false;
+                            NeuralTrainer.AddDroneToNNWaitingQueue(responseDrone);
                             break;
                         default:
-                            forwardToServer = true;
+                            forwardToSim = true;
                             break;
                     }
 
-                    if (forwardToServer) {
+                    if (forwardToSim) {
                         if (NeuralTrainer.ContinueSimulation || opCode == Master.OPCODE_SPAWN_DRONE) {
-                            // No action needed from server -> forward message directly to simulation
+                            // Forward message directly to simulation -> No action needed from server
+
                             if (!USE_FAKE_SIM) {
+                                // Forward message to real simulation
                                 SendSimStreamMessage(msg.message);
                             } else {
-                                // Immediately forward to drone for emulated simulation
+                                // Emulate simulation
+                                // Immediately forward message to drone for emulated simulation
                                 JObject forwardMessageJson = JObject.Parse(FAKE_SIM_RESPONSE);
                                 responseDrone.ReceiveMessageFromSimulation(forwardMessageJson);
                             }
                         } else {
-                            // TODO: add drone to queue of drones waiting for server response
-                            Console.WriteLine("FIX THIS");
+                            // Add drone to queue of drones waiting for server response
+                            NeuralTrainer.AddDroneToNNWaitingQueue(responseDrone);
                         }
                     }
                 }

@@ -36,10 +36,12 @@ public class DroneServerHandler : MonoBehaviour {
 
     private const int MAX_DRONE_COUNT = 40;
 
-    // Socket opcodes
+    // drone opcodes
     private const int CODE_SPAWN_DRONE = 0x1;
     private const int CODE_MOTOR_OUTPUT = 0x2;
 
+    // Server response opcodes
+    public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
 
     private const int SPAWN_ROWS_COUNT = 6;
     private const float SPAWN_SPACING = 0.3f;
@@ -147,6 +149,7 @@ public class DroneServerHandler : MonoBehaviour {
                     Drone newDrone = SpawnDrone(message);
 
                     jsonOut = JObject.FromObject(newDrone.dData);
+                    jsonOut.Add(new JProperty("opcode", RESPONSE_OPCODE_SENSOR_DATA));
                     sendCServerData(jsonOut);
                     break;
                 case CODE_MOTOR_OUTPUT:
@@ -159,6 +162,7 @@ public class DroneServerHandler : MonoBehaviour {
                         );
 
                     jsonOut = JObject.FromObject(drone.dData);
+                    jsonOut.Add(new JProperty("opcode", RESPONSE_OPCODE_SENSOR_DATA));
                     sendCServerData(jsonOut);
                     break;
                 case -1:

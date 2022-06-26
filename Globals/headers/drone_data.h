@@ -4,9 +4,14 @@
 // Libs
 #include <json-c/json.h>
 
+// OPCODES FOR SENDING MESSAGES TO SERVER
 #define CODE_SPAWN_DRONE 0x1
 #define CODE_MOTOR_OUTPUT 0x2
 #define CODE_REQUEST_TARGET_NN_FROM_SERVER 0x3
+
+// OPCODES FOR RESPONSES FROM SERVER
+#define RESPONSE_CODE_SENSOR_DATA 0x4
+#define RESPONSE_CODE_LOAD_NN 0x5 // Reload the provided neural network
 
 struct drone_data {
     uint64_t id;

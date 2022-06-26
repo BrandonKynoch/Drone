@@ -13,10 +13,18 @@ namespace SimServer {
         /// CONSTANTS //////////////////////////////////////////////////////////
         private const int MAXIMUM_DRONE_CONNECTIONS = 50;
 
-        // OPCODES
+        // DRONE OPCODES
         public const int OPCODE_SPAWN_DRONE = 0x1;
         public const int OPCODE_REQUEST_TARGET_NN_FROM_SERVER = 0x3;
+
+        // SIMULATION RESPONSE OPCODES
+        public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
+        public const int RESPONSE_OPCODE_LOAD_NN = 0x5;
         /// CONSTANTS //////////////////////////////////////////////////////////
+
+        /// PROPERTIES /////////////////////////////////////////////////////////
+        public static int GetDroneCount { get { return staticInstance.droneCount; } }
+        /// PROPERTIES /////////////////////////////////////////////////////////
 
         private DroneThreadPair[] drones = new DroneThreadPair[MAXIMUM_DRONE_CONNECTIONS];
         private int droneCount = 0;

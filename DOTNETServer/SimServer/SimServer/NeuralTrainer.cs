@@ -25,8 +25,9 @@ namespace SimServer {
         private DirectoryInfo currentTrainingDir;
         private int currentEpoch = 0;
 
+        private Queue<ConnectedDrone> dronesWaitingToReceiveNN = new Queue<ConnectedDrone>();
+
         public bool continueSimulation = false;     // Set to true when the simulation is actually simulating & drones flying
-        public Queue<ConnectedDrone> dronesWaitingToReceiveNN = new Queue<ConnectedDrone>();
         /// TRAINING DATA //////////////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////
@@ -112,11 +113,19 @@ namespace SimServer {
             bool createNew = continueFrom.Equals("");
             if (!createNew) {
                 // Copy files over to target folder for new epoch
+                string[] previousNNs = Directory.GetFiles(continueFrom);
+
+                foreach (var fileNN in previousNNs) {
+                    string file = fileNN.ToString();
+                    string copyTo = file.Replace(continueFrom, targetFolder);
+                    File.Copy(file, copyTo);
+                }
+
 
                 // Execute genetic algorithm here
+                EvolveDirectoryContents(targetFolder);
 
-                // Send files to drone
-
+                // MARK: TODO: Check that number of agents matches number of files
             }
 
             // Respond to drones with target files
@@ -127,13 +136,43 @@ namespace SimServer {
 
                     JObject responseToDrone = new JObject(
                         new JProperty("id", drone.id),
+                        new JProperty("opcode", Master.RESPONSE_OPCODE_LOAD_NN),
                         new JProperty("file", nnDir));
 
                     drone.ReceiveMessageFromSimulation(responseToDrone);
 
+                    // TODO:
+                    //send message to server telling that drone to reset
+
                     Thread.Yield();
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies the genetic algorithm and evolves the contents of a given directory.
+        /// </summary>
+        public void EvolveDirectoryContents(string targetDirectory) {
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
         }
 
 
@@ -149,10 +188,28 @@ namespace SimServer {
             while (true) {
                 Thread.Sleep(TimeSpan.FromSeconds(EPOCH_RUN_TIME));
 
+                continueSimulation = false;
+
+                while (dronesWaitingToReceiveNN.Count < Master.GetDroneCount) {
+                    Thread.Yield();
+                }
+
                 currentEpoch++;
                 Console.WriteLine("Starting epoch: " + currentEpoch);
 
+                GeneticNNUpdates(currentTrainingDir.ToString() + "/" + (currentEpoch-1), currentTrainingDir.ToString());
+
                 Thread.Yield();
+            }
+        }
+
+        /// <summary>
+        /// Add drone to queue of drones waiting to receive a response from the server with the file that should be loaded from training
+        /// </summary>
+        /// <param name="d"></param>
+        public static void AddDroneToNNWaitingQueue(ConnectedDrone d) {
+            lock (staticInstance.dronesWaitingToReceiveNN) {
+                staticInstance.dronesWaitingToReceiveNN.Enqueue(d);
             }
         }
     }
