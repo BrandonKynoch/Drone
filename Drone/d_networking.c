@@ -68,7 +68,7 @@ void spawn_in_unity_server(struct drone_data* drone_data) {
 
     json = json_tokener_parse(network_message);
     char* json_string_receiveived = json_object_to_json_string_ext(json, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY);
-    printf("Received spawn response from unity sim:\n%s\n", json_string_receiveived);
+    printf("Received spawn response from unity sim:\n%s\n\n", json_string_receiveived);
 
     json_object_put(json);
 }

@@ -135,6 +135,10 @@ public class DroneServerHandler : MonoBehaviour {
                 opCode = message.GetValue("opcode").Value<int>();
             } catch {
                 print("Recieved corrupt packet");
+
+                // TODO: SEND MESSAGE TO SERVER TO RESET
+                // Wait for to receive all responses from drones. Then reset and
+                // send message to all drones to reset
             }
 
             JObject jsonOut = null;

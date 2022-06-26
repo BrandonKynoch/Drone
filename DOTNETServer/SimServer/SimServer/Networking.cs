@@ -15,7 +15,7 @@ namespace SimServer {
         /// CONSTANTS //////////////////////////////////////////////////////////
         // When true the DOTNET server will emulate responses from the server so that unity doesn't have to be running
         // NOTE: FAKE SIMULATION DOES NOT SUPPORT MULTIPLE DRONES!!!
-        public const bool USE_FAKE_SIM = true;
+        public const bool USE_FAKE_SIM = false;
 
         public const Int32 STD_MSG_LEN = 1024;
         private const int PACKAGE_HEADER_SIZE = 4; // 4 bytes for UInt32 to determine size of the payload
@@ -113,13 +113,18 @@ namespace SimServer {
                     }
 
                     if (forwardToServer) {
-                        // No action needed from server -> forward message directly to simulation
-                        if (!USE_FAKE_SIM) {
-                            SendSimStreamMessage(msg.message);
+                        if (NeuralTrainer.ContinueSimulation || opCode == Master.OPCODE_SPAWN_DRONE) {
+                            // No action needed from server -> forward message directly to simulation
+                            if (!USE_FAKE_SIM) {
+                                SendSimStreamMessage(msg.message);
+                            } else {
+                                // Immediately forward to drone for emulated simulation
+                                JObject forwardMessageJson = JObject.Parse(FAKE_SIM_RESPONSE);
+                                responseDrone.ReceiveMessageFromSimulation(forwardMessageJson);
+                            }
                         } else {
-                            // Immediately forward to drone for emulated simulation
-                            JObject forwardMessageJson = JObject.Parse(FAKE_SIM_RESPONSE);
-                            responseDrone.ReceiveMessageFromSimulation(forwardMessageJson);
+                            // TODO: add drone to queue of drones waiting for server response
+                            Console.WriteLine("FIX THIS");
                         }
                     }
                 }

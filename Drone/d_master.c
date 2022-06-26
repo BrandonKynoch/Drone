@@ -25,9 +25,10 @@ int main() {
     // Request target NN from server
     char* target_NN_file = request_target_NN_from_server();
     init_neural_data(target_NN_file, &drone_data.neural);
+    printf("NN init check\n");
     feed_forward_network(drone_data.neural);
     printf("NN feedforward check\n");
-    print_matrix("Output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
+    print_matrix("NN output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
 #else
     // TODO: load NN directly from file on device
 #endif
@@ -145,6 +146,8 @@ char* request_target_NN_from_server() {
     // Free memory
     json_object_put(request_json);
     json_object_put(response_json);
+
+    printf("NN target file:\n\t%s\n", target_file_copy);
 
     return target_file_copy;
 }

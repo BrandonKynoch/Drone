@@ -165,7 +165,7 @@ void feed_forward_network(struct neural_data* network) {
     double* B;
 
     // Copy original bias becase the result of each matrix multiplication is stored in the array of bias matrices
-    for (int i = 0; i < MAX_NEURAL_LAYERS; i++) {
+    for (int i = 0; i < network->weights_matrix_count; i++) {
         mat_copy(
             network->biases_layers_original[i],
             network->biases_layers[i],
