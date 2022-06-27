@@ -33,6 +33,16 @@ void init_and_test_NN_from_file(char* file) {
     printf("NN feedforward check\n");
     print_matrix("NN output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
     printf("\n\n");
+
+    printf("Creating sensor timebuffer\n");
+
+    // input layer size 
+    // drone_data.neural->weights_row_count[0]
+    int sensor_input_size = DRONE_CIRCLE_SENSOR_COUNT + 2;
+
+    ASSERT((int) (drone_data.neural->weights_row_count[0]) % sensor_input_size == 0);
+
+    drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, (int) (drone_data.neural->weights_row_count[0] / sensor_input_size));
 }
 
 void drone_logic_loop() {
@@ -77,14 +87,7 @@ void drone_logic_loop() {
                 read_sensor_data(&drone_data, json_response);
 
                 // Set input layer to neural network
-                //network_input_layer_size(drone_data.neural)
-                for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
-                    drone_data.neural->input_layer[i] = drone_data.circle_sensor_array[i];
-                    printf(", %f", drone_data.neural->input_layer[i]);
-                }
-                drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
-                drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
-                printf("\n");
+                set_NN_input_from_sensor_data(&drone_data);
 
                 // Feed forward data
                 feed_forward_network(drone_data.neural);
@@ -122,7 +125,6 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
         drone->circle_sensor_array[i] = json_object_get_double(sensor_data);
     }
 
-
     struct json_object* sensor_top;
     json_object_object_get_ex(json_in, "sensorTop", &sensor_top);
     drone->sensor_top = json_object_get_double(sensor_top);
@@ -130,6 +132,24 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     struct json_object* sensor_bottom;
     json_object_object_get_ex(json_in, "sensorBottom", &sensor_bottom);
     drone->sensor_bottom = json_object_get_double(sensor_bottom);
+}
+
+void set_NN_input_from_sensor_data(struct drone_data* drone) {
+    //network_input_layer_size(drone_data.neural)
+    // for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
+    //     drone_data.neural->input_layer[i] = drone_data.circle_sensor_array[i];
+    //     printf(", %f", drone_data.neural->input_layer[i]);
+    // }
+    // drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
+    // drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
+    // printf("\n");
+
+    timebuffer_set(drone->sensor_time_buffer, drone_data.circle_sensor_array, DRONE_CIRCLE_SENSOR_COUNT, 0);
+    drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
+    drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_bottom;
+    timebuffer_increment(drone->sensor_time_buffer);
+
+    timebuffer_copy_corrected(drone->sensor_time_buffer, drone_data.neural->input_layer);
 }
 
 void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone) {

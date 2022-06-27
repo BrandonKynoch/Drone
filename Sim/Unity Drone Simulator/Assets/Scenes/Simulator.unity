@@ -375,7 +375,7 @@ MonoBehaviour:
   clipMoveTime: 0.05
   returnTime: 0.4
   sphereCastRadius: 0.1
-  visualiseInEditor: 1
+  visualiseInEditor: 0
   closestDistance: 0.3
   dontClipTag: Player
   zoomOriginalDist: 0.3

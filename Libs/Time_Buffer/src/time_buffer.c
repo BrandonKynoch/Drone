@@ -1,33 +1,33 @@
 #include <time_buffer.h>
 
-int main() {
-    double test[] = {0.1, 0.2, 0.3};
+// int main() {
+//     double test[] = {0.1, 0.2, 0.3};
 
-    int size = 3;
-    int time_steps = 4;
+//     int size = 3;
+//     int time_steps = 4;
 
-    struct time_buffer* timebuf = init_timebuffer(size, time_steps);
+//     struct time_buffer* timebuf = init_timebuffer(size, time_steps);
 
-    double* corrected_time_buffer = calloc(size * time_steps, sizeof(double));
+//     double* corrected_time_buffer = calloc(size * time_steps, sizeof(double));
 
-    for (int i = 0; i < 8; i++) {
-        timebuffer_set(timebuf, test, 3, 0);
-        timebuffer_increment(timebuf);
+//     for (int i = 0; i < 8; i++) {
+//         timebuffer_set(timebuf, test, 3, 0);
+//         timebuffer_increment(timebuf);
 
-        timebuffer_copy_corrected(timebuf, corrected_time_buffer);
+//         timebuffer_copy_corrected(timebuf, corrected_time_buffer);
 
-        printf("Full timebuffer after iteration: %d\n", i);
-        for (int j = 0; j < timebuf->single_timestep_size * timebuf->timesteps; j++) {
-            printf("%f\t\t%f\n", timebuf->full_buffer[j], corrected_time_buffer[j]);
-        }
+//         printf("Full timebuffer after iteration: %d\n", i);
+//         for (int j = 0; j < timebuf->single_timestep_size * timebuf->timesteps; j++) {
+//             printf("%f\t\t%f\n", timebuf->full_buffer[j], corrected_time_buffer[j]);
+//         }
 
-        printf("\n\n\n\n\n\n\n\n");
+//         printf("\n\n\n\n\n\n\n\n");
         
-        test[0] += 1.0;
-        test[1] += 1.0;
-        test[2] += 1.0;
-    }
-}
+//         test[0] += 1.0;
+//         test[1] += 1.0;
+//         test[2] += 1.0;
+//     }
+// }
 
 struct time_buffer* init_timebuffer(int size, int time_steps) {
     struct time_buffer* tb = calloc(1, sizeof(struct time_buffer));

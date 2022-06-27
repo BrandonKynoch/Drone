@@ -3,12 +3,15 @@
 #include <d_networking.h>
 #include <d_neural.h>
 
+#include "time_buffer.h"
+
 // ############################################################################
 // #######      DRONE MAIN      ###############################################
 // ############################################################################
 
 void drone_logic_loop();
 void read_sensor_data(struct drone_data* drone, struct json_object* json_in);
+void set_NN_input_from_sensor_data(struct drone_data* drone);
 void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone);
 
 // ############################################################################

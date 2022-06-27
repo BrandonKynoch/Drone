@@ -26,12 +26,16 @@ lib_BLAS_custom = \
 	$(libs_dir)/BLAS_Custom/lib/custom_BLAS.a \
 	-I$(libs_dir)/BLAS_Custom/headers
 
+lib_timebuffer_custom = \
+	$(libs_dir)/Time_Buffer/lib/time_buffer.a \
+	-I$(libs_dir)/Time_Buffer/headers
+
 lib_CBLAS = \
 	$(libs_dir)/CBLAS/lib/cblas_LINUX.a \
 	$(libs_dir)/CBLAS/lib/libblas.a \
 	-I$(libs_dir)/CBLAS/include
 
-libraries = $(lib_Json_C) $(lib_BLAS_custom) $(lib_CBLAS)
+libraries = $(lib_Json_C) $(lib_BLAS_custom) $(lib_timebuffer_custom) $(lib_CBLAS)
 ###################################################################################
 #####       LIBRARIES          ####################################################
 ###################################################################################

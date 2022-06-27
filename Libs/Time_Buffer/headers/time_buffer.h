@@ -11,7 +11,7 @@ struct time_buffer {
 
 struct time_buffer* init_timebuffer(int size, int time_steps);
 
-// Copies 'count' elements from 'array' into the timebuffer at the
+// Copies 'count' elements from 'target' into the timebuffer at the
 // correct timestep
 // REMEMBER TO CALL TIMEBUFFER INCREMENT WHEN DONE
 void timebuffer_set(struct time_buffer* tb, double* target, int count, int buffer_offset);
