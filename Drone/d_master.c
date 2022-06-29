@@ -39,10 +39,10 @@ void init_and_test_NN_from_file(char* file) {
     // input layer size 
     // drone_data.neural->weights_row_count[0]
     int sensor_input_size = DRONE_CIRCLE_SENSOR_COUNT + 2;
-
     ASSERT((int) (drone_data.neural->weights_row_count[0]) % sensor_input_size == 0);
 
-    drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, (int) (drone_data.neural->weights_row_count[0] / sensor_input_size));
+    int timesteps = (int) (drone_data.neural->weights_row_count[0] / sensor_input_size) - 1; // IMPORTANT: Remember to -1
+    drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, timesteps);
 }
 
 void drone_logic_loop() {
@@ -52,33 +52,39 @@ void drone_logic_loop() {
     motor_br = 0;
     motor_bl = 0;
 
-    ASSERT(DRONE_CIRCLE_SENSOR_COUNT == network_input_layer_size(drone_data.neural) - 2);
+    ASSERT(network_input_layer_size(drone_data.neural) % (DRONE_CIRCLE_SENSOR_COUNT + 2) == 0);
+
+    char* server_response;
+    struct json_object* json_response;
+    struct json_object* response_opcode_json;
+    int32_t response_opcode;
+
+    struct json_object* response_NN_file_json;
+    char* response_NN_file;
 
     while (TRUE) {
         motor_output(motor_fl, motor_fr, motor_br, motor_bl, &drone_data);
 
         // Receive sensore data respone from server - position, distance sensors etc.
-        char* server_response = receive_server_message(&drone_data);
+        server_response = receive_server_message(&drone_data);
 
         // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
         usleep(32000); // sleep for 32 milliseconds - 30HZ
 
         // Decode server response
-        struct json_object* json_response = json_tokener_parse(server_response);
+        json_response = json_tokener_parse(server_response);
 
-        struct json_object* response_opcode_json;
         json_object_object_get_ex(json_response, "opcode", &response_opcode_json);
         
-        int32_t response_opcode = json_object_get_int(response_opcode_json);
+        response_opcode = json_object_get_int(response_opcode_json);
 
         switch (response_opcode) {
             case RESPONSE_CODE_LOAD_NN:
                 free(drone_data.neural);
 
-                struct json_object* response_NN_file_json;
                 json_object_object_get_ex(json_response, "file", &response_NN_file_json);
                 
-                char* response_NN_file = json_object_get_string(response_NN_file_json);
+                response_NN_file = json_object_get_string(response_NN_file_json);
 
                 init_and_test_NN_from_file(response_NN_file);
                 break;
@@ -146,7 +152,7 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
 
     timebuffer_set(drone->sensor_time_buffer, drone_data.circle_sensor_array, DRONE_CIRCLE_SENSOR_COUNT, 0);
     drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
-    drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_bottom;
+    drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
     timebuffer_increment(drone->sensor_time_buffer);
 
     timebuffer_copy_corrected(drone->sensor_time_buffer, drone_data.neural->input_layer);
