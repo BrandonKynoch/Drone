@@ -67,7 +67,8 @@ void drone_logic_loop() {
         server_response = receive_server_message(&drone_data);
 
         // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
-        usleep(32000); // sleep for 32 milliseconds - 30HZ
+        // usleep(32000); // sleep for 32 milliseconds - 30HZ
+        usleep(16000);
 
         // Decode server response
         json_response = json_tokener_parse(server_response);

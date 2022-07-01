@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace SimServer {
     public class NeuralTrainer {
@@ -142,6 +140,8 @@ namespace SimServer {
                 // MARK: TODO: Check that number of agents matches number of files
             }
 
+            Thread.Sleep(TimeSpan.FromSeconds(3));
+
             // Respond to drones with target files
             lock (dronesWaitingToReceiveNN) {
                 while (dronesWaitingToReceiveNN.Count > 0) {
@@ -201,10 +201,12 @@ namespace SimServer {
             int totalCount = nns.Count;
             double keep = 0.1; // Keep the top percentage completely unmodified
             double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
-            double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
+            //double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
+            double crossOverPopulation = 1f;
             double crossOverPercentile = 0.7; 
             double mutationProbability = 0.2; // Likelyhood that a specimin will have any mutation
-            double mutationAmount = 0.2f; // When a specimin is mutating, what amount of genes should change
+            double speciminMutationProbability = 0.3f; // When a specimin is mutating, what amount of genes should change
+            double speciminMutationAmount = 0.2f; // When a specimin is mutating, by how much should a single genome change
 
             int keepCount = (int)Math.Ceiling(((double)totalCount) * keep);
             int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
@@ -215,7 +217,7 @@ namespace SimServer {
             }
 
             // Perform crossovers
-            for (int i = keepCount; i < totalCount; i++) {
+            for (int i = 0; i < totalCount * crossOverPopulation; i++) {
                 int a = (int) Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
                 int b = (int)Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
 
@@ -229,15 +231,18 @@ namespace SimServer {
             // Mutation
             for (int i = keepCount; i < totalCount; i++) {
                 if (Utils.Random01Double() < mutationProbability) {
-                    nns[i].Mutate(mutationAmount);
+                    nns[i].Mutate(speciminMutationProbability, speciminMutationAmount);
                 }
             }
 
             // Write changes to NN file
+            Console.WriteLine("Write to file");
             foreach (NNData nd in nns) {
+                Console.WriteLine("Writing: " + nd.nnFile);
                 File.Delete(nd.nnFile);
-                File.WriteAllBytes(nd.nnFile, nd.modifiedData);
+                nd.WriteToFile();
             }
+            Console.WriteLine("Finish writing to file");
         }
 
 
@@ -289,8 +294,9 @@ namespace SimServer {
         public class NNData: IComparable<NNData> {
             public string nnFile;
 
-            public byte[] originalData;
-            public byte[] modifiedData;
+            public byte[] rawHeader;
+            public double[] originalData;
+            public double[] modifiedData;
             public int geneticDataIndex; // The start index of data that should be modified (i.e. after header)
 
             double fitness; // Higher is better
@@ -298,30 +304,45 @@ namespace SimServer {
             public NNData(string fromNNFile, string metaFile) {
                 nnFile = fromNNFile;
 
-                originalData = File.ReadAllBytes(fromNNFile);
-
-                byte[] neuralSizeRawBytes = new byte[4];
-                for (int i = 0; i < 4; i++) {
-                    neuralSizeRawBytes[i] = originalData[i];
-                }
-
-                Int32 neuralSize = BitConverter.ToInt32(neuralSizeRawBytes, 0);
+                byte[] rawData = File.ReadAllBytes(fromNNFile);
+                Int32 neuralSize = BitConverter.ToInt32(rawData, 0);
 
                 geneticDataIndex = 4 * // size of int
                     (1 + // neural size
                     neuralSize + // neural shape
                     (neuralSize - 1)); // activations
 
-                modifiedData = new byte[originalData.Length];
-                for (int i = 0; i < originalData.Length; i++) {
-                    modifiedData[i] = originalData[i];
+                rawHeader = new byte[geneticDataIndex];
+                for (int i = 0; i < geneticDataIndex; i++) {
+                    rawHeader[i] = rawData[i];
                 }
 
+                int doubleCount = (rawData.Length - geneticDataIndex) / 8; // number of doubles in weights and biases combined
+                originalData = new double[doubleCount];
+                modifiedData = new double[doubleCount];
+
+                for (int i = 0; i < doubleCount; i++) {
+                    originalData[i] = BitConverter.ToDouble(rawData, geneticDataIndex + (i * 8)); // 8bytes
+                    modifiedData[i] = originalData[i];
+                }
 
                 // Get fitness from meta file
                 string meta = File.ReadAllText(metaFile);
                 JObject metaJson = JObject.Parse(meta);
                 fitness = metaJson.GetValue("fitness").Value<double>();
+            }
+
+            public void WriteToFile() {
+                if (File.Exists(nnFile)) {
+                    File.Delete(nnFile);
+                }
+                using (FileStream fs = new FileStream(nnFile, FileMode.CreateNew, FileAccess.Write)) {
+                    fs.Write(rawHeader, 0, rawHeader.Length);
+                    byte[] dataBytes = new byte[originalData.Length * 8];
+                    Buffer.BlockCopy(modifiedData, 0, dataBytes, 0, dataBytes.Length);
+                    fs.Write(dataBytes, 0, dataBytes.Length);
+                    fs.Close();
+                }
             }
 
             public void CopyData(NNData from, bool useOriginal = true) {
@@ -349,10 +370,10 @@ namespace SimServer {
                 }
             }
 
-            public void Mutate(double mutationAmount) {
+            public void Mutate(double mutationProbability, double mutationAmount) {
                 for (int i = geneticDataIndex; i < modifiedData.Length - 1; i++) {
-                    if (Utils.Random01Double() < mutationAmount) {
-                        modifiedData[i] = (byte) ~modifiedData[i];
+                    if (Utils.Random01Double() < mutationProbability) {
+                        modifiedData[i] += Utils.RandomRange(-mutationAmount, mutationAmount);
                     }
                 }
             }
