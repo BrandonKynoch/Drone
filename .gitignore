@@ -62,6 +62,8 @@ dkms.conf
 /Sim/Unity Drone Simulator/[Ll]ogs/
 /Sim/Unity Drone Simulator/[Uu]ser[Ss]ettings/
 
+/Training Data/
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /Sim/Unity Drone Simulator/[Mm]emoryCaptures/

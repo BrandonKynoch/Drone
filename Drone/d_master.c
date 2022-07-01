@@ -6,8 +6,12 @@
 
 struct drone_data drone_data;
 
+double sqrt2;
+
 int main() {
     srand (time(NULL) + getpid()); // Initalize seed for random numbers
+    sqrt2 = sqrt(2.0);
+
 
     printf("Initializing Drone\n");
 
@@ -46,12 +50,6 @@ void init_and_test_NN_from_file(char* file) {
 }
 
 void drone_logic_loop() {
-    double motor_fl, motor_fr, motor_br, motor_bl;
-    motor_fl = 0;
-    motor_fr = 0;
-    motor_br = 0;
-    motor_bl = 0;
-
     ASSERT(network_input_layer_size(drone_data.neural) % (DRONE_CIRCLE_SENSOR_COUNT + 2) == 0);
 
     char* server_response;
@@ -63,7 +61,7 @@ void drone_logic_loop() {
     char* response_NN_file;
 
     while (TRUE) {
-        motor_output(motor_fl, motor_fr, motor_br, motor_bl, &drone_data);
+        motor_output(&drone_data);
 
         // Receive sensore data respone from server - position, distance sensors etc.
         server_response = receive_server_message(&drone_data);
@@ -99,14 +97,15 @@ void drone_logic_loop() {
                 feed_forward_network(drone_data.neural);
 
                 // Set motors from output
-                // TODO: Create motor controller to convert neural output to motor values
-                motor_bl = drone_data.neural->output_layer[0];
-                motor_br = drone_data.neural->output_layer[1];
-                motor_fr = drone_data.neural->output_layer[2];
-                motor_fl = drone_data.neural->output_layer[3];
-                printf("motors: %f, %f, %f, %f", motor_bl, motor_br, motor_fr, motor_fl);
+                motor_output_from_controller(
+                    &drone_data,
+                    drone_data.neural->output_layer[0], // X_in
+                    drone_data.neural->output_layer[1], // Y_in
+                    drone_data.neural->output_layer[2], // limit_scaler
+                    drone_data.neural->output_layer[3]  // power_scaler
+                );
 
-                printf("\n\n\n\n");
+                printf("motors: %f, %f, %f, %f\n", drone_data.m_fl, drone_data.m_fr, drone_data.m_br, drone_data.m_bl);
                 break;
             default:
                 fprintf(stderr, "Unhandled server response");
@@ -141,15 +140,6 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
 }
 
 void set_NN_input_from_sensor_data(struct drone_data* drone) {
-    //network_input_layer_size(drone_data.neural)
-    // for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
-    //     drone_data.neural->input_layer[i] = drone_data.circle_sensor_array[i];
-    //     printf(", %f", drone_data.neural->input_layer[i]);
-    // }
-    // drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
-    // drone_data.neural->input_layer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
-    // printf("\n");
-
     timebuffer_set(drone->sensor_time_buffer, drone_data.circle_sensor_array, DRONE_CIRCLE_SENSOR_COUNT, 0);
     drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
     drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
@@ -158,7 +148,44 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     timebuffer_copy_corrected(drone->sensor_time_buffer, drone_data.neural->input_layer);
 }
 
-void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone) {
+void motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {
+    // Remap values from    0 - 1      to      -1 - 1
+    double x_out = (2 * x_in) - 1;
+    double y_out = (2 * y_in) - 1;
+
+    double v_length = sqrt(pow(x_out, 2) + pow(y_out, 2));
+
+    // Normalize
+    // if (v_length)
+    // x_out = x_out / v_length;
+    // y_out = y_out / v_length;
+
+    // Convert
+    drone->m_fl = compute_motor_output_from_offset(x_out, y_out, -1, 1);
+    drone->m_fr = compute_motor_output_from_offset(x_out, y_out, 1, 1);
+    drone->m_br = compute_motor_output_from_offset(x_out, y_out, 1, -1);
+    drone->m_bl = compute_motor_output_from_offset(x_out, y_out, -1, -1);
+
+    double m_mean = (drone->m_fl + drone->m_fr + drone->m_br + drone->m_bl) / 4;
+
+    // Shift & remap
+    drone->m_fl = compute_motor_output_from_scalers(drone->m_fl, m_mean, power_scaler, limit_scaler);
+    drone->m_fr = compute_motor_output_from_scalers(drone->m_fr, m_mean, power_scaler, limit_scaler);
+    drone->m_br = compute_motor_output_from_scalers(drone->m_br, m_mean, power_scaler, limit_scaler);
+    drone->m_bl = compute_motor_output_from_scalers(drone->m_bl, m_mean, power_scaler, limit_scaler);
+
+    motor_output(drone);
+}
+
+double compute_motor_output_from_offset(double direction_x, double direction_y, double m_pos_x, double m_pos_y) {
+    return sqrt(pow(m_pos_x - direction_x, 2) + pow(m_pos_y - direction_y , 2));
+}
+
+double compute_motor_output_from_scalers(double m_in, double m_mean, double power_scaler, double limit_scaler) {
+    return power_scaler * (m_in - (m_mean * limit_scaler));
+}
+
+void motor_output(struct drone_data* drone) {
     struct json_object* json_fl;
     struct json_object* json_fr;
     struct json_object* json_br;
@@ -169,10 +196,10 @@ void motor_output(double fl, double fr, double br, double bl, struct drone_data*
     json_object_object_get_ex(drone->m_json, "motor_br", &json_br);
     json_object_object_get_ex(drone->m_json, "motor_bl", &json_bl);
 
-    json_object_set_double(json_fl, fl);
-    json_object_set_double(json_fr, fr);
-    json_object_set_double(json_br, br);
-    json_object_set_double(json_bl, bl);
+    json_object_set_double(json_fl, drone->m_fl);
+    json_object_set_double(json_fr, drone->m_fr);
+    json_object_set_double(json_br, drone->m_br);
+    json_object_set_double(json_bl, drone->m_bl);
 
     // Send server message
     send_server_json(drone, drone->m_json);

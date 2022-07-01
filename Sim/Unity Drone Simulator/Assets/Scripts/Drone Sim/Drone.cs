@@ -8,8 +8,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private const float SENSOR_DIST_FROM_CENTER = 0.15f;
     private const float SENSOR_MAX_RANGE = 2f;
 
-    private const int SPAWN_ROWS_COUNT = 6;
-    private const float SPAWN_SPACING = 0.3f;
+    private const int SPAWN_ROWS_COUNT = 5;
+    private const float SPAWN_SPACING = 4f;
     /// Constants //////////////////////////////////////////
 
     // Simulation variables

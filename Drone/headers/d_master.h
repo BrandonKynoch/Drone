@@ -10,9 +10,36 @@
 // ############################################################################
 
 void drone_logic_loop();
+
+// Read sensor data from simulation
 void read_sensor_data(struct drone_data* drone, struct json_object* json_in);
+
+// Sets the input layer for sensor data NN
 void set_NN_input_from_sensor_data(struct drone_data* drone);
-void motor_output(double fl, double fr, double br, double bl, struct drone_data* drone);
+
+// Convert vector direction (x_in, y_in) & limit_scaler & power_scaler to 4 motor output values
+// Used to convert output layer of neural network to motor values
+void motor_output_from_controller(
+    struct drone_data* drone,
+    double x_in,
+    double y_in,
+    double limit_scaler,
+    double power_scaler
+);
+
+// Compute the motor output value based on:
+//      - the input direction vector: (direction_x, direction_y)
+//      - the actual position of the motor relative to the center of the drone (m_pos_x, m_pos_y)
+double compute_motor_output_from_offset(double direction_x, double direction_y, double m_pos_x, double m_pos_y);
+
+// Compute the motor output by remapping motor values based on
+//      - m_mean :: The mean motor output before remapping
+//      - power_scaler :: Determines the amplitude of motor output
+//      - limit_scaler :: Determines the lower bound, and therefore the range of motor outputs
+double compute_motor_output_from_scalers(double m_in, double m_mean, double power_scaler, double limit_scaler);
+
+// Set drone motor json either send message to simulation or write to gpio pins
+void motor_output(struct drone_data* drone);
 
 // ############################################################################
 // #######      DRONE MAIN      ###############################################
