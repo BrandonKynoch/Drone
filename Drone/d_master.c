@@ -174,8 +174,6 @@ void motor_output_from_controller(struct drone_data* drone, double x_in, double 
     drone->m_fr = compute_motor_output_from_scalers(drone->m_fr, m_mean, power_scaler, limit_scaler);
     drone->m_br = compute_motor_output_from_scalers(drone->m_br, m_mean, power_scaler, limit_scaler);
     drone->m_bl = compute_motor_output_from_scalers(drone->m_bl, m_mean, power_scaler, limit_scaler);
-
-    motor_output(drone);
 }
 
 double compute_motor_output_from_offset(double direction_x, double direction_y, double m_pos_x, double m_pos_y) {

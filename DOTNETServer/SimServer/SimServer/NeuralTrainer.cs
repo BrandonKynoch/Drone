@@ -140,8 +140,6 @@ namespace SimServer {
                 // MARK: TODO: Check that number of agents matches number of files
             }
 
-            Thread.Sleep(TimeSpan.FromSeconds(3));
-
             // Respond to drones with target files
             lock (dronesWaitingToReceiveNN) {
                 while (dronesWaitingToReceiveNN.Count > 0) {
@@ -258,7 +256,7 @@ namespace SimServer {
             while (true) {
                 Thread.Sleep(TimeSpan.FromSeconds(EPOCH_RUN_TIME));
 
-                continueSimulation = false;
+                continueSimulation = false; // After setting this to false Network handler adds all incoming request drones to dronesWaitingToReceiveNN
 
                 while (dronesWaitingToReceiveNN.Count < Master.GetDroneCount) {
                     Thread.Yield();

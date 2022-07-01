@@ -153,7 +153,8 @@ namespace SimServer {
                 int responseOpcode = responseJson.GetValue("opcode").Value<int>();
                 switch (responseOpcode) {
                     case Master.REPONSE_OPCODE_RESET_DRONES:
-
+                        // When a corrupt package is received by unity it responds with a message that all drones should be reset
+                        // TODO: Implement this
                         break;
                     default:
                         ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
