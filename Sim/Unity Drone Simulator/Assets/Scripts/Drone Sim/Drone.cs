@@ -28,8 +28,21 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     private int contactsCount = 0;
 
+    /// Fitness Vars /////////////////////////////////////////
+    private float airborneFitness = 0;
+    private float rotationFitness = 0;
+    private float distFitness = 0;
+
+    public float AirborneFitness { get { return airborneFitness; } }
+    public float RotationFitness { get { return rotationFitness; } }
+    public float DistFitness { get { return distFitness; } }
+    /// Fitness Vars /////////////////////////////////////////
+
     /// Debug Vars /////////////////////////////////////////
+    private DroneUI droneUI;
+
     private Queue<Vector3> collisionPoints = new Queue<Vector3>();
+    private float debug_NextCollisionPointRemoveTime = 0;
     /// Debug Vars /////////////////////////////////////////
 
     /// Properties /////////////////////////////////////////
@@ -51,11 +64,21 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         bladeFR = bladesTransform.Find("FR");
         bladeBR = bladesTransform.Find("BR");
         bladeBL = bladesTransform.Find("BL");
+
+        droneUI = GetComponentInChildren<DroneUI>();
+        droneUI.SetID((int)dData.id);
     }
 
 
     public void Update() {
 
+
+        /// DEBUG UPDATE //////////////////////////////////////
+        if (Time.time > debug_NextCollisionPointRemoveTime && collisionPoints.Count > 0) {
+            debug_NextCollisionPointRemoveTime = Time.time + 0.2f;
+            collisionPoints.Dequeue();
+        }
+        /// DEBUG UPDATE //////////////////////////////////////
     }
 
     public void FixedUpdate() {
@@ -77,6 +100,9 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void OnCollisionExit(Collision collision) {
+        if (collisionPoints.Count > 0) {
+            collisionPoints.Dequeue();
+        }
         contactsCount--;
     }
 
@@ -128,14 +154,14 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     public void CalculateFitness() {
         float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
-        float distFitness = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
-        distFitness = Mathf.Clamp(distFitness, 0, 20) / 20f;
+        distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
+        distFitness += Mathf.Clamp(distToTarget, 0, 20) / 20f;
 
-        float airborneFitness = (contactsCount == 0) ? 1 : 0;
+        airborneFitness += (contactsCount == 0) ? 1 : 0;
 
         float totalFitness = distFitness + airborneFitness;
 
-        data.fitness += distFitness * Time.deltaTime;
+        data.fitness = totalFitness * Time.deltaTime;
     }
 
     public void ResetDrone(Vector3 spawnPosition) {
@@ -144,6 +170,9 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             return;
         }
 
+        distFitness = 0;
+        rotationFitness = 0;
+        airborneFitness = 0;
         data.fitness = 0;
 
         transform.position =
@@ -219,6 +248,13 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         Gizmos.DrawLine(
                 transform.position,
                 transform.position + (-transform.up * (float)data.sensorBottom));
+
+
+        // Collision gizmos
+        Gizmos.color = Color.black;
+        foreach (Vector3 v in collisionPoints) {
+            Gizmos.DrawCube(v, Vector3.one * 0.03f);
+        }
     }
 
     private void DrawGizmosCircle(Transform t, float radius, int segments) {

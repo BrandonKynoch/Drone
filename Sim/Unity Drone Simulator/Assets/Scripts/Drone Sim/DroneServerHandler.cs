@@ -17,6 +17,8 @@ public class DroneServerHandler : MonoBehaviour {
     private Drone[] drones = new Drone[MAX_DRONE_COUNT];
     private int droneCount = 0;
 
+    private Drone fittestDrone;
+
     /// C Server interface ///
     private Thread serverSocketThread;
     Stream networkStream;
@@ -58,6 +60,9 @@ public class DroneServerHandler : MonoBehaviour {
     ///
 
     /// Properties ///
+    public static Drone[] Drones { get { return staticInstance.drones; } }
+    public static Drone FittestDrone { get { return staticInstance.fittestDrone; } }
+
     public static float MaximumDroneDistFromTarget {
         get { return staticInstance.maximumDroneDistFromTarget; }
     }
@@ -88,6 +93,8 @@ public class DroneServerHandler : MonoBehaviour {
 
     public void Update() {
         HandleInboundMessages();
+
+        CalculateFittestDrone();
     }
 
     private void OnApplicationQuit() {
@@ -268,6 +275,25 @@ public class DroneServerHandler : MonoBehaviour {
         foreach (Drone d in drones) {
             if (d != null) {
                 d.ResetDrone(spawnTransform.position);
+            }
+        }
+    }
+
+    private void CalculateFittestDrone() {
+        if (fittestDrone == null) {
+            foreach (Drone d in drones) {
+                if (d != null) {
+                    fittestDrone = d;
+                    break;
+                }
+            }
+        }
+
+        foreach (Drone d in drones) {
+            if (d != null) {
+                if (d.dData.fitness > fittestDrone.dData.fitness) {
+                    fittestDrone = d;
+                }
             }
         }
     }

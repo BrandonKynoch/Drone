@@ -9,7 +9,8 @@ public class DroneCamHandler : MonoBehaviour {
     private FreeLookCam freeLookCam;
     private FocalPointObject currentFocalPoint;
 
-    private Transform originalFocus;
+    private bool focusOnBestFitness;
+    private double findFittestDroneNextTime;
 
     private static DroneCamHandler staticInstance;
     public static DroneCamHandler StaticInstance {
@@ -20,7 +21,9 @@ public class DroneCamHandler : MonoBehaviour {
         staticInstance = this;
 
         freeLookCam = GetComponent<FreeLookCam>();
-        originalFocus = freeLookCam.Target;
+
+        focusOnBestFitness = true;
+        findFittestDroneNextTime = float.NegativeInfinity;
 
         ChangeFocalPoint(0);
     }
@@ -28,10 +31,23 @@ public class DroneCamHandler : MonoBehaviour {
     public void Update() {
         if (MasterHandler.CurrentUserMode == MasterHandler.UserMode.DroneCam) {
             if (Input.GetKeyDown(KeyCode.O)) {
+                focusOnBestFitness = false;
                 ChangeFocalPoint(-1);
             }
             if (Input.GetKeyDown(KeyCode.P)) {
+                focusOnBestFitness = false;
                 ChangeFocalPoint(1);
+            }
+
+            if (Input.GetKeyDown(KeyCode.U)) {
+                focusOnBestFitness = true;
+            }
+
+            if (focusOnBestFitness) {
+                if (Time.time > findFittestDroneNextTime) {
+                    findFittestDroneNextTime = Time.time + 0.2f;
+                    SetFocalPoint(DroneServerHandler.FittestDrone.GetComponent<FocalPointObject>());
+                }
             }
         }
     }

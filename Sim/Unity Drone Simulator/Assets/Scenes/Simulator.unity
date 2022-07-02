@@ -376,9 +376,8 @@ MonoBehaviour:
   returnTime: 0.4
   sphereCastRadius: 0.1
   visualiseInEditor: 0
-  closestDistance: 0.3
+  closestDistance: 1
   dontClipTag: Player
-  zoomOriginalDist: 0.3
 --- !u!114 &464393158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -771,7 +770,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 815390072}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13.691, y: 0.96, z: -11.567}
+  m_LocalPosition: {x: 8.549, y: 0.96, z: -9.087}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1393,7 +1392,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1666220898}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13.61, y: 1.037, z: -17.32}
+  m_LocalPosition: {x: 13.61, y: 1.857, z: -17.32}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2311,7 +2310,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 13.611
+      value: 7.978
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2319,7 +2318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -8.87
+      value: -5.239
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalRotation.w

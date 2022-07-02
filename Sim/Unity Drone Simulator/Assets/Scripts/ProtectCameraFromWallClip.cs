@@ -16,8 +16,8 @@ public class ProtectCameraFromWallClip : MonoBehaviour
     private Transform m_Cam;                  // the transform of the camera
     private Transform m_Pivot;                // the point at which the camera pivots around
     private float originalDist;             // the original distance to the camera before any modification are made
-    public float zoomOriginalDist;
-    private float usingOriginalDist;
+    private float zoomOriginalDist = 1.0f;
+    private float correctedDist;
     private float m_MoveVelocity;             // the velocity at which the camera moved
     private float m_CurrentDist;              // the current distance from the camera to the target
     private Ray m_Ray = new Ray();                        // the ray used in the lateupdate for casting between the camera and the target
@@ -31,8 +31,8 @@ public class ProtectCameraFromWallClip : MonoBehaviour
         m_Cam = GetComponentInChildren<Camera>().transform;
         m_Pivot = m_Cam.parent;
         originalDist = m_Cam.localPosition.magnitude;
-        usingOriginalDist = originalDist;
-        m_CurrentDist = usingOriginalDist;
+        correctedDist = originalDist;
+        m_CurrentDist = correctedDist;
 
         // create a new RayHitComparer
         m_RayHitComparer = new RayHitComparer();
@@ -41,10 +41,10 @@ public class ProtectCameraFromWallClip : MonoBehaviour
 
     private void LateUpdate()
     {
-        usingOriginalDist = (MasterHandler.CurrentUserMode == MasterHandler.UserMode.DroneCam) ? zoomOriginalDist : originalDist;
+        correctedDist = (MasterHandler.CurrentUserMode == MasterHandler.UserMode.DroneCam) ? zoomOriginalDist : originalDist;
 
         // initially set the target distance
-        float targetDist = usingOriginalDist;
+        float targetDist = correctedDist;
 
         m_Ray.origin = m_Pivot.position + m_Pivot.forward*sphereCastRadius;
         m_Ray.direction = -m_Pivot.forward;
@@ -72,12 +72,12 @@ public class ProtectCameraFromWallClip : MonoBehaviour
             m_Ray.origin += m_Pivot.forward*sphereCastRadius;
 
             // do a raycast and gather all the intersections
-            m_Hits = Physics.RaycastAll(m_Ray, usingOriginalDist - sphereCastRadius);
+            m_Hits = Physics.RaycastAll(m_Ray, correctedDist - sphereCastRadius);
         }
         else
         {
             // if there was no collision do a sphere cast to see if there were any other collisions
-            m_Hits = Physics.SphereCastAll(m_Ray, sphereCastRadius, usingOriginalDist + sphereCastRadius);
+            m_Hits = Physics.SphereCastAll(m_Ray, sphereCastRadius, correctedDist + sphereCastRadius);
         }
 
         // sort the collisions by distance
@@ -111,7 +111,7 @@ public class ProtectCameraFromWallClip : MonoBehaviour
         protecting = hitSomething;
         m_CurrentDist = Mathf.SmoothDamp(m_CurrentDist, targetDist, ref m_MoveVelocity,
                                         m_CurrentDist > targetDist ? clipMoveTime : returnTime);
-        m_CurrentDist = Mathf.Clamp(m_CurrentDist, closestDistance, usingOriginalDist);
+        m_CurrentDist = Mathf.Clamp(m_CurrentDist, closestDistance, correctedDist);
         m_Cam.localPosition = -Vector3.forward*m_CurrentDist;
     }
 

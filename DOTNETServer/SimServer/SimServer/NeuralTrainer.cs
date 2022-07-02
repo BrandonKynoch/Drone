@@ -23,6 +23,7 @@ namespace SimServer {
         private DirectoryInfo rootTrainingDir;
         private DirectoryInfo currentTrainingDir;
         private int currentEpoch = 0;
+        private int firstIteration = 2;
 
         private Queue<ConnectedDrone> dronesWaitingToReceiveNN = new Queue<ConnectedDrone>();
 
@@ -91,6 +92,15 @@ namespace SimServer {
                 } else {
                     Console.WriteLine("CONTINUING FROM:\n\t" + continueFromDirFull + "\n\n");
 
+                    try {
+                        // Read the last epoch that simulation stopped at from directory name
+                        string[] dirSplit = continueFromDirFull.Split(new char[] { '/' });
+                        int continuingEpoch = int.Parse(dirSplit[dirSplit.Length - 1]);
+                        currentEpoch = continuingEpoch;
+                    } catch (Exception e) { }
+
+                    //currentEpoch = 
+
                     // Continue simulation from previous folder
                     GeneticNNUpdates(continueFromDirFull, currentTrainingDir.ToString());
                 }
@@ -135,7 +145,12 @@ namespace SimServer {
 
 
                 // Execute genetic algorithm here
-                EvolveDirectoryContents(targetFolder);
+                if (firstIteration < 0) {
+                    EvolveDirectoryContents(targetFolder);
+                } else {
+                    firstIteration--;
+                    Console.WriteLine("\n\nDiscarding results of first iteration...\n\n");
+                }
 
                 // MARK: TODO: Check that number of agents matches number of files
             }
@@ -156,30 +171,6 @@ namespace SimServer {
                     Thread.Yield();
                 }
             }
-
-            // TODO:
-            //send message to server telling all drones to reset
-
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-            //  TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-            // O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-            // DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-            // ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
         }
 
         /// <summary>
@@ -200,11 +191,11 @@ namespace SimServer {
             double keep = 0.1; // Keep the top percentage completely unmodified
             double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
             //double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
-            double crossOverPopulation = 1f;
-            double crossOverPercentile = 0.7; 
-            double mutationProbability = 0.2; // Likelyhood that a specimin will have any mutation
+            double crossOverPopulation = 1.3f;
+            double crossOverPercentile = 0.3; 
+            double mutationProbability = 0.7; // Likelyhood that a specimin will have any mutation
             double speciminMutationProbability = 0.3f; // When a specimin is mutating, what amount of genes should change
-            double speciminMutationAmount = 0.2f; // When a specimin is mutating, by how much should a single genome change
+            double speciminMutationAmount = 1f; // When a specimin is mutating, by how much should a single genome change
 
             int keepCount = (int)Math.Ceiling(((double)totalCount) * keep);
             int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
@@ -234,13 +225,13 @@ namespace SimServer {
             }
 
             // Write changes to NN file
-            Console.WriteLine("Write to file");
+            Console.Write("Writing NN files: ");
             foreach (NNData nd in nns) {
-                Console.WriteLine("Writing: " + nd.nnFile);
+                Console.Write(".");
                 File.Delete(nd.nnFile);
                 nd.WriteToFile();
             }
-            Console.WriteLine("Finish writing to file");
+            Console.WriteLine(" Finished");
         }
 
 
@@ -254,7 +245,19 @@ namespace SimServer {
             }
 
             while (true) {
-                Thread.Sleep(TimeSpan.FromSeconds(EPOCH_RUN_TIME));
+                int progressUILength = 40;
+                for (int i = 0; i < progressUILength; i++) {
+                    Console.Write("_");
+                }
+                Console.WriteLine("");
+                ConsoleColor originalConsoleCol = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                for (int i = 0; i < progressUILength; i++) {
+                    Thread.Sleep(TimeSpan.FromSeconds(EPOCH_RUN_TIME / progressUILength));
+                    Console.Write("█");
+                }
+                Console.ForegroundColor = originalConsoleCol;
+                Console.WriteLine("\n\n");
 
                 continueSimulation = false; // After setting this to false Network handler adds all incoming request drones to dronesWaitingToReceiveNN
 
@@ -267,6 +270,7 @@ namespace SimServer {
 
                 GeneticNNUpdates(currentTrainingDir.ToString() + "/" + (currentEpoch-1), currentTrainingDir.ToString());
 
+                // Tell the simulation to reset all drones
                 JObject resetRequestJSON = new JObject(new JProperty("opcode", Master.CODE_RESET_ALL_DRONES));
 
                 Networking.SendStringToNetworkStream(Networking.SimStream, resetRequestJSON.ToString());
@@ -345,31 +349,26 @@ namespace SimServer {
 
             public void CopyData(NNData from, bool useOriginal = true) {
                 if (useOriginal) {
-                    for (int i = geneticDataIndex; i < modifiedData.Length; i++) {
+                    for (int i = 0; i < modifiedData.Length; i++) {
                         modifiedData[i] = from.originalData[i];
                     }
                 } else {
-                    for (int i = geneticDataIndex; i < modifiedData.Length; i++) {
+                    for (int i = 0; i < modifiedData.Length; i++) {
                         modifiedData[i] = from.modifiedData[i];
                     }
                 }
             }
 
-            public static void CrossOver(NNData left, NNData right, double crossOverProbability) {
-                bool useLeft = false;
-                for (int i = left.geneticDataIndex; i < left.modifiedData.Length; i++) {
+            public static void CrossOver(NNData from, NNData to, double crossOverProbability) {
+                for (int i = 0; i < from.originalData.Length; i++) {
                     if (Utils.Random01Double() < crossOverProbability) {
-                        if (useLeft) {
-                            right.modifiedData[i] = left.modifiedData[i];
-                        } else {
-                            left.modifiedData[i] = right.modifiedData[i];
-                        }
+                        to.modifiedData[i] = from.originalData[i];
                     }
                 }
             }
 
             public void Mutate(double mutationProbability, double mutationAmount) {
-                for (int i = geneticDataIndex; i < modifiedData.Length - 1; i++) {
+                for (int i = 0; i < modifiedData.Length; i++) {
                     if (Utils.Random01Double() < mutationProbability) {
                         modifiedData[i] += Utils.RandomRange(-mutationAmount, mutationAmount);
                     }
