@@ -124,9 +124,9 @@ namespace SimServer {
                 ConnectedDrone d = Master.GetDrone(i).Drone;
 
                 // Write drone fitness to meta file
-                string nnMetaPath = targetFolder + "/" + d.id + NN_META_FILE_EXTENSION;
+                string nnMetaPath = ((continueFrom != "") ? continueFrom : targetFolder) + "/" + d.id + NN_META_FILE_EXTENSION;
                 JObject droneMetaData = new JObject(new JProperty("fitness", d.Fitness));
-                File.WriteAllTextAsync(nnMetaPath, droneMetaData.ToString());
+                File.WriteAllText(nnMetaPath, droneMetaData.ToString());
             }
 
             bool createNew = continueFrom.Equals("");

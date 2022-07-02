@@ -10,6 +10,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     private const int SPAWN_ROWS_COUNT = 5;
     private const float SPAWN_SPACING = 4f;
+
+    private const float GIZMO_DIST_FROM_CAMERA = 5f;
     /// Constants //////////////////////////////////////////
 
     // Simulation variables
@@ -84,6 +86,12 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     public void FixedUpdate() {
         GetSensorData();
 
+        // Gyro data
+        dData.angle = Vector3.Angle(transform.up, Vector3.up);
+        dData.upsideDown = dData.angle > 90f;
+        if (dData.angle > 90f)
+            dData.angle = 180f - dData.angle;
+
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FL]) * motorStrength, bladeFL.position);
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FR]) * motorStrength, bladeFR.position);
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.BR]) * motorStrength, bladeBR.position);
@@ -110,7 +118,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         // Circle sensors
         RaycastHit hit;
         for (int i = 0; i < data.circleSensorData.Length; i++) {
-            Vector3 rotationVec = ((Quaternion.EulerRotation(0, ((float)i / data.circleSensorData.Length) * Mathf.Deg2Rad * 360f, 0)) * transform.forward).normalized;
+            Vector3 rotationVec = (transform.localToWorldMatrix * ((Quaternion.EulerRotation(0, ((float)i / data.circleSensorData.Length) * Mathf.Deg2Rad * 360f, 0)) * Vector3.forward)).normalized;
             hit = new RaycastHit();
             Physics.Raycast(
                 transform.position + (rotationVec * SENSOR_DIST_FROM_CENTER),
@@ -173,7 +181,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         distFitness = 0;
         rotationFitness = 0;
         airborneFitness = 0;
-        data.fitness = 0;
+        Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
 
         transform.position =
                 spawnPosition +
@@ -213,6 +221,10 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     #region GIZMOS
     /// Gizmos ///
     private void OnDrawGizmos() {
+        if (Vector3.Distance(transform.position, Camera.main.transform.position) > GIZMO_DIST_FROM_CAMERA) {
+            return;
+        }
+
         float gizmosScaler = 0.1f;
 
         // Forward indicator
@@ -231,12 +243,12 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             transform.position + (transform.forward * gizmosScaler * 0.75f - transform.right * gizmosScaler * 0.2f));
 
         // Circle indicator
-        Gizmos.color = Color.cyan;
+        Gizmos.color = Color.black;
         DrawGizmosCircle(transform, SENSOR_DIST_FROM_CENTER, 20);
 
         // Sensor Indicators
         for (int i = 0; i < data.circleSensorData.Length; i++) {
-            Vector3 rotationVec = ((Quaternion.EulerRotation(0, ((float)i / data.circleSensorData.Length) * Mathf.Deg2Rad * 360f, 0)) * transform.forward).normalized;
+            Vector3 rotationVec = (transform.localToWorldMatrix * ((Quaternion.EulerRotation(0, ((float)i / data.circleSensorData.Length) * Mathf.Deg2Rad * 360f, 0)) * Vector3.forward)).normalized;
             Gizmos.DrawLine(
                 transform.position + (rotationVec * SENSOR_DIST_FROM_CENTER),
                 transform.position + (rotationVec * (SENSOR_DIST_FROM_CENTER + (float) data.circleSensorData[i])));
@@ -259,9 +271,35 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     private void DrawGizmosCircle(Transform t, float radius, int segments) {
         for (int i = 0; i < segments; i++) {
-            Gizmos.DrawLine(
-                transform.position + ((Quaternion.EulerRotation(0, ((float)i / segments) * Mathf.Deg2Rad * 360f, 0)) * transform.forward * radius),
-                transform.position + ((Quaternion.EulerRotation(0, ((float) (i + 1) / segments) * Mathf.Deg2Rad * 360f, 0)) * transform.forward * radius));
+            for (int j = 0; j < 3; j++) {
+                Vector3 r0 = ((Quaternion.EulerRotation(0, ((float)i / segments) * Mathf.Deg2Rad * 360f + (transform.eulerAngles.y * Mathf.Deg2Rad), 0)) * Vector3.forward * radius) + (Vector3.up * j * 0.003f);
+                Vector3 r1 = ((Quaternion.EulerRotation(0, ((float)i / segments) * Mathf.Deg2Rad * 360f, 0)) * Vector3.forward * radius) + (Vector3.up * j * 0.003f);
+                Vector3 r2 = (Quaternion.EulerRotation(0, ((float)(i + 1) / segments) * Mathf.Deg2Rad * 360f, 0)) * Vector3.forward * radius + (Vector3.up * j * 0.003f);
+                Vector4 a4 = transform.localToWorldMatrix * r1;
+                Vector4 b4 = transform.localToWorldMatrix * r2;
+                Vector3 a = new Vector3(a4.x, a4.y, a4.z);
+                Vector3 b = new Vector3(b4.x, b4.y, b4.z);
+
+                // World plane
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawLine(
+                    transform.position + r1,
+                    transform.position + r2);
+                Gizmos.color = Color.black;
+
+                // Local plane
+                Gizmos.DrawLine(
+                    transform.position + a,
+                    transform.position + b);
+
+                Gizmos.color = Color.cyan;
+                if (j == 0) {
+                    Gizmos.DrawLine(
+                        transform.position + a,
+                        transform.position + r0);
+                }
+                Gizmos.color = Color.black;
+            }
         }
     }
     ///
@@ -287,6 +325,9 @@ public class DroneData {
     public double[] circleSensorData = new double[CIRCLE_circle_sensor_array_COUNT];
     public double sensorTop;
     public double sensorBottom;
+
+    public double angle;
+    public bool upsideDown;
 
     public double fitness;
 
