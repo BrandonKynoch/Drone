@@ -27,14 +27,17 @@ namespace SimServer {
         private DirectoryInfo previousTrainingDir;
         private int currentEpoch = 0;
         private int firstIteration = 1;
+        public int staleDroneCount = 0;
 
         private Queue<ConnectedDrone> dronesWaitingToReceiveNN = new Queue<ConnectedDrone>();
 
-        public bool continueSimulation = false;     // Set to true when the simulation is actually simulating & drones flying
+        public bool continueSimulation = false;     // Set to true when the simulation is actually simulating & drones flying (This is false during genetic NN updates)
+        public bool sessionStarted = false;         // Set to true once session path has been specified and simulation has started, remains true for duration of program
         /// TRAINING DATA //////////////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////
         public static bool ContinueSimulation { get { return staticInstance.continueSimulation; } }
+        public static bool SessionStarted { get { return staticInstance.sessionStarted; } }
         /// PROPERTIES /////////////////////////////////////////////////////////
 
         public NeuralTrainer() {
@@ -116,8 +119,6 @@ namespace SimServer {
         /// <param name="continueFrom"></param>
         /// <param name="targetFolder"></param>
         public void GeneticNNUpdates(bool startNew = false) {
-            continueSimulation = true;
-
             bool isSuperEvolution = (currentEpoch % SUPER_EVOLUTION_CYCLE) == 0;
 
             string targetFolderName = currentEpoch.ToString();
@@ -163,7 +164,7 @@ namespace SimServer {
 
 
                 // Execute genetic algorithm here
-                if (firstIteration < 0) {
+                if (firstIteration < 0 && !Networking.StaticInstance.isResettingNetwork) {
                     EvolveDirectoryContents(currentTrainingDir.ToString());
                 } else {
                     firstIteration--;
@@ -175,6 +176,9 @@ namespace SimServer {
 
             // Respond to drones with target files
             lock (dronesWaitingToReceiveNN) {
+                continueSimulation = true;
+                Networking.StaticInstance.isResettingNetwork = false;
+                Networking.lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
                 while (dronesWaitingToReceiveNN.Count > 0) {
                     ConnectedDrone drone = dronesWaitingToReceiveNN.Dequeue();
                     string nnPath = currentTrainingDir + "/" + drone.id + NN_FILE_EXTENSION;
@@ -262,6 +266,8 @@ namespace SimServer {
                 Thread.Yield();
             }
 
+            sessionStarted = true;
+
             while (true) {
                 int progressUILength = 40;
                 for (int i = 0; i < progressUILength; i++) {
@@ -271,7 +277,7 @@ namespace SimServer {
                 ConsoleColor originalConsoleCol = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
                 for (int i = 0; i < progressUILength; i++) {
-                    if (Networking.StaticInstance.isResettingFromCorruptPacket) {
+                    if (Networking.StaticInstance.isResettingNetwork) {
                         break;
                     }
 
@@ -283,16 +289,19 @@ namespace SimServer {
 
                 continueSimulation = false; // After setting this to false Network handler adds all incoming request drones to dronesWaitingToReceiveNN
 
-                while (dronesWaitingToReceiveNN.Count < Master.GetDroneCount) {
+                while (dronesWaitingToReceiveNN.Count < Master.GetDroneCount - staleDroneCount) {
                     Thread.Yield();
                 }
-
-                Networking.StaticInstance.isResettingFromCorruptPacket = false;
 
                 currentEpoch++;
                 Console.WriteLine("Starting epoch: " + currentEpoch);
 
-                Networking.lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
+                // Decrease stale drone count once simulation is stable again
+                if (!Networking.StaticInstance.isResettingNetwork) {
+                    if (currentEpoch % 10 == 0 && staleDroneCount > 0) {
+                        staleDroneCount--;
+                    }
+                }
 
                 GeneticNNUpdates();
 

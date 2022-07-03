@@ -37,10 +37,10 @@ namespace SimServer {
 
         private Thread awaitDroneConnectionsThread;     // Thread dedicated to receiving new drone connections
 
-        public static TimeOnly lastSimPacketReceivedTime;
-        public bool isResettingFromCorruptPacket;       // True after receiving response from simulation that sim received a corrupt packet, begins loop to resolve
-        public int numTimesReconnectingToSim = 0;           // Sometimes the server has to reconnect to sim on a different port to fix stale connection
-        public static int currentSimConnectionSocket;          // The socket used to connect to the sim (Note this is not the actual socket being used for data transfer, this is the socket used to connect to sim)
+        public static long lastSimPacketReceivedTimeTicks;      // Used by watchdog process to see if simulation has gone stale
+        public bool isResettingNetwork;                         // True after receiving response from simulation that sim received a corrupt packet (or after sim has gone stale), begins loop to resolve
+        public int numTimesReconnectingToSim = 0;               // Sometimes the server has to reconnect to sim on a different port to fix stale connection
+        public static int currentSimConnectionSocket;           // The socket used to connect to the sim (Note this is not the actual socket being used for data transfer, this is the socket used to connect to sim)
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ namespace SimServer {
             }
             staticInstance = this;
 
-            lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
+            lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
             currentSimConnectionSocket = SIM_SERVER_SOCKET_PORT;
 
             /// Unity Connection ////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ namespace SimServer {
                 string response = ReceiveSimStreamMessage();
                 JObject responseJson = JObject.Parse(response);
 
-                lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
+                lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
 
                 int responseOpcode = responseJson.GetValue("opcode").Value<int>();
                 switch (responseOpcode) {
@@ -208,7 +208,7 @@ namespace SimServer {
                         // Response from simulation after resetting all drones
                         break;
                     case Master.RESPONSE_OPCODE_CORRUPT_PACKET_RECEIVED:
-                        isResettingFromCorruptPacket = true;
+                        isResettingNetwork = true;
 
                         ConsoleColor originalConsoleBackCol = Console.BackgroundColor;
                         ConsoleColor originalConsoleCol = Console.ForegroundColor;
@@ -237,19 +237,17 @@ namespace SimServer {
             while (true) {
                 Thread.Yield();
 
-                if (!NeuralTrainer.ContinueSimulation) {
+                if (!NeuralTrainer.SessionStarted) {
                     continue;
                 }
 
-                if ((TimeOnly.FromDateTime(DateTime.Now) - lastSimPacketReceivedTime).TotalSeconds > 5) {
-                    Console.WriteLine("\n\n\n");
-                    Console.WriteLine("Dif: " + (TimeOnly.FromDateTime(DateTime.Now) - lastSimPacketReceivedTime).TotalSeconds);
-                    Console.WriteLine("Last: " + lastSimPacketReceivedTime.Second);
-                    Console.WriteLine("Current: " + TimeOnly.FromDateTime(DateTime.Now).Second);
-                    Console.WriteLine("\n\n\n");
+                double dif = new TimeSpan(DateTime.Now.Ticks - lastSimPacketReceivedTimeTicks).TotalSeconds;
+
+                if (dif > 5) {
+                    
                     Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
 
-                    lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
+                    lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
                     
                     ConsoleColor originalConsoleBackCol = Console.BackgroundColor;
                     ConsoleColor originalConsoleCol = Console.ForegroundColor;
@@ -263,9 +261,15 @@ namespace SimServer {
 
                     ReConnectToUnity();
 
+                    NeuralTrainer.StaticInstance.staleDroneCount++; // This is not an ideal method to handle stale connection errors
+
                     ResetSimulationFromCorruptNetConnection();
 
                     Thread.CurrentThread.Priority = ThreadPriority.Lowest;
+
+                    while (isResettingNetwork) {
+                        Thread.Yield();     // Wait for neural trainer, genetic update loop to finish before checking for stale sim again
+                    }
                 }
             }
         }
@@ -276,6 +280,9 @@ namespace SimServer {
             //}
 
             Thread.Sleep(TimeSpan.FromSeconds(0.5));
+
+            isResettingNetwork = true;
+            lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
 
             for (int i = 0; i < Master.GetDroneCount; i++) {
                 ConnectedDrone d = Master.GetDrone(i).Drone;
@@ -308,7 +315,7 @@ namespace SimServer {
         /// </summary>
         /// <param name="s"></param>
         public static void SendToSim(ConnectedDrone drone, string s) {
-            if (staticInstance.isResettingFromCorruptPacket) {
+            if (staticInstance.isResettingNetwork) {
                 return;
             }
 
