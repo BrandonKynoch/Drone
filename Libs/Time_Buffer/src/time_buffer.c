@@ -68,3 +68,7 @@ void timebuffer_copy_corrected(struct time_buffer* tb, double* target) {
         targetI++;
     }
 }
+
+double timebuffer_total_size(struct time_buffer* tb) {
+    return tb->single_timestep_size * tb->timesteps;
+}

@@ -5,11 +5,16 @@
 
 #include "time_buffer.h"
 
+#define SENSOR_DEFAULT 2.0
+
 // ############################################################################
 // #######      DRONE MAIN      ###############################################
 // ############################################################################
 
 void drone_logic_loop();
+
+// Reset all sensor readings
+void init_drone_sensor_data(struct drone_data* drone);
 
 // Read sensor data from simulation
 void read_sensor_data(struct drone_data* drone, struct json_object* json_in);

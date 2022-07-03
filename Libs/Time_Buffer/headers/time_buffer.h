@@ -21,3 +21,5 @@ void timebuffer_increment(struct time_buffer* tb);
 
 // Copies the data into destination array while shifting offset
 void timebuffer_copy_corrected(struct time_buffer* tb, double* target);
+
+double timebuffer_total_size(struct time_buffer* tb);

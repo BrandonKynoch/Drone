@@ -35,6 +35,12 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private float rotationFitness = 0;
     private float distFitness = 0;
 
+    public float SumFitness {
+        get {
+            return airborneFitness + rotationFitness + distFitness;
+        }
+    }
+
     public float AirborneFitness { get { return airborneFitness; } }
     public float RotationFitness { get { return rotationFitness; } }
     public float DistFitness { get { return distFitness; } }
@@ -161,15 +167,17 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void CalculateFitness() {
-        float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
-        distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
-        distFitness += Mathf.Clamp(distToTarget, 0, 20) / 20f;
+        if (!IsInContact) {
+            airborneFitness += Time.deltaTime;
 
-        airborneFitness += (contactsCount == 0) ? 1 : 0;
+            rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime;
 
-        float totalFitness = distFitness + airborneFitness;
+            float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
+            distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
+            distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime;
+        }
 
-        data.fitness = totalFitness * Time.deltaTime;
+        data.fitness = SumFitness;
     }
 
     public void ResetDrone(Vector3 spawnPosition) {
@@ -326,7 +334,7 @@ public class DroneData {
     public double sensorTop;
     public double sensorBottom;
 
-    public double angle;
+    public double angle; // The angle of the drone relative to the horizontal plane. in the range of 0-90 degrees
     public bool upsideDown;
 
     public double fitness;

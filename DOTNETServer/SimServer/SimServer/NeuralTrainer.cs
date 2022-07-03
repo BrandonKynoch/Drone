@@ -15,15 +15,18 @@ namespace SimServer {
         private const string NN_META_FILE_EXTENSION = ".NNM";
 
         private const double EPOCH_RUN_TIME = 7;   // Time for a single epoch to execute in seconds
+        private const int SUPER_EVOLUTION_CYCLE = 10; // Super evolution every n epochs
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// TRAINING DATA //////////////////////////////////////////////////////
         private Thread neuralTrainingThread;    // Thread dedicated to training the drones
 
         private DirectoryInfo rootTrainingDir;
+        private DirectoryInfo sessionTrainingDir;
         private DirectoryInfo currentTrainingDir;
+        private DirectoryInfo previousTrainingDir;
         private int currentEpoch = 0;
-        private int firstIteration = 2;
+        private int firstIteration = 1;
 
         private Queue<ConnectedDrone> dronesWaitingToReceiveNN = new Queue<ConnectedDrone>();
 
@@ -53,56 +56,55 @@ namespace SimServer {
         public void InitTrainer() {
             rootTrainingDir = Directory.CreateDirectory(ROOT_TRAINING_DIR);
 
-            string currentTrainingDirName = DateTime.Now.ToShortDateString() + "-" + DateTime.Now.ToShortTimeString();
-            currentTrainingDirName = currentTrainingDirName.Replace("/", "-");
-            currentTrainingDirName = currentTrainingDirName.Replace(" PM", "");
-            currentTrainingDirName = currentTrainingDirName.Replace(" AM", "");
-            currentTrainingDirName = currentTrainingDirName.Replace(":", "");
-            currentTrainingDirName = currentTrainingDirName.Replace("-2022", "");
+            string sessionTrainingDirName = DateTime.Now.ToShortDateString() + "-" + DateTime.Now.ToShortTimeString();
+            sessionTrainingDirName = sessionTrainingDirName.Replace("/", "-");
+            sessionTrainingDirName = sessionTrainingDirName.Replace(" PM", "");
+            sessionTrainingDirName = sessionTrainingDirName.Replace(" AM", "");
+            sessionTrainingDirName = sessionTrainingDirName.Replace(":", "");
+            sessionTrainingDirName = sessionTrainingDirName.Replace("-2022", "");
 
-            currentTrainingDir = Directory.CreateDirectory(ROOT_TRAINING_DIR + "/" + currentTrainingDirName);
-            Console.WriteLine("Current training dir:\n\t" + currentTrainingDir.ToString() + "\n\n");
+            sessionTrainingDir = Directory.CreateDirectory(ROOT_TRAINING_DIR + "/" + sessionTrainingDirName);
+            Console.WriteLine("Current training dir:\n\t" + sessionTrainingDir.ToString() + "\n\n");
 
             // Sleep for a little bit so that other threads can finish printing
             Thread.Sleep(TimeSpan.FromSeconds(0.1));
 
             Console.WriteLine("Enter the name of the folder to continue training from or n to create new\n");
             bool inputValid = false;
+            bool directoryValid = false;
             while (!inputValid) {
                 String continueFromDirName = Console.ReadLine();
                 String continueFromDirFull = rootTrainingDir.ToString() + "/" + continueFromDirName;
 
-                if (continueFromDirName.ToLower().Equals("n")) {
-                    inputValid = true;
-
-                    // Create new NN's
-                    GeneticNNUpdates("", currentTrainingDir.ToString());
-
-                    break;
-                } else {
-                    if (continueFromDirName.Equals("")) {
-                        inputValid = false;
-                    } else if (Directory.Exists(continueFromDirFull)) {
+                // Handle user input
+                if (!continueFromDirName.Equals("")) {
+                    if (continueFromDirName.ToLower().Equals("n")) {
                         inputValid = true;
                     }
+
+                    if (Directory.Exists(continueFromDirFull)) {
+                        inputValid = true;
+                        directoryValid = true;
+                    }
                 }
+
 
                 if (!inputValid) {
                     Console.WriteLine("Invalid directory, try again:\n");
                 } else {
-                    Console.WriteLine("CONTINUING FROM:\n\t" + continueFromDirFull + "\n\n");
-
-                    try {
+                    if (directoryValid) {
                         // Read the last epoch that simulation stopped at from directory name
                         string[] dirSplit = continueFromDirFull.Split(new char[] { '/' });
-                        int continuingEpoch = int.Parse(dirSplit[dirSplit.Length - 1]);
+                        string intName = string.Concat(dirSplit[dirSplit.Length - 1].Where(char.IsNumber));
+                        int continuingEpoch = int.Parse(intName);
                         currentEpoch = continuingEpoch;
-                    } catch (Exception e) { }
 
-                    //currentEpoch = 
+                        Console.WriteLine("CONTINUING FROM:\n\t" + continueFromDirFull + "\n\n");
 
-                    // Continue simulation from previous folder
-                    GeneticNNUpdates(continueFromDirFull, currentTrainingDir.ToString());
+                        previousTrainingDir = new DirectoryInfo(continueFromDirFull);
+                    }
+
+                    GeneticNNUpdates(startNew: true);
                 }
             }
         }
@@ -113,30 +115,46 @@ namespace SimServer {
         /// </summary>
         /// <param name="continueFrom"></param>
         /// <param name="targetFolder"></param>
-        public void GeneticNNUpdates(string continueFrom, string targetFolder) {
-            targetFolder = targetFolder + "/" + currentEpoch;
-            Directory.CreateDirectory(targetFolder);
-
+        public void GeneticNNUpdates(bool startNew = false) {
             continueSimulation = true;
+
+            bool isSuperEvolution = (currentEpoch % SUPER_EVOLUTION_CYCLE) == 0;
+
+            string targetFolderName = currentEpoch.ToString();
+            if (isSuperEvolution)
+                targetFolderName += " (Super)";
+
+            previousTrainingDir = currentTrainingDir;
+            currentTrainingDir = Directory.CreateDirectory(sessionTrainingDir.ToString() + "/" + targetFolderName);
+
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // Super evolution code 
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
+            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
 
             // Create NNMeta files saving current fitness score
             for (int i = 0; i < Master.GetDroneCount; i++) {
                 ConnectedDrone d = Master.GetDrone(i).Drone;
 
                 // Write drone fitness to meta file
-                string nnMetaPath = ((continueFrom != "") ? continueFrom : targetFolder) + "/" + d.id + NN_META_FILE_EXTENSION;
+                string nnMetaPath = ((!startNew) ? previousTrainingDir.ToString() : currentTrainingDir.ToString()) + "/" + d.id + NN_META_FILE_EXTENSION;
                 JObject droneMetaData = new JObject(new JProperty("fitness", d.Fitness));
                 File.WriteAllText(nnMetaPath, droneMetaData.ToString());
             }
 
-            bool createNew = continueFrom.Equals("");
-            if (!createNew) {
+            if (!startNew) {
                 // Copy files over to target folder for new epoch
-                string[] previousNNs = Directory.GetFiles(continueFrom);
+                string[] previousNNs = Directory.GetFiles(previousTrainingDir.ToString());
 
                 foreach (var fileNN in previousNNs) {
                     string file = fileNN.ToString();
-                    string copyTo = file.Replace(continueFrom, targetFolder);
+                    string copyTo = file.Replace(previousTrainingDir.ToString(), currentTrainingDir.ToString());
                     if (File.Exists(copyTo)) {
                         File.Delete(copyTo);
                     }
@@ -146,10 +164,10 @@ namespace SimServer {
 
                 // Execute genetic algorithm here
                 if (firstIteration < 0) {
-                    EvolveDirectoryContents(targetFolder);
+                    EvolveDirectoryContents(currentTrainingDir.ToString());
                 } else {
                     firstIteration--;
-                    Console.WriteLine("\n\nDiscarding results of first iteration...\n\n");
+                    Console.WriteLine("\n\nSkipping evolution on current epoch...\n\n");
                 }
 
                 // MARK: TODO: Check that number of agents matches number of files
@@ -159,7 +177,7 @@ namespace SimServer {
             lock (dronesWaitingToReceiveNN) {
                 while (dronesWaitingToReceiveNN.Count > 0) {
                     ConnectedDrone drone = dronesWaitingToReceiveNN.Dequeue();
-                    string nnPath = targetFolder + "/" + drone.id + NN_FILE_EXTENSION;
+                    string nnPath = currentTrainingDir + "/" + drone.id + NN_FILE_EXTENSION;
 
                     JObject responseToDrone = new JObject(
                         new JProperty("id", drone.id),
@@ -268,7 +286,7 @@ namespace SimServer {
                 currentEpoch++;
                 Console.WriteLine("Starting epoch: " + currentEpoch);
 
-                GeneticNNUpdates(currentTrainingDir.ToString() + "/" + (currentEpoch-1), currentTrainingDir.ToString());
+                GeneticNNUpdates();
 
                 // Tell the simulation to reset all drones
                 JObject resetRequestJSON = new JObject(new JProperty("opcode", Master.CODE_RESET_ALL_DRONES));

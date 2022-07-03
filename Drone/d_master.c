@@ -6,11 +6,11 @@
 
 struct drone_data drone_data;
 
-double sqrt2;
+// double sqrt2;
 
 int main() {
     srand (time(NULL) + getpid()); // Initalize seed for random numbers
-    sqrt2 = sqrt(2.0);
+    // sqrt2 = sqrt(2.0);
 
 
     printf("Initializing Drone\n");
@@ -26,6 +26,8 @@ int main() {
 #else
     // TODO: load NN directly from file on device
 #endif
+
+    init_drone_sensor_data(&drone_data);
 
     drone_logic_loop();
 }
@@ -86,6 +88,8 @@ void drone_logic_loop() {
                 response_NN_file = json_object_get_string(response_NN_file_json);
 
                 init_and_test_NN_from_file(response_NN_file);
+
+                init_drone_sensor_data(&drone_data);
                 break;
             case RESPONSE_CODE_SENSOR_DATA:
                 // Read sensor data from server response
@@ -114,6 +118,19 @@ void drone_logic_loop() {
         }
 
         json_object_put(json_response);
+    }
+}
+
+void init_drone_sensor_data(struct drone_data* drone) {
+    for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
+        drone->circle_sensor_array[i] = SENSOR_DEFAULT;
+    }
+
+    drone->sensor_top = SENSOR_DEFAULT;
+    drone->sensor_bottom = 0;
+
+    for (int i = 0; i < timebuffer_total_size(drone->sensor_time_buffer); i++) {
+        drone->sensor_time_buffer->full_buffer[i] = SENSOR_DEFAULT;
     }
 }
 
