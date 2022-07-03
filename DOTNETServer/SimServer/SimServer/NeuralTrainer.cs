@@ -14,7 +14,7 @@ namespace SimServer {
         private const string NN_FILE_EXTENSION = ".NN";
         private const string NN_META_FILE_EXTENSION = ".NNM";
 
-        private const double EPOCH_RUN_TIME = 7;   // Time for a single epoch to execute in seconds
+        private const double EPOCH_RUN_TIME = 6;   // Time for a single epoch to execute in seconds
         private const int SUPER_EVOLUTION_CYCLE = 10; // Super evolution every n epochs
         /// CONSTANTS //////////////////////////////////////////////////////////
 
@@ -210,14 +210,14 @@ namespace SimServer {
             nns.Sort();
 
             int totalCount = nns.Count;
-            double keep = 0.1; // Keep the top percentage completely unmodified
+            double keep = 0.3; // Keep the top percentage completely unmodified
             double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
             //double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
             double crossOverPopulation = 1.3f;
-            double crossOverPercentile = 0.3; 
-            double mutationProbability = 0.7; // Likelyhood that a specimin will have any mutation
-            double speciminMutationProbability = 0.3f; // When a specimin is mutating, what amount of genes should change
-            double speciminMutationAmount = 1f; // When a specimin is mutating, by how much should a single genome change
+            double crossOverAmount = 0.2f; // Amount of genes to take when crossing over
+            double mutationProbability = 0.5; // Likelyhood that a specimin will have any mutation
+            double speciminMutationProbability = 0.1f; // When a specimin is mutating, what amount of genes should change
+            double speciminMutationAmount = 0.5f; // When a specimin is mutating, by how much should a single genome change
 
             int keepCount = (int)Math.Ceiling(((double)totalCount) * keep);
             int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
@@ -229,13 +229,13 @@ namespace SimServer {
 
             // Perform crossovers
             for (int i = 0; i < totalCount * crossOverPopulation; i++) {
-                int a = (int) Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
+                int a = (int) Utils.RandomRange(0, totalCount * keep);
                 int b = (int)Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
 
                 //Console.WriteLine("Cross over: " + a + ":" + b);
 
                 if (a != b) {
-                    NNData.CrossOver(nns[a], nns[b], crossOverPercentile);
+                    NNData.CrossOver(nns[a], nns[b], crossOverAmount);
                 }
             }
 
@@ -399,7 +399,7 @@ namespace SimServer {
             public static void CrossOver(NNData from, NNData to, double crossOverProbability) {
                 for (int i = 0; i < from.originalData.Length; i++) {
                     if (Utils.Random01Double() < crossOverProbability) {
-                        to.modifiedData[i] = from.originalData[i];
+                        to.modifiedData[i] = from.modifiedData[i];
                     }
                 }
             }

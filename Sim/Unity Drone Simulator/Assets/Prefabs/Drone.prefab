@@ -96,7 +96,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e6915d139835e347b46cddd4e5f84ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propSpeed: 10
 --- !u!1 &510405045728333352
 GameObject:
   m_ObjectHideFlags: 0
@@ -193,7 +192,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e6915d139835e347b46cddd4e5f84ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propSpeed: 10
 --- !u!1 &1399146370127915898
 GameObject:
   m_ObjectHideFlags: 0
@@ -256,7 +254,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b2ce821b19584196ac4831b3ae05ae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  motorStrength: 4
+  motorStrength: 6
   bladesTransform: {fileID: 2282108832137225285}
 --- !u!54 &3801286038611135215
 Rigidbody:
@@ -501,7 +499,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e6915d139835e347b46cddd4e5f84ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propSpeed: 10
 --- !u!1 &2771357785684609945
 GameObject:
   m_ObjectHideFlags: 0
@@ -598,7 +595,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e6915d139835e347b46cddd4e5f84ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  propSpeed: 10
 --- !u!1001 &1648348868977111726
 PrefabInstance:
   m_ObjectHideFlags: 0

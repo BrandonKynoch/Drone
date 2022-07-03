@@ -11,7 +11,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private const int SPAWN_ROWS_COUNT = 5;
     private const float SPAWN_SPACING = 4f;
 
-    private const float GIZMO_DIST_FROM_CAMERA = 5f;
+    public const float GIZMO_DIST_FROM_CAMERA = 5f;
     /// Constants //////////////////////////////////////////
 
     // Simulation variables
@@ -167,7 +167,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void CalculateFitness() {
-        if (!IsInContact) {
+        if (!IsInContact && transform.position.y < 14f) {
             airborneFitness += Time.deltaTime;
 
             rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime;
@@ -175,6 +175,12 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
             distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
             distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime;
+        }
+
+        if (transform.position.y > 18f) {
+            airborneFitness = 0;
+            rotationFitness = 0;
+            distFitness = 0;
         }
 
         data.fitness = SumFitness;

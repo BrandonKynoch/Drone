@@ -234,6 +234,8 @@ namespace SimServer {
         /// Periodically check if the simulation has gone stale and connection needs to be re-established
         /// </summary>
         private void CheckForStaleSimLoop() {
+            Thread.Sleep(TimeSpan.FromSeconds(2f));
+
             while (true) {
                 Thread.Yield();
 

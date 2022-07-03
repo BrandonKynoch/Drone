@@ -70,7 +70,7 @@ void drone_logic_loop() {
 
         // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
         // usleep(32000); // sleep for 32 milliseconds - 30HZ
-        usleep(8000);
+        usleep(4000);
 
         // Decode server response
         json_response = json_tokener_parse(server_response);
@@ -101,14 +101,13 @@ void drone_logic_loop() {
                 // Feed forward data
                 feed_forward_network(drone_data.neural);
 
+                drone_data.m_fl = drone_data.neural->output_layer[0] - 0.5; // X_in
+                drone_data.m_fr = drone_data.neural->output_layer[1] - 0.5; // Y_in
+                drone_data.m_br = drone_data.neural->output_layer[2] - 0.5; // limit_scaler
+                drone_data.m_bl = drone_data.neural->output_layer[3] - 0.5;  // power_scaler
+
                 // Set motors from output
-                motor_output_from_controller(
-                    &drone_data,
-                    drone_data.neural->output_layer[0], // X_in
-                    drone_data.neural->output_layer[1], // Y_in
-                    drone_data.neural->output_layer[2], // limit_scaler
-                    drone_data.neural->output_layer[3]  // power_scaler
-                );
+                // motor_output(&drone_data);
 
                 printf("motors: %f, %f, %f, %f\n", drone_data.m_fl, drone_data.m_fr, drone_data.m_br, drone_data.m_bl);
                 break;

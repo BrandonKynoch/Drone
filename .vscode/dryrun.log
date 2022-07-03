@@ -11,10 +11,8 @@ make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Projects/Drone/Drone'
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Drone'
 cc -c -o obj/d_master.o d_master.c -I./headers -I../Globals/headers -ljson-c ../Libs/BLAS_Custom/lib/custom_BLAS.a -I../Libs/BLAS_Custom/headers ../Libs/Time_Buffer/lib/time_buffer.a -I../Libs/Time_Buffer/headers ../Libs/CBLAS/lib/cblas_LINUX.a ../Libs/CBLAS/lib/libblas.a -I../Libs/CBLAS/include -w
 cc -c -o obj/d_networking.o d_networking.c -I./headers -I../Globals/headers -ljson-c ../Libs/BLAS_Custom/lib/custom_BLAS.a -I../Libs/BLAS_Custom/headers ../Libs/Time_Buffer/lib/time_buffer.a -I../Libs/Time_Buffer/headers ../Libs/CBLAS/lib/cblas_LINUX.a ../Libs/CBLAS/lib/libblas.a -I../Libs/CBLAS/include -w
- 
 cc -c -o obj/d_neural.o d_neural.c -I./headers -I../Globals/headers -ljson-c ../Libs/BLAS_Custom/lib/custom_BLAS.a -I../Libs/BLAS_Custom/headers ../Libs/Time_Buffer/lib/time_buffer.a -I../Libs/Time_Buffer/headers ../Libs/CBLAS/lib/cblas_LINUX.a ../Libs/CBLAS/lib/libblas.a -I../Libs/CBLAS/include -w
 cc -c -o ../Globals/obj/drone_data.o ../Globals/drone_data.c -I./headers -I../Globals/headers -ljson-c ../Libs/BLAS_Custom/lib/custom_BLAS.a -I../Libs/BLAS_Custom/headers ../Libs/Time_Buffer/lib/time_buffer.a -I../Libs/Time_Buffer/headers ../Libs/CBLAS/lib/cblas_LINUX.a ../Libs/CBLAS/lib/libblas.a -I../Libs/CBLAS/include -w
- 
 cc -c -o ../Globals/obj/utilities.o ../Globals/utilities.c -I./headers -I../Globals/headers -ljson-c ../Libs/BLAS_Custom/lib/custom_BLAS.a -I../Libs/BLAS_Custom/headers ../Libs/Time_Buffer/lib/time_buffer.a -I../Libs/Time_Buffer/headers ../Libs/CBLAS/lib/cblas_LINUX.a ../Libs/CBLAS/lib/libblas.a -I../Libs/CBLAS/include -w
 mkdir -p obj
 cc -o output  obj/d_master.o  obj/d_networking.o  obj/d_neural.o  ../Globals/obj/drone_data.o  ../Globals/obj/utilities.o -I./headers -I../Globals/headers -ljson-c ../Libs/BLAS_Custom/lib/custom_BLAS.a -I../Libs/BLAS_Custom/headers ../Libs/Time_Buffer/lib/time_buffer.a -I../Libs/Time_Buffer/headers ../Libs/CBLAS/lib/cblas_LINUX.a ../Libs/CBLAS/lib/libblas.a -I../Libs/CBLAS/include -w -lm

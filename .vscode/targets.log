@@ -17,7 +17,7 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 # This program built for i386-apple-darwin11.3.0
  
 
-# Make data base, printed on Sat Jul  2 22:26:51 2022
+# Make data base, printed on Sun Jul  3 14:25:59 2022
 
 # Variables
 
@@ -60,7 +60,7 @@ libs_dir = ../Libs
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-91c2b681-26d1-4f8a-a1c5-997d648f5c12.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-7a9435b5-87ee-46b6-9ec2-9af7c6add47b.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -74,7 +74,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.3JhpU8fNkJ/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.xZbnwasI4w/Listeners
 # makefile (from `makefile', line 5)
 headers_dir = ./headers
 # automatic
@@ -184,7 +184,7 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1804
+VSCODE_PID = 12902
 # variable set hash-table stats:
 # Load=82/1024=8%, Rehash=0, Collisions=2/139=1%
 
@@ -335,10 +335,10 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jul  2 22:26:51 2022
+# Finished Make data base on Sun Jul  3 14:25:59 2022
 
 
-# Make data base, printed on Sat Jul  2 22:26:51 2022
+# Make data base, printed on Sun Jul  3 14:25:59 2022
 
 # Variables
 
@@ -369,7 +369,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-91c2b681-26d1-4f8a-a1c5-997d648f5c12.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-7a9435b5-87ee-46b6-9ec2-9af7c6add47b.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -381,7 +381,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.3JhpU8fNkJ/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.xZbnwasI4w/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -413,7 +413,6 @@ MAKE = $(MAKE_COMMAND)
 # default
 MAKECMDGOALS := all
 # environment
- 
 SHLVL = 1
 # default
 MAKE_VERSION := 3.81
@@ -466,7 +465,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1804
+VSCODE_PID = 12902
 # variable set hash-table stats:
 # Load=62/1024=6%, Rehash=0, Collisions=1/96=1%
 
@@ -551,7 +550,7 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Sat Jul  2 22:26:51 2022
+# Finished Make data base on Sun Jul  3 14:25:59 2022
 
  
 make: *** [all] Error 1
