@@ -271,6 +271,10 @@ namespace SimServer {
                 ConsoleColor originalConsoleCol = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
                 for (int i = 0; i < progressUILength; i++) {
+                    if (Networking.StaticInstance.isResettingFromCorruptPacket) {
+                        break;
+                    }
+
                     Thread.Sleep(TimeSpan.FromSeconds(EPOCH_RUN_TIME / progressUILength));
                     Console.Write("█");
                 }
@@ -283,8 +287,12 @@ namespace SimServer {
                     Thread.Yield();
                 }
 
+                Networking.StaticInstance.isResettingFromCorruptPacket = false;
+
                 currentEpoch++;
                 Console.WriteLine("Starting epoch: " + currentEpoch);
+
+                Networking.lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
 
                 GeneticNNUpdates();
 
@@ -303,7 +311,9 @@ namespace SimServer {
         /// <param name="d"></param>
         public static void AddDroneToNNWaitingQueue(ConnectedDrone d) {
             lock (staticInstance.dronesWaitingToReceiveNN) {
-                staticInstance.dronesWaitingToReceiveNN.Enqueue(d);
+                if (!staticInstance.dronesWaitingToReceiveNN.Contains(d)) {
+                    staticInstance.dronesWaitingToReceiveNN.Enqueue(d);
+                }
             }
         }
 

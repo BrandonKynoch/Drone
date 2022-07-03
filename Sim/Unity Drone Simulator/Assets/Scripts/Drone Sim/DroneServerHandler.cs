@@ -20,7 +20,7 @@ public class DroneServerHandler : MonoBehaviour {
     private Drone fittestDrone;
 
     /// C Server interface ///
-    private Thread serverSocketThread;
+    private List<Thread> serverSocketThreads = new List<Thread>();
     Stream networkStream;
     Socket socket;
     private bool serverConnected = false;
@@ -29,6 +29,9 @@ public class DroneServerHandler : MonoBehaviour {
     StringBuilder tcpStrBuilder = new StringBuilder();
 
     private Queue<JObject> inboundMessages = new Queue<JObject>();
+
+    private float corruptPacketTimeout;
+    public static bool isInTimeoutFromCorruptPacket = false;
     ///
 
     /// Static ///
@@ -40,6 +43,7 @@ public class DroneServerHandler : MonoBehaviour {
 
     /// CONSTANTS ///
     private const int SERVER_SOCKET = 1755;
+    private const float CORRUPT_PACKET_TIMEOUT_DURATION = 0.5f; // After receiving a corrupt packet, disregard all incoming requests for this amount of time
 
     private const int NETWORK_MESSAGE_LENGTH = 1024;
 
@@ -53,6 +57,7 @@ public class DroneServerHandler : MonoBehaviour {
     // Server response opcodes
     public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
     public const int REPONSE_OPCODE_RESET_DRONES = 0x7;
+    public const int RESPONSE_OPCODE_CORRUPT_PACKET_RECEIVED = 0x8;
     ///
 
     /// Neural network fitness variables ///
@@ -76,6 +81,8 @@ public class DroneServerHandler : MonoBehaviour {
         Application.runInBackground = true;
         Application.targetFrameRate = 60;
 
+        corruptPacketTimeout = float.NegativeInfinity;
+
         startSimServer();
     }
 
@@ -95,70 +102,86 @@ public class DroneServerHandler : MonoBehaviour {
         HandleInboundMessages();
 
         CalculateFittestDrone();
+
+        isInTimeoutFromCorruptPacket = Time.time < staticInstance.corruptPacketTimeout;
     }
 
     private void OnApplicationQuit() {
-        serverSocketThread.Abort();
+        foreach (Thread t in serverSocketThreads) {
+            if (t != null) {
+                t.Abort();
+            }
+        }
     }
 
     void startSimServer() {
-        serverSocketThread = new Thread(SimServerLogic);
+        Thread serverSocketThread = new Thread(SimServerLogic);
         serverSocketThread.IsBackground = true;
+        serverSocketThreads.Add(serverSocketThread);
         serverSocketThread.Start();
     }
 
     private void SimServerLogic() {
-        IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, SERVER_SOCKET);
+        int listeningSocket = SERVER_SOCKET + (serverSocketThreads.Count - 1);
+        IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, listeningSocket);
         TcpListener listener = new TcpListener(endPoint);
         listener.Start();
 
-        print("Waiting for C server to connect");
+        print("Listening for server connection on socket: " + listeningSocket);
 
         socket = listener.AcceptSocket(); // blocks
 
         serverConnected = true;
         print("C server connected");
 
+        startSimServer();
+
         networkStream = new NetworkStream(socket);
         MemoryStream ms = new MemoryStream();
         int numBytesRead;
 
         while (true) {
+            if (isInTimeoutFromCorruptPacket) {
+                continue;
+            }
+
             // UNPACK MESSAGES AND ENQUEUE
 
-            // Get package size
-            ms.SetLength(0);
-            numBytesRead = 0;
-            while ((numBytesRead = networkStream.Read(tcpData, 0, 4 - numBytesRead)) > 0) {
-                ms.Write(tcpData, 0, numBytesRead);
-            }
-            byte[] packageSizeArray = ms.ToArray();
-
-            if (packageSizeArray.Length < 4) {
-                continue; // Invalid packet header, try again
-            }
-
-            UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
-
-            ms.SetLength(0);
-            numBytesRead = 0;
-            while ((numBytesRead = networkStream.Read(tcpData, 0, (int) packageSize - numBytesRead)) > 0) {
-                ms.Write(tcpData, 0, numBytesRead);
-            }
-
-            String streamMsg = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
-
-            JObject jsonIn = null;
-
             try {
-                jsonIn = JObject.Parse(streamMsg);
-            } catch (Exception e) {
-                Debug.Log("Could not parse JSON:\n" + streamMsg);
-            }
+                // Get package size
+                ms.SetLength(0);
+                numBytesRead = 0;
+                while ((numBytesRead = networkStream.Read(tcpData, 0, 4 - numBytesRead)) > 0) {
+                    ms.Write(tcpData, 0, numBytesRead);
+                }
+                byte[] packageSizeArray = ms.ToArray();
 
-            if (jsonIn != null) {
-                inboundMessages.Enqueue(jsonIn);
-            }
+                if (packageSizeArray.Length < 4) {
+                    continue; // Invalid packet header, try again
+                }
+
+                UInt32 packageSize = BitConverter.ToUInt32(packageSizeArray, 0);
+
+                ms.SetLength(0);
+                numBytesRead = 0;
+                while ((numBytesRead = networkStream.Read(tcpData, 0, (int)packageSize - numBytesRead)) > 0) {
+                    ms.Write(tcpData, 0, numBytesRead);
+                }
+
+                String streamMsg = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
+
+                JObject jsonIn = null;
+
+                try {
+                    jsonIn = JObject.Parse(streamMsg);
+                } catch (Exception e) {
+                    Debug.Log("Could not parse JSON:\n" + streamMsg);
+                }
+
+                if (jsonIn != null) {
+                    inboundMessages.Enqueue(jsonIn);
+                }
+            } catch (Exception e) { }
 
             //NullifyTCPData();
         }
@@ -172,17 +195,24 @@ public class DroneServerHandler : MonoBehaviour {
             JObject message = inboundMessages.Dequeue();
             int opCode = -1;
 
+            JObject jsonOut = null;
+
             try {
                 opCode = message.GetValue("opcode").Value<int>();
             } catch {
-                print("Recieved corrupt packet");
+                Debug.LogError("Corrupt packet received - Resetting");
 
-                // TODO: SEND MESSAGE TO SERVER TO RESET
-                // Wait for to receive all responses from drones. Then reset and
-                // send message to all drones to reset
+                inboundMessages.Clear();
+
+                corruptPacketTimeout = Time.time + CORRUPT_PACKET_TIMEOUT_DURATION;
+
+                jsonOut = new JObject();
+                jsonOut.Add(new JProperty("opcode", RESPONSE_OPCODE_CORRUPT_PACKET_RECEIVED));
+                sendCServerData(jsonOut);
+
+                continue;
             }
 
-            JObject jsonOut = null;
             switch (opCode) {
                 case CODE_SPAWN_DRONE:
                     Drone newDrone = SpawnDrone(message);

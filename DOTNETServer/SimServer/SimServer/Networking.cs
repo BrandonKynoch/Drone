@@ -30,11 +30,17 @@ namespace SimServer {
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
         private Thread simSendThread;           // Thread dedicated to sending simulation messages
         private Thread simReceiveThread;        // Thread dedicated to receiving messages from the simulation
+        private Thread simStaleCheckThread;     // Periodically check if the simulation has gone stale and connection needs to be re-established
         private NetworkStream simStream;        // Network stream connected to the simulation
         private byte[] simReceiveBuffer = new byte[STD_MSG_LEN * 10];  // Network buffer for the simulation
         private Queue<DroneMessage> outgoingDroneMessageRequests = new Queue<DroneMessage>();
 
         private Thread awaitDroneConnectionsThread;     // Thread dedicated to receiving new drone connections
+
+        public static TimeOnly lastSimPacketReceivedTime;
+        public bool isResettingFromCorruptPacket;       // True after receiving response from simulation that sim received a corrupt packet, begins loop to resolve
+        public int numTimesReconnectingToSim = 0;           // Sometimes the server has to reconnect to sim on a different port to fix stale connection
+        public static int currentSimConnectionSocket;          // The socket used to connect to the sim (Note this is not the actual socket being used for data transfer, this is the socket used to connect to sim)
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////
@@ -48,6 +54,9 @@ namespace SimServer {
                 return;
             }
             staticInstance = this;
+
+            lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
+            currentSimConnectionSocket = SIM_SERVER_SOCKET_PORT;
 
             /// Unity Connection ////////////////////////////////////////////////////////////////
             if (!USE_FAKE_SIM) {
@@ -67,6 +76,10 @@ namespace SimServer {
             simSendThread = new Thread(new ThreadStart(SimNetworkingSendLoop));
             simSendThread.Priority = ThreadPriority.AboveNormal;
             simSendThread.Start();
+
+            simStaleCheckThread = new Thread(new ThreadStart(CheckForStaleSimLoop));
+            simStaleCheckThread.Priority = ThreadPriority.Lowest;
+            simStaleCheckThread.Start();
             /// Unity Connection ////////////////////////////////////////////////////////////////
 
             awaitDroneConnectionsThread = new Thread(new ThreadStart(AwaitConnecetions));
@@ -78,8 +91,33 @@ namespace SimServer {
         /// Establish connection with unity simulation
         /// </summary>
         private void ConnectToUnity() {
+            Console.WriteLine("Trying to connect to sim on socket: " + SIM_SERVER_SOCKET_PORT + "\n");
             TcpClient simSocket = new TcpClient("127.0.0.1", SIM_SERVER_SOCKET_PORT);
             simStream = simSocket.GetStream();
+            Console.WriteLine("Connection accepted at socket: " + SIM_SERVER_SOCKET_PORT + "\n");
+
+            numTimesReconnectingToSim++;
+        }
+
+        private void ReConnectToUnity() {
+            int tryConnectSocket = SIM_SERVER_SOCKET_PORT + numTimesReconnectingToSim;
+            Console.WriteLine("Trying to connect to sim on socket: " + tryConnectSocket + "\n");
+            TcpClient simSocket = new TcpClient("127.0.0.1", tryConnectSocket);
+            simStream = simSocket.GetStream();
+            Console.WriteLine("Connection accepted at socket: " + tryConnectSocket + "\n");
+
+            currentSimConnectionSocket = tryConnectSocket;
+            numTimesReconnectingToSim++;
+            
+            simReceiveThread = new Thread(new ThreadStart(SimNetworkingReceiveLoop));
+            simReceiveThread.Priority = ThreadPriority.AboveNormal;
+            simReceiveThread.Start();
+
+            while (!simReceiveThread.IsAlive) { }
+
+            simSendThread = new Thread(new ThreadStart(SimNetworkingSendLoop));
+            simSendThread.Priority = ThreadPriority.AboveNormal;
+            simSendThread.Start();
         }
 
         /// <summary>
@@ -87,9 +125,15 @@ namespace SimServer {
         /// As well as any other network requests that need to be sent to unity simulation
         /// </summary>
         private void SimNetworkingSendLoop() {
+            int thisThreadConnectionSocket = currentSimConnectionSocket; // Used to check if this thread is still the active thread for send loop
+
             DroneMessage nullMSG = new DroneMessage();
             bool msgIsNull = true;
             while (true) {
+                if (thisThreadConnectionSocket != currentSimConnectionSocket) {
+                    break;
+                }
+
                 DroneMessage msg = nullMSG;
                 msgIsNull = true;
 
@@ -146,14 +190,35 @@ namespace SimServer {
         /// corresponding drone according to the drone id
         /// </summary>
         private void SimNetworkingReceiveLoop() {
+            int thisThreadConnectionSocket = currentSimConnectionSocket; // Used to check if this thread is still the active thread for receive loop
+
             while (true) {
+                if (thisThreadConnectionSocket != currentSimConnectionSocket) {
+                    break;
+                }
+
                 string response = ReceiveSimStreamMessage();
                 JObject responseJson = JObject.Parse(response);
+
+                lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
 
                 int responseOpcode = responseJson.GetValue("opcode").Value<int>();
                 switch (responseOpcode) {
                     case Master.REPONSE_OPCODE_RESET_DRONES:
                         // Response from simulation after resetting all drones
+                        break;
+                    case Master.RESPONSE_OPCODE_CORRUPT_PACKET_RECEIVED:
+                        isResettingFromCorruptPacket = true;
+
+                        ConsoleColor originalConsoleBackCol = Console.BackgroundColor;
+                        ConsoleColor originalConsoleCol = Console.ForegroundColor;
+                        Console.BackgroundColor = ConsoleColor.Red;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine("\n\tResetting from corrupt packet\n");
+                        Console.BackgroundColor = originalConsoleBackCol;
+                        Console.ForegroundColor = originalConsoleCol;
+
+                        ResetSimulationFromCorruptNetConnection();
                         break;
                     default:
                         ConnectedDrone responseDrone = Master.GetDrone(responseJson.GetValue("id").Value<int>()).Drone;
@@ -162,6 +227,61 @@ namespace SimServer {
                 }
 
                 Thread.Yield();
+            }
+        }
+
+        /// <summary>
+        /// Periodically check if the simulation has gone stale and connection needs to be re-established
+        /// </summary>
+        private void CheckForStaleSimLoop() {
+            while (true) {
+                Thread.Yield();
+
+                if (!NeuralTrainer.ContinueSimulation) {
+                    continue;
+                }
+
+                if ((TimeOnly.FromDateTime(DateTime.Now) - lastSimPacketReceivedTime).TotalSeconds > 5) {
+                    Console.WriteLine("\n\n\n");
+                    Console.WriteLine("Dif: " + (TimeOnly.FromDateTime(DateTime.Now) - lastSimPacketReceivedTime).TotalSeconds);
+                    Console.WriteLine("Last: " + lastSimPacketReceivedTime.Second);
+                    Console.WriteLine("Current: " + TimeOnly.FromDateTime(DateTime.Now).Second);
+                    Console.WriteLine("\n\n\n");
+                    Thread.CurrentThread.Priority = ThreadPriority.AboveNormal;
+
+                    lastSimPacketReceivedTime = TimeOnly.FromDateTime(DateTime.Now);
+                    
+                    ConsoleColor originalConsoleBackCol = Console.BackgroundColor;
+                    ConsoleColor originalConsoleCol = Console.ForegroundColor;
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("\n\tResetting from stale simulation\n");
+                    Console.BackgroundColor = originalConsoleBackCol;
+                    Console.ForegroundColor = originalConsoleCol;
+
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+
+                    ReConnectToUnity();
+
+                    ResetSimulationFromCorruptNetConnection();
+
+                    Thread.CurrentThread.Priority = ThreadPriority.Lowest;
+                }
+            }
+        }
+
+        private void ResetSimulationFromCorruptNetConnection() {
+            //lock (outgoingDroneMessageRequests) {
+                outgoingDroneMessageRequests.Clear();
+            //}
+
+            Thread.Sleep(TimeSpan.FromSeconds(0.5));
+
+            for (int i = 0; i < Master.GetDroneCount; i++) {
+                ConnectedDrone d = Master.GetDrone(i).Drone;
+                if (d != null) {
+                    NeuralTrainer.AddDroneToNNWaitingQueue(d);
+                }
             }
         }
 
@@ -188,6 +308,10 @@ namespace SimServer {
         /// </summary>
         /// <param name="s"></param>
         public static void SendToSim(ConnectedDrone drone, string s) {
+            if (staticInstance.isResettingFromCorruptPacket) {
+                return;
+            }
+
             DroneMessage droneMessage = new DroneMessage(drone, s);
             lock (staticInstance.outgoingDroneMessageRequests) {
                 StaticInstance.outgoingDroneMessageRequests.Enqueue(droneMessage);

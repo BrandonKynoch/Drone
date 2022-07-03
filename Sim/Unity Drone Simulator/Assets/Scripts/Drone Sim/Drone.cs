@@ -252,7 +252,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
         // Circle indicator
         Gizmos.color = Color.black;
-        DrawGizmosCircle(transform, SENSOR_DIST_FROM_CENTER, 20);
+        DrawGizmosCircle(transform, SENSOR_DIST_FROM_CENTER, 60);
 
         // Sensor Indicators
         for (int i = 0; i < data.circleSensorData.Length; i++) {

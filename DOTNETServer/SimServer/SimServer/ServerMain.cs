@@ -22,6 +22,7 @@ namespace SimServer {
         public const int RESPONSE_OPCODE_SENSOR_DATA = 0x4;
         public const int RESPONSE_OPCODE_LOAD_NN = 0x5;
         public const int REPONSE_OPCODE_RESET_DRONES = 0x7;
+        public const int RESPONSE_OPCODE_CORRUPT_PACKET_RECEIVED = 0x8;
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////
