@@ -64,6 +64,9 @@ void init_and_test_NN_from_file(char* file);
 // returns the file address of the NN to load
 char* request_target_NN_from_server();
 
+
+void test_motor_controller();
+
 // ############################################################################
 // #######      SIMULATION      ###############################################
 // ############################################################################

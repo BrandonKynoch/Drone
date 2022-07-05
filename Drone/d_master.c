@@ -6,12 +6,15 @@
 
 struct drone_data drone_data;
 
-// double sqrt2;
+double sqrt2;
 
 int main() {
     srand (time(NULL) + getpid()); // Initalize seed for random numbers
-    // sqrt2 = sqrt(2.0);
+    sqrt2 = sqrt(2.0);
 
+
+    test_motor_controller();
+    return 0;
 
     printf("Initializing Drone\n");
 
@@ -101,15 +104,16 @@ void drone_logic_loop() {
                 // Feed forward data
                 feed_forward_network(drone_data.neural);
 
-                drone_data.m_fl = drone_data.neural->output_layer[0] - 0.5; // X_in
-                drone_data.m_fr = drone_data.neural->output_layer[1] - 0.5; // Y_in
-                drone_data.m_br = drone_data.neural->output_layer[2] - 0.5; // limit_scaler
-                drone_data.m_bl = drone_data.neural->output_layer[3] - 0.5;  // power_scaler
-
                 // Set motors from output
-                // motor_output(&drone_data);
+                motor_output_from_controller(
+                    &drone_data,
+                    drone_data.neural->output_layer[0],
+                    drone_data.neural->output_layer[1],
+                    drone_data.neural->output_layer[2],
+                    drone_data.neural->output_layer[3]
+                );
 
-                printf("motors: %f, %f, %f, %f\n", drone_data.m_fl, drone_data.m_fr, drone_data.m_br, drone_data.m_bl);
+                print_motor_output(&drone_data);
                 break;
             default:
                 fprintf(stderr, "Unhandled server response");
@@ -169,13 +173,15 @@ void motor_output_from_controller(struct drone_data* drone, double x_in, double 
     // Remap values from    0 - 1      to      -1 - 1
     double x_out = (2 * x_in) - 1;
     double y_out = (2 * y_in) - 1;
+    power_scaler = (2 * power_scaler) - 1;
 
     double v_length = sqrt(pow(x_out, 2) + pow(y_out, 2));
 
-    // Normalize
-    // if (v_length)
-    // x_out = x_out / v_length;
-    // y_out = y_out / v_length;
+    // Clamp output to 1 max
+    if (v_length > 1) {
+        x_out = x_out / v_length;
+        y_out = y_out / v_length;
+    }
 
     // Convert
     drone->m_fl = compute_motor_output_from_offset(x_out, y_out, -1, 1);
@@ -193,7 +199,7 @@ void motor_output_from_controller(struct drone_data* drone, double x_in, double 
 }
 
 double compute_motor_output_from_offset(double direction_x, double direction_y, double m_pos_x, double m_pos_y) {
-    return sqrt(pow(m_pos_x - direction_x, 2) + pow(m_pos_y - direction_y , 2));
+    return sqrt(pow(m_pos_x - direction_x, 2) + pow(m_pos_y - direction_y , 2)) / sqrt2;
 }
 
 double compute_motor_output_from_scalers(double m_in, double m_mean, double power_scaler, double limit_scaler) {
@@ -220,7 +226,11 @@ void motor_output(struct drone_data* drone) {
     send_server_json(drone, drone->m_json);
 }
 
-
+void print_motor_output(struct drone_data* drone) {
+    printf("█████████████████████████████████████████████████\n");
+    printf("█\tf_l\t\t\tf_r\t\t█\n█\t%f\t\t%f\t█\n█\t\t\t\t\t\t█\n█\t%f\t\t%f\t█\n█\tb_l\t\t\tb_r\t\t█\n", drone->m_fl, drone->m_fr, drone->m_bl, drone->m_br);
+    printf("█████████████████████████████████████████████████\n");
+}
 
 
 
@@ -251,5 +261,118 @@ char* request_target_NN_from_server() {
     printf("NN target file:\n\t%s\n", target_file_copy);
 
     return target_file_copy;
+}
+
+void test_motor_controller() {
+    printf("Center full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        0.5, // X_in
+        0.5, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Center upsidedown full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        0.5, // X_in
+        0.5, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Resting\n");
+    motor_output_from_controller(
+        &drone_data,
+        0.5, // X_in
+        0.5, // Y_in
+        0, // Limit scaler
+        0  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Forward full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        0.5, // X_in
+        1, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Forward full rotational\n");
+    motor_output_from_controller(
+        &drone_data,
+        0.5, // X_in
+        1, // Y_in
+        1, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+
+    printf("Right full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        1, // X_in
+        0.5, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Left full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        0, // X_in
+        0.5, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Back full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        0.5, // X_in
+        0, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Front right full force\n");
+    motor_output_from_controller(
+        &drone_data,
+        1, // X_in
+        1, // Y_in
+        0, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
+
+    printf("Front right full rotational\n");
+    motor_output_from_controller(
+        &drone_data,
+        1, // X_in
+        1, // Y_in
+        1, // Limit scaler
+        1  // Power scaler
+    );
+    print_motor_output(&drone_data);
+    printf("\n\n");
 }
 #endif
