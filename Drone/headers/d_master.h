@@ -46,6 +46,8 @@ double compute_motor_output_from_scalers(double m_in, double m_mean, double powe
 // Set drone motor json either send message to simulation or write to gpio pins
 void motor_output(struct drone_data* drone);
 
+void print_motor_output(struct drone_data* drone);
+
 // ############################################################################
 // #######      DRONE MAIN      ###############################################
 // ############################################################################
@@ -63,7 +65,6 @@ void init_and_test_NN_from_file(char* file);
 // Send a request to the server to provide the drone with a NN file to load
 // returns the file address of the NN to load
 char* request_target_NN_from_server();
-
 
 void test_motor_controller();
 

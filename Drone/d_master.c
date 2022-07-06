@@ -12,10 +12,6 @@ int main() {
     srand (time(NULL) + getpid()); // Initalize seed for random numbers
     sqrt2 = sqrt(2.0);
 
-
-    test_motor_controller();
-    return 0;
-
     printf("Initializing Drone\n");
 
     init_drone_data(&drone_data);
@@ -113,6 +109,7 @@ void drone_logic_loop() {
                     drone_data.neural->output_layer[3]
                 );
 
+                printf("\n\n\n\n");
                 print_motor_output(&drone_data);
                 break;
             default:
