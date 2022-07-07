@@ -128,17 +128,6 @@ namespace SimServer {
             previousTrainingDir = currentTrainingDir;
             currentTrainingDir = Directory.CreateDirectory(sessionTrainingDir.ToString() + "/" + targetFolderName);
 
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // Super evolution code 
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-            // TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:TODO:
-
             // Create NNMeta files saving current fitness score
             for (int i = 0; i < Master.GetDroneCount; i++) {
                 ConnectedDrone d = Master.GetDrone(i).Drone;
@@ -165,11 +154,11 @@ namespace SimServer {
                     epochDirs.Reverse();
                     int maxI = (SUPER_EVOLUTION_CYCLE + 1 < epochDirs.Count) ? SUPER_EVOLUTION_CYCLE + 1 : epochDirs.Count;
                     for (int i = 1; i < maxI; i++) { // Start at index 1 so that we don't copy elements from/to same dir
-                        CopyNNFiles(epochDirs.ElementAt(i).filePath, currentTrainingDir.ToString(), overwrite: false);
+                        CopyNNFiles(epochDirs.ElementAt(i).fullFilePath, currentTrainingDir.ToString(), overwrite: false);
                     }
                     CullNNS(currentTrainingDir.ToString(), Master.GetDroneCount);
                     for (int i = 1; i < maxI; i++) {
-                        Directory.Delete(epochDirs.ElementAt(i).filePath, true);
+                        Directory.Delete(epochDirs.ElementAt(i).fullFilePath, true);
                     }
                 }
 
@@ -229,15 +218,19 @@ namespace SimServer {
                     }
                 }
 
+                if (maxFileI <= Master.GetDroneCount) {
+                    maxFileI = Master.GetDroneCount + 1;    // Reserve the low indices so that we don't overwrite when writing back there
+                }
+
                 List<Utils.FileData> previousNNFiles = Utils.ExtractFileNameInts(previousNNs);
                 foreach (Utils.FileData fd in previousNNFiles) {
-                    string copyTo = fd.filePath.Replace(from, to);
+                    string copyTo = fd.fullFilePath.Replace(from, to);
 
                     copyTo = copyTo.Replace(
-                        fd.fileNameInt + "." + fd.fileExention,
-                        (fd.fileNameInt + maxFileI + 1) + "." + fd.fileExention);
+                        fd.fileNameInt + "." + fd.fileExtension,
+                        (fd.fileNameInt + maxFileI + 1) + "." + fd.fileExtension);
 
-                    File.Copy(fd.filePath, copyTo);
+                    File.Copy(fd.fullFilePath, copyTo);
                 }
             }
         }
@@ -248,11 +241,7 @@ namespace SimServer {
             List<NNMetaData> nns = new List<NNMetaData>();
             string nnMetaFileExtensionWithoutDot = NN_META_FILE_EXTENSION.Replace(".", "");
             for (int i = 0; i < nnsFileData.Count; i++) {
-                //if (fileNames[i].Contains(NN_FILE_EXTENSION) && !fileNames[i].Contains(NN_META_FILE_EXTENSION)) {
-                //    nns.Add(new NNData(fileNames[i], fileNames[i].Replace(NN_FILE_EXTENSION, NN_META_FILE_EXTENSION)));
-                //}
-
-                if (nnsFileData.ElementAt(i).fileExention.Equals(nnMetaFileExtensionWithoutDot)) {
+                if (nnsFileData.ElementAt(i).fileExtension.Equals(nnMetaFileExtensionWithoutDot)) {
                     nns.Add(new NNMetaData(nnsFileData.ElementAt(i)));
                 }
             }
@@ -260,21 +249,20 @@ namespace SimServer {
             nns.Sort();
 
             for (int i = nns.Count - 1; i >= keepCount; i--) {
-                File.Delete(nns[i].nnMetaFile.filePath);
-                File.Delete(nns[i].nnMetaFile.filePath.Replace(NN_META_FILE_EXTENSION, NN_FILE_EXTENSION));
+                File.Delete(nns[i].nnMetaFile.fullFilePath);
+                File.Delete(nns[i].nnMetaFile.fullFilePath.Replace(NN_META_FILE_EXTENSION, NN_FILE_EXTENSION));
             }
 
             // Rename files
             for (int i = keepCount - 1; i >= 0; i--) {
-                string metaFile = nns[i].nnMetaFile.filePath;
+                Utils.FileData metaFile = nns[i].nnMetaFile;
                 File.Move(
-                    metaFile,
-                    metaFile.Replace(nns[i].nnMetaFile.fileNameInt.ToString(), i.ToString())); // TODO: FIX THIS TO ONLY REPLACE LAST PART OF STRING
+                    metaFile.fullFilePath,
+                    metaFile.enclosingDir + "/" + i + "." + metaFile.fileExtension);
 
-                string nnFile = metaFile.Replace(NN_META_FILE_EXTENSION, NN_FILE_EXTENSION);
                 File.Move(
-                    nnFile,
-                    nnFile.Replace(nns[i].nnMetaFile.fileNameInt.ToString(), i.ToString())); // TODO: FIX THIS TO ONLY REPLACE LAST PART OF STRING
+                    metaFile.enclosingDir + "/" + metaFile.fileName + NN_FILE_EXTENSION,
+                    metaFile.enclosingDir + "/" + i + NN_FILE_EXTENSION);
             }
         }
 
@@ -511,7 +499,7 @@ namespace SimServer {
                 nnMetaFile = metaFile;
 
                 // Get fitness from meta file
-                string meta = File.ReadAllText(metaFile.filePath);
+                string meta = File.ReadAllText(metaFile.fullFilePath);
                 JObject metaJson = JObject.Parse(meta);
                 fitness = metaJson.GetValue("fitness").Value<double>();
             }

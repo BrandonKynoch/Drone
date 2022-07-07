@@ -7,7 +7,6 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
- 
 # GNU Make 3.81
 # Copyright (C) 2006  Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.
@@ -15,9 +14,8 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
- 
 
-# Make data base, printed on Tue Jul  5 21:58:24 2022
+# Make data base, printed on Wed Jul  6 22:41:17 2022
 
 # Variables
 
@@ -60,7 +58,7 @@ libs_dir = ../Libs
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-22dcc3ce-a074-4221-8120-11fc17e2d5a2.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-3c7e41ad-8b6d-4a79-813b-a0e6feaf4489.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -74,7 +72,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.ycyKih3PZl/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.gLIpJ2ezPe/Listeners
 # makefile (from `makefile', line 5)
 headers_dir = ./headers
 # automatic
@@ -184,7 +182,7 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 12146
+VSCODE_PID = 5425
 # variable set hash-table stats:
 # Load=82/1024=8%, Rehash=0, Collisions=2/139=1%
 
@@ -274,6 +272,7 @@ clean:
 #  Implicit/static pattern stem: `'
 #  File does not exist.
 #  File has been updated.
+ 
 #  Needs to be updated (-q is set).
 # automatic
 # @ := clean
@@ -304,7 +303,6 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
- 
 #  commands to execute (from `makefile', line 47):
 	mkdir -p obj
 	$(CC) -o output $(objects) $(global_objects) $(CFLAGS) -lm
@@ -335,10 +333,10 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Tue Jul  5 21:58:24 2022
+# Finished Make data base on Wed Jul  6 22:41:17 2022
 
 
-# Make data base, printed on Tue Jul  5 21:58:24 2022
+# Make data base, printed on Wed Jul  6 22:41:17 2022
 
 # Variables
 
@@ -369,7 +367,7 @@ VSCODE_VERBOSE_LOGGING = true
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-22dcc3ce-a074-4221-8120-11fc17e2d5a2.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-3c7e41ad-8b6d-4a79-813b-a0e6feaf4489.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -381,7 +379,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.ycyKih3PZl/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.gLIpJ2ezPe/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -465,7 +463,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 12146
+VSCODE_PID = 5425
 # variable set hash-table stats:
 # Load=62/1024=6%, Rehash=0, Collisions=1/96=1%
 
@@ -550,7 +548,7 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Tue Jul  5 21:58:24 2022
+# Finished Make data base on Wed Jul  6 22:41:17 2022
 
  
 make: *** [all] Error 1

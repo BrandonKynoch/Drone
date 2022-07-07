@@ -177,7 +177,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime;
         }
 
-        if (transform.position.y > 18f) {
+        if (transform.position.y > 18f || transform.position.y < -1f) {
             airborneFitness = 0;
             rotationFitness = 0;
             distFitness = 0;

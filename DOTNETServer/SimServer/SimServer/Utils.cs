@@ -18,33 +18,41 @@ namespace SimServer {
         public static List<FileData> ExtractFileNameInts(string[] filepaths) {
             List<FileData> files = new List<FileData>();
             for (int i = 0; i < filepaths.Length; i++) {
-                string[] pathSplit = filepaths[i].Split(new char[] { '/' });
-                string[] fileSplit = pathSplit[pathSplit.Length - 1].Split(new char[] { '.' });
-                if (fileSplit.Length > 1) {
-                    // Has extension -> Is file
-                    files.Add(new FileData(filepaths[i], fileSplit[0], fileSplit[1]));
-                } else {
-                    // No extension -> Is directory
-                    files.Add(new FileData(filepaths[i], fileSplit[0], ""));
-                }
+                files.Add(new FileData(filepaths[i]));
             }
 
             return files;
         }
 
         public struct FileData: IComparable<FileData> {
-            public string filePath;
-            public int fileNameInt;
-            public string fileExention;
+            public string fullFilePath;
+            public string enclosingDir;
+            public string fileName;
+            public int fileNameInt; // The integer component of the file name
+            public string fileExtension;
 
-            public FileData(string _filePath, string _fileNameInt, string _fileExtension) {
-                this.filePath = _filePath;
+            public FileData(string _filePath) {
+                this.fullFilePath = _filePath;
+
+                string[] filePathSplit = _filePath.Split(new char[] { '/' });
+                this.enclosingDir = "";
+                for (int i = 0; i < filePathSplit.Length - 1; i++) {
+                    this.enclosingDir = enclosingDir + "/" + filePathSplit[i];
+                }
+
+                this.fileName = filePathSplit[filePathSplit.Length - 1];
+                this.fileExtension = "";
+                string[] nameSplit = fileName.Split(new char[] { '.' });
+                if (nameSplit.Length > 1) {
+                    this.fileName = nameSplit[0];
+                    this.fileExtension = nameSplit[nameSplit.Length - 1];
+                }
+
                 try {
-                    this.fileNameInt = int.Parse(string.Concat(_fileNameInt.Where(char.IsNumber)));
+                    this.fileNameInt = int.Parse(string.Concat(fileName.Where(char.IsNumber)));
                 } catch {
                     this.fileNameInt = -1;
                 }
-                this.fileExention = _fileExtension;
             }
 
             public int CompareTo(FileData other) {
