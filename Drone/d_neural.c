@@ -15,12 +15,71 @@
 
 void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* drone) {
     char* file = malloc(MAX_FILE_PATH_LENGTH);
-    sprintf(file, "%s/Sensor.NN\0", enclosing_dir);
-    init_neural_data(file, &drone->neural);
+
     // Sensor.NN
+    sprintf(file, "%s/Sensor.NN\0", enclosing_dir);
+    if (access(file, F_OK) == 0) {
+        // File exists
+        init_neural_data_from_file(file, &drone->sensor_neural);
+    } else {
+        // File does not exist
+        init_neural_data_from_design(file, &drone->sensor_neural);
+        int sensor_n_size = 5;
+        int sensor_n_shape[] = {300, 200, 100, 50, 20};
+        int sensor_n_activations[] = {
+            ACTIVATION_RELU,
+            ACTIVATION_RELU,
+            ACTIVATION_RELU,
+            ACTIVATION_RELU
+        };
+        drone->sensor_neural = init_matrices_from_network_design(sensor_n_size, sensor_n_shape, sensor_n_activations);
+        write_neural_data_to_file(file, drone->sensor_neural);
+    }
+    
+
+
     // Rotation.NN
+    sprintf(file, "%s/Rotation.NN\0", enclosing_dir);
+    if (access(file, F_OK) == 0) {
+        // File exists
+        init_neural_data_from_file(file, &drone->rotation_neural);
+    } else {
+        // File does not exist
+        init_neural_data_from_design(file, &drone->rotation_neural);
+        int rotation_n_size = 4;
+        int rotation_n_shape[] = {90, 60, 30, 20};
+        int rotation_n_activations[] = {
+            ACTIVATION_RELU,
+            ACTIVATION_RELU,
+            ACTIVATION_RELU
+        };
+        drone->rotation_neural = init_matrices_from_network_design(rotation_n_size, rotation_n_shape, rotation_n_activations);
+        write_neural_data_to_file(file, drone->rotation_neural);
+    }
+    
+    
+    
+    
     // Combine.NN
-    // {id}.NNM
+    sprintf(file, "%s/Combine.NN\0", enclosing_dir);
+    if (access(file, F_OK) == 0) {
+        // File exists
+        init_neural_data_from_file(file, &drone->combine_neural);
+    } else {
+        // File does not exist
+        init_neural_data_from_design(file, &drone->combine_neural);
+        int combine_n_size = 4;
+        int combine_n_shape[] = {40, 40, 20, 4};
+        int combine_n_activations[] = {
+            ACTIVATION_RELU,
+            ACTIVATION_RELU,
+            ACTIVATION_SIGMOID
+        };
+        drone->combine_neural = init_matrices_from_network_design(combine_n_size, combine_n_shape, combine_n_activations);
+        write_neural_data_to_file(file, drone->combine_neural);
+    }
+
+
 
     free(file);
 }
@@ -171,6 +230,23 @@ struct neural_data* init_matrices_from_network_design(int layer_count, int neura
     network->output_layer = network->biases_layers[network->weights_matrix_count-1];
 
     return network;
+}
+
+void feed_forward_full_network(struct drone_data* drone) {
+    feed_forward_network(drone->sensor_neural);
+    feed_forward_network(drone->rotation_neural);
+
+    int c_i = 0;
+    for (int i = 0; i < drone->sensor_neural->weights_row_count[drone->sensor_neural->weights_matrix_count-1]; i++) {
+        drone->combine_neural->input_layer[c_i] = drone->sensor_neural->output_layer[i];
+        c_i++;
+    }
+    for (int i = 0; i < drone->rotation_neural->weights_row_count[drone->rotation_neural->weights_matrix_count-1]; i++) {
+        drone->combine_neural->input_layer[c_i] = drone->rotation_neural->output_layer[i];
+        c_i++;
+    }
+
+    feed_forward_network(drone->combine_neural);
 }
 
 void feed_forward_network(struct neural_data* network) {

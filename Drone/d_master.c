@@ -34,9 +34,9 @@ int main() {
 void init_and_test_NN_from_folder(char* folder) {
     init_all_neural_data_in_dir(folder, &drone_data);
     printf("NN init check\n");
-    feed_forward_network(drone_data.neural);
+    feed_forward_full_network(&drone_data);
     printf("NN feedforward check\n");
-    print_matrix("NN output", drone_data.neural->output_layer, drone_data.neural->weights_row_count[drone_data.neural->weights_matrix_count-1], 1);
+    print_matrix("NN output", drone_data.combine_neural->output_layer, drone_data.combine_neural->weights_row_count[drone_data.combine_neural->weights_matrix_count-1], 1);
     printf("\n\n");
 
     printf("Creating sensor timebuffer\n");
@@ -44,14 +44,14 @@ void init_and_test_NN_from_folder(char* folder) {
     // input layer size 
     // drone_data.neural->weights_row_count[0]
     int sensor_input_size = DRONE_CIRCLE_SENSOR_COUNT + 2;
-    ASSERT((int) (drone_data.neural->weights_row_count[0]) % sensor_input_size == 0);
+    ASSERT((int) (drone_data.sensor_neural->weights_row_count[0]) % sensor_input_size == 0);
 
-    int timesteps = (int) (drone_data.neural->weights_row_count[0] / sensor_input_size) - 1; // IMPORTANT: Remember to -1
+    int timesteps = (int) (drone_data.sensor_neural->weights_row_count[0] / sensor_input_size) - 1; // IMPORTANT: Remember to -1
     drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, timesteps);
 }
 
 void drone_logic_loop() {
-    ASSERT(network_input_layer_size(drone_data.neural) % (DRONE_CIRCLE_SENSOR_COUNT + 2) == 0);
+    ASSERT(network_input_layer_size(drone_data.sensor_neural) % (DRONE_CIRCLE_SENSOR_COUNT + 2) == 0);
 
     char* server_response;
     struct json_object* json_response;
@@ -69,7 +69,7 @@ void drone_logic_loop() {
 
         // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
         // usleep(32000); // sleep for 32 milliseconds - 30HZ
-        usleep(4000);
+        usleep(20000);
 
         // Decode server response
         json_response = json_tokener_parse(server_response);
@@ -80,7 +80,9 @@ void drone_logic_loop() {
 
         switch (response_opcode) {
             case RESPONSE_CODE_LOAD_NN:
-                free(drone_data.neural);
+                free(drone_data.sensor_neural);
+                free(drone_data.rotation_neural);
+                free(drone_data.combine_neural);
 
                 json_object_object_get_ex(json_response, "nnFolder", &response_NN_folder_json);
                 
@@ -98,15 +100,15 @@ void drone_logic_loop() {
                 set_NN_input_from_sensor_data(&drone_data);
 
                 // Feed forward data
-                feed_forward_network(drone_data.neural);
+                feed_forward_full_network(&drone_data);
 
                 // Set motors from output
                 motor_output_from_controller(
                     &drone_data,
-                    drone_data.neural->output_layer[0],
-                    drone_data.neural->output_layer[1],
-                    drone_data.neural->output_layer[2],
-                    drone_data.neural->output_layer[3]
+                    drone_data.combine_neural->output_layer[0],
+                    drone_data.combine_neural->output_layer[1],
+                    drone_data.combine_neural->output_layer[2],
+                    drone_data.combine_neural->output_layer[3]
                 );
 
                 printf("\n\n\n\n");
@@ -163,7 +165,7 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
     timebuffer_increment(drone->sensor_time_buffer);
 
-    timebuffer_copy_corrected(drone->sensor_time_buffer, drone_data.neural->input_layer);
+    timebuffer_copy_corrected(drone->sensor_time_buffer, drone_data.sensor_neural->input_layer);
 }
 
 void motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {

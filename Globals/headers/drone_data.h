@@ -20,7 +20,9 @@ struct drone_data {
     uint64_t id;
     int socket;
 
-    struct neural_data* neural;
+    struct neural_data* sensor_neural;
+    struct neural_data* rotation_neural;
+    struct neural_data* combine_neural;
 
     // Sensor readings
     double circle_sensor_array[DRONE_CIRCLE_SENSOR_COUNT];

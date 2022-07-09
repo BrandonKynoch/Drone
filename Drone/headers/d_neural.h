@@ -77,6 +77,9 @@ void init_neural_data_from_design(const char* file, struct neural_data** nd);
 // IMPORTANT: layer_count must equal the number of elements in 'neural_design' parameter
 struct neural_data* init_matrices_from_network_design(int layer_count, int neural_design[], int activations[]);
 
+// Feed forward the entire neural network composed of multiple NN's of a given drone
+void feed_forward_full_network(struct drone_data* drone);
+
 // Perform one feed forward on the network
 // Output is stored in neural_data->output_layer
 void feed_forward_network(struct neural_data* network);
