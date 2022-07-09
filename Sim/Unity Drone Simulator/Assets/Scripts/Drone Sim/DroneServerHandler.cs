@@ -302,6 +302,11 @@ public class DroneServerHandler : MonoBehaviour {
     }
 
     private void ResetAllDrones() {
+        float maxRange = 30f;
+        MasterHandler.DroneTarget.position = new Vector3(
+            30 + UnityEngine.Random.Range(-maxRange, maxRange),
+            MasterHandler.DroneTarget.position.y,
+            UnityEngine.Random.Range(-maxRange, maxRange));
         foreach (Drone d in drones) {
             if (d != null) {
                 d.ResetDrone(spawnTransform.position);

@@ -28,9 +28,9 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         int sensor_n_shape[] = {300, 200, 100, 50, 20};
         int sensor_n_activations[] = {
             ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_RELU,
-            ACTIVATION_RELU,
-            ACTIVATION_RELU
+            ACTIVATION_LEAKY_RELU
         };
         drone->sensor_neural = init_matrices_from_network_design(sensor_n_size, sensor_n_shape, sensor_n_activations);
         write_neural_data_to_file(file, drone->sensor_neural);
@@ -50,7 +50,7 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         int rotation_n_shape[] = {90, 60, 30, 20};
         int rotation_n_activations[] = {
             ACTIVATION_RELU,
-            ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_RELU
         };
         drone->rotation_neural = init_matrices_from_network_design(rotation_n_size, rotation_n_shape, rotation_n_activations);
@@ -68,10 +68,11 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         init_neural_data_from_design(file, &drone->combine_neural);
-        int combine_n_size = 4;
-        int combine_n_shape[] = {40, 40, 20, 4};
+        int combine_n_size = 5;
+        int combine_n_shape[] = {40, 40, 40, 20, 4};
         int combine_n_activations[] = {
             ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_RELU,
             ACTIVATION_SIGMOID
         };
@@ -285,8 +286,6 @@ void feed_forward_network(struct neural_data* network) {
 }
 
 double apply_activation(double val, int activation) {
-    ASSERT(activation == ACTIVATION_RELU || activation == ACTIVATION_SIGMOID);
-
     switch(activation) {
         case ACTIVATION_RELU:
             return (val > 0) ? val : 0;

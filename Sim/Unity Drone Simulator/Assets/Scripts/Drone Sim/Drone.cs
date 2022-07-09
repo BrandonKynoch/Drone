@@ -183,7 +183,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
             float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
             distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
-            distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime;
+            distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime  * 0.5f;
         }
 
         if (transform.position.y > 18f || transform.position.y < -1f) {
