@@ -1,3 +1,6 @@
+#ifndef HEADER_GLOBALS_H
+#define HEADER_GLOBALS_H
+
 #define TRUE 1
 #define FALSE 0
 #define bool int
@@ -9,7 +12,10 @@
 #define SIMULATION_SERVER_SOCKET 1755
 #define DRONE_SERVER_SOCKET 8060
 
+#define MAX_FILE_PATH_LENGTH 1000
+
 // DRONE CONSTS
 #define DRONE_CIRCLE_SENSOR_COUNT 8
 
 #define DRONE_SENSOR_RANGE 2.0
+#endif

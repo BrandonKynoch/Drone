@@ -1,7 +1,6 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone'
 cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
- 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Drone'
 rm -r obj
 mkdir obj
@@ -19,13 +18,13 @@ cc -o output  obj/d_master.o  obj/d_networking.o  obj/d_neural.o  ../Globals/obj
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Projects/Drone/Drone'
 cd ..
 cd Server && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
- 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Server'
 rm -r obj
 mkdir obj
 rm -r ../Globals/obj
 mkdir ../Globals/obj
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Projects/Drone/Server'
+ 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Server'
 cc -c -o obj/server.o server.c -g -I./headers -I../Globals/headers -ljson-c -w
 cc -c -o ../Globals/obj/drone_data.o ../Globals/drone_data.c -g -I./headers -I../Globals/headers -ljson-c -w

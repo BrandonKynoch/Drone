@@ -13,6 +13,18 @@
 // #######      INITIALIZATION      ###########################################
 // ############################################################################
 
+void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* drone) {
+    char* file = malloc(MAX_FILE_PATH_LENGTH);
+    sprintf(file, "%s/Sensor.NN\0", enclosing_dir);
+    init_neural_data(file, &drone->neural);
+    // Sensor.NN
+    // Rotation.NN
+    // Combine.NN
+    // {id}.NNM
+
+    free(file);
+}
+
 void init_neural_data(const char* file, struct neural_data** nd) {
     if (access(file, F_OK) == 0) {
         // File exists

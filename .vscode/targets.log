@@ -15,7 +15,7 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 
 # This program built for i386-apple-darwin11.3.0
 
-# Make data base, printed on Wed Jul  6 22:41:17 2022
+# Make data base, printed on Fri Jul  8 21:23:20 2022
 
 # Variables
 
@@ -23,8 +23,6 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
 ?F = $(notdir $?)
-# environment
-VSCODE_LOG_NATIVE = false
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # makefile (from `makefile', line 10)
@@ -51,14 +49,10 @@ objects :=  obj/d_master.o  obj/d_networking.o  obj/d_neural.o
 MAKEFILE_LIST :=  makefile
 # makefile (from `makefile', line 33)
 lib_CBLAS = $(libs_dir)/CBLAS/lib/cblas_LINUX.a $(libs_dir)/CBLAS/lib/libblas.a -I$(libs_dir)/CBLAS/include
-# environment
-VSCODE_VERBOSE_LOGGING = true
 # makefile (from `makefile', line 3)
 libs_dir = ../Libs
 # environment
 __CFBundleIdentifier = com.microsoft.VSCode
-# environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-3c7e41ad-8b6d-4a79-813b-a0e6feaf4489.sock
 # environment
 VSCODE_CWD = /
 # environment
@@ -66,19 +60,15 @@ PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.d
 # makefile (from `makefile', line 12)
 files := ./d_master.c ./d_networking.c ./d_neural.c
 # environment
-VSCODE_LOG_STACK = false
-# environment
 ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.gLIpJ2ezPe/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.N2ay4ciVhV/Listeners
 # makefile (from `makefile', line 5)
 headers_dir = ./headers
 # automatic
 %F = $(notdir $%)
-# environment
-VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /Users/brandonkynoch/Desktop/Projects/Drone/Drone
 # makefile (from `makefile', line 6)
@@ -96,7 +86,7 @@ lib_Json_C = -ljson-c
 # default
 MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/brandonkynoch/Library/Application Support/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+VSCODE_CODE_CACHE_PATH = /Users/brandonkynoch/Library/Application Support/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
 # environment
 LOGNAME = brandonkynoch
 # environment
@@ -138,7 +128,9 @@ TMPDIR = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/
 # automatic
 *F = $(notdir $*)
 # environment
-VSCODE_IPC_HOOK = /Users/brandonkynoch/Library/Application Support/Code/1.68.1-main.sock
+VSCODE_IPC_HOOK = /Users/brandonkynoch/Library/Application Support/Code/1.69.0-main.sock
+# environment
+MallocNanoZone = 0
 # makefile
 MAKEFLAGS = Rrqp
 # environment
@@ -182,9 +174,9 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 5425
+VSCODE_PID = 1347
 # variable set hash-table stats:
-# Load=82/1024=8%, Rehash=0, Collisions=2/139=1%
+# Load=78/1024=8%, Rehash=0, Collisions=2/135=1%
 
 # Pattern-specific Variable Values
 
@@ -272,7 +264,6 @@ clean:
 #  Implicit/static pattern stem: `'
 #  File does not exist.
 #  File has been updated.
- 
 #  Needs to be updated (-q is set).
 # automatic
 # @ := clean
@@ -292,6 +283,7 @@ clean:
 # ? := 
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/14=7%
+ 
 #  commands to execute (from `makefile', line 60):
 	rm -r $(obj_dir)
 	mkdir $(obj_dir)
@@ -333,10 +325,10 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Wed Jul  6 22:41:17 2022
+# Finished Make data base on Fri Jul  8 21:23:20 2022
 
 
-# Make data base, printed on Wed Jul  6 22:41:17 2022
+# Make data base, printed on Fri Jul  8 21:23:20 2022
 
 # Variables
 
@@ -344,8 +336,6 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 <D = $(patsubst %/,%,$(dir $<))
 # automatic
 ?F = $(notdir $?)
-# environment
-VSCODE_LOG_NATIVE = false
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # automatic
@@ -363,27 +353,19 @@ _ = /usr/bin/make
 # makefile (from `makefile', line 1)
 MAKEFILE_LIST :=  makefile
 # environment
-VSCODE_VERBOSE_LOGGING = true
-# environment
 __CFBundleIdentifier = com.microsoft.VSCode
-# environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/vscode-ipc-3c7e41ad-8b6d-4a79-813b-a0e6feaf4489.sock
 # environment
 VSCODE_CWD = /
 # environment
 PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 # environment
-VSCODE_LOG_STACK = false
-# environment
 ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.gLIpJ2ezPe/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.N2ay4ciVhV/Listeners
 # automatic
 %F = $(notdir $%)
-# environment
-VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /Users/brandonkynoch/Desktop/Projects/Drone
 # environment
@@ -395,7 +377,7 @@ HOME = /Users/brandonkynoch
 # default
 MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
 # environment
-VSCODE_CODE_CACHE_PATH = /Users/brandonkynoch/Library/Application Support/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+VSCODE_CODE_CACHE_PATH = /Users/brandonkynoch/Library/Application Support/Code/CachedData/92d25e35d9bf1a6b16f7d0758f25d48ace11e5b9
 # environment
 LOGNAME = brandonkynoch
 # environment
@@ -429,7 +411,9 @@ TMPDIR = /var/folders/r3/h9dwybgx4dncqv7z3_fk5vg80000gq/T/
 # automatic
 *F = $(notdir $*)
 # environment
-VSCODE_IPC_HOOK = /Users/brandonkynoch/Library/Application Support/Code/1.68.1-main.sock
+VSCODE_IPC_HOOK = /Users/brandonkynoch/Library/Application Support/Code/1.69.0-main.sock
+# environment
+MallocNanoZone = 0
 # makefile
 MAKEFLAGS = Rrqp
 # environment
@@ -437,7 +421,7 @@ MFLAGS = -Rrqp
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-XPC_SERVICE_NAME = application.com.microsoft.VSCode.107878579.107878585
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.112650315.112650321
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # automatic
@@ -463,9 +447,9 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 5425
+VSCODE_PID = 1347
 # variable set hash-table stats:
-# Load=62/1024=6%, Rehash=0, Collisions=1/96=1%
+# Load=58/1024=6%, Rehash=0, Collisions=1/92=1%
 
 # Pattern-specific Variable Values
 
@@ -548,7 +532,7 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Wed Jul  6 22:41:17 2022
+# Finished Make data base on Fri Jul  8 21:23:20 2022
 
  
 make: *** [all] Error 1

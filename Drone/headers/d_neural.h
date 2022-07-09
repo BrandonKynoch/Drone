@@ -1,9 +1,14 @@
+#ifndef HEADER_NEURAL_H
+#define HEADER_NEURAL_H
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
-#include <globals.h>
 #include "custom_BLAS.h"
+
+#include <globals.h>
+#include <drone_data.h>
 
 // Only for simulation
 #include <unistd.h>
@@ -41,6 +46,10 @@ struct neural_data {
 // ############################################################################
 // #######      INITIALIZATION      ###########################################
 // ############################################################################
+
+// Initializes multiple neural networks for drone in a specified folder
+// Neural networks are allocated for all parts of total NN design
+void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* drone);
 
 // Main entry point for initializing neural_data
 // Attempts to load data from the given file. If file does not exist, a new
@@ -97,3 +106,5 @@ int network_input_layer_size(struct neural_data* network);
 // ############################################################################
 // #######      UTILITIES      ################################################
 // ############################################################################
+
+#endif

@@ -20,6 +20,8 @@
         "d_master.h": "c",
         "typeinfo": "c",
         "d_neural.h": "c",
-        "globals.h": "c"
+        "globals.h": "c",
+        "d_networking.h": "c",
+        "unistd.h": "c"
     }
 }

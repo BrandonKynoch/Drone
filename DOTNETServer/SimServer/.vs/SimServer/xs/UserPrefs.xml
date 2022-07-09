@@ -1,18 +1,16 @@
 ﻿<Properties StartupConfiguration="{31E21F89-6C30-44D7-A681-4871B2CE752E}|Default">
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workbench ActiveDocument="SimServer/NeuralTrainer.cs">
     <Files>
       <File FileName="SimServer/ServerMain.cs" Line="56" Column="20" />
-      <File FileName="SimServer/NeuralTrainer.cs" Line="296" Column="30" />
+      <File FileName="SimServer/NeuralTrainer.cs" Line="228" Column="53" />
       <File FileName="SimServer/Networking.cs" Line="107" Column="76" />
       <File FileName="SimServer/ConnectedDrone.cs" Line="88" Column="51" />
-      <File FileName="SimServer/Utils.cs" Line="22" Column="14" />
+      <File FileName="SimServer/Utils.cs" Line="73" Column="35" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -29,4 +27,6 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
 </Properties>

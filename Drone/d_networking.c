@@ -1,5 +1,4 @@
-﻿#include <globals.h>
-#include <d_networking.h>
+﻿#include <d_networking.h>
 // #include <inttypes.h> // for printing UInt32
 
 char network_message[NETWORK_STD_MSG_LEN];

@@ -121,6 +121,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void GetSensorData() {
+        /// INFARED SENSOR DATA //////////////////////////////////////////////
         // Circle sensors
         RaycastHit hit;
         for (int i = 0; i < data.circleSensorData.Length; i++) {
@@ -164,6 +165,14 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         } else {
             data.sensorBottom = SENSOR_MAX_RANGE;
         }
+        /// INFARED SENSOR DATA //////////////////////////////////////////////
+
+
+        /// ROTATION DATA ////////////////////////////////////////////////////
+        data.rotationX = ((transform.eulerAngles.x + 180f) % 360f) - 180f;
+        data.rotationY = ((transform.eulerAngles.y + 180f) % 360f) - 180f;
+        data.rotationZ = ((transform.eulerAngles.z + 180f) % 360f) - 180f;
+        /// ROTATION DATA ////////////////////////////////////////////////////
     }
 
     public void CalculateFitness() {
@@ -333,13 +342,19 @@ public class DroneData {
     /// Constants //////////////////////////////////////////
 
     public UInt64 id;
-
     public double[] motorOutputs = new double[4];
+
     // Sensors start from directly in front and rotate around clockwise when viewed from above drone
     public double[] circleSensorData = new double[CIRCLE_circle_sensor_array_COUNT];
     public double sensorTop;
     public double sensorBottom;
 
+    // The axis angle offset from identity (upright & forward) - wrapped around -180 to 180
+    public double rotationX;
+    public double rotationY;
+    public double rotationZ;
+
+    // Sim & fitness function variables
     public double angle; // The angle of the drone relative to the horizontal plane. in the range of 0-90 degrees
     public bool upsideDown;
 

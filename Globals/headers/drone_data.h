@@ -1,3 +1,6 @@
+#ifndef HEADER_DRONE_DATA_H
+#define HEADER_DRONE_DATA_H
+
 #include <stdlib.h>
 #include <globals.h>
 
@@ -36,3 +39,5 @@ struct drone_data {
 void init_drone_data(struct drone_data* d);
 
 void pack_msg_with_standard_header(struct json_object* json, struct drone_data* drone, int opcode);
+
+#endif

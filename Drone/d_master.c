@@ -20,8 +20,8 @@ int main() {
 
 #if IS_SIMULATION
     // Request target NN from server
-    char* target_NN_file = request_target_NN_from_server();
-    init_and_test_NN_from_file(target_NN_file);
+    char* target_NN_folder = request_target_NN_folder_from_server();
+    init_and_test_NN_from_folder(target_NN_folder);
 #else
     // TODO: load NN directly from file on device
 #endif
@@ -31,8 +31,8 @@ int main() {
     drone_logic_loop();
 }
 
-void init_and_test_NN_from_file(char* file) {
-    init_neural_data(file, &drone_data.neural);
+void init_and_test_NN_from_folder(char* folder) {
+    init_all_neural_data_in_dir(folder, &drone_data);
     printf("NN init check\n");
     feed_forward_network(drone_data.neural);
     printf("NN feedforward check\n");
@@ -58,8 +58,8 @@ void drone_logic_loop() {
     struct json_object* response_opcode_json;
     int32_t response_opcode;
 
-    struct json_object* response_NN_file_json;
-    char* response_NN_file;
+    struct json_object* response_NN_folder_json;
+    char* response_NN_folder;
 
     while (TRUE) {
         motor_output(&drone_data);
@@ -82,11 +82,11 @@ void drone_logic_loop() {
             case RESPONSE_CODE_LOAD_NN:
                 free(drone_data.neural);
 
-                json_object_object_get_ex(json_response, "file", &response_NN_file_json);
+                json_object_object_get_ex(json_response, "nnFolder", &response_NN_folder_json);
                 
-                response_NN_file = json_object_get_string(response_NN_file_json);
+                response_NN_folder = json_object_get_string(response_NN_folder_json);
 
-                init_and_test_NN_from_file(response_NN_file);
+                init_and_test_NN_from_folder(response_NN_folder);
 
                 init_drone_sensor_data(&drone_data);
                 break;
@@ -233,7 +233,7 @@ void print_motor_output(struct drone_data* drone) {
 
 
 #if IS_SIMULATION
-char* request_target_NN_from_server() {
+char* request_target_NN_folder_from_server() {
     // Send request to server
     struct json_object* request_json = json_object_new_object();
     pack_msg_with_standard_header(request_json, &drone_data, CODE_REQUEST_TARGET_NN_FROM_SERVER);
@@ -243,21 +243,21 @@ char* request_target_NN_from_server() {
     struct json_object* response_json = receive_server_json(&drone_data);
 
     // Decode response
-    struct json_object* json_file_addr;
-    json_object_object_get_ex(response_json, "file", &json_file_addr);
-    char* target_file = json_object_get_string(json_file_addr);
+    struct json_object* json_folder_addr;
+    json_object_object_get_ex(response_json, "nnFolder", &json_folder_addr);
+    char* target_folder = json_object_get_string(json_folder_addr);
 
     // Reallocate and copy result
-    char* target_file_copy = malloc(strlen(target_file));
-    sprintf(target_file_copy, target_file);
+    char* target_folder_copy = malloc(strlen(target_folder));
+    sprintf(target_folder_copy, target_folder);
 
     // Free memory
     json_object_put(request_json);
     json_object_put(response_json);
 
-    printf("NN target file:\n\t%s\n", target_file_copy);
+    printf("NN target file:\n\t%s\n", target_folder_copy);
 
-    return target_file_copy;
+    return target_folder_copy;
 }
 
 void test_motor_controller() {

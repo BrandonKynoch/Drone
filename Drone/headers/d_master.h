@@ -2,6 +2,7 @@
 
 #include <d_networking.h>
 #include <d_neural.h>
+#include <globals.h>
 
 #include "time_buffer.h"
 
@@ -60,11 +61,11 @@ void print_motor_output(struct drone_data* drone);
 // ############################################################################
 
 // Initialize and attempt to load the given NN file
-void init_and_test_NN_from_file(char* file);
+void init_and_test_NN_from_folder(char* folder);
 
 // Send a request to the server to provide the drone with a NN file to load
 // returns the file address of the NN to load
-char* request_target_NN_from_server();
+char* request_target_NN_folder_from_server();
 
 void test_motor_controller();
 

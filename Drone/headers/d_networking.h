@@ -7,7 +7,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-// Project code
 #include <globals.h>
 
 #include <drone_data.h>

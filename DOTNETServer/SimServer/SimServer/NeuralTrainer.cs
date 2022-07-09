@@ -11,6 +11,7 @@ namespace SimServer {
 
         /// CONSTANTS //////////////////////////////////////////////////////////
         private const string ROOT_TRAINING_DIR = "/Users/brandonkynoch/Desktop/Projects/Drone/Training Data";
+        private const string META_FILE = "Drone";
         private const string NN_FILE_EXTENSION = ".NN";
         private const string NN_META_FILE_EXTENSION = ".NNM";
 
@@ -133,7 +134,11 @@ namespace SimServer {
                 ConnectedDrone d = Master.GetDrone(i).Drone;
 
                 // Write drone fitness to meta file
-                string nnMetaPath = ((!startNew) ? previousTrainingDir.ToString() : currentTrainingDir.ToString()) + "/" + d.id + NN_META_FILE_EXTENSION;
+                string droneEnclosingDir = ((!startNew) ? previousTrainingDir.ToString() : currentTrainingDir.ToString()) + "/" + d.id;
+                if (!Directory.Exists(droneEnclosingDir)) {
+                    Directory.CreateDirectory(droneEnclosingDir);
+                }
+                string nnMetaPath = droneEnclosingDir + "/" + META_FILE + NN_META_FILE_EXTENSION;
                 JObject droneMetaData = new JObject(new JProperty("fitness", d.Fitness));
                 File.WriteAllText(nnMetaPath, droneMetaData.ToString());
             }
@@ -141,20 +146,20 @@ namespace SimServer {
             
             if (!startNew) {
                 // Copy files over to target folder for new epoch
-                string[] previousNNs = Directory.GetFiles(previousTrainingDir.ToString());
+                string[] previousNNs = Directory.GetDirectories(previousTrainingDir.ToString());
 
                 if (!isSuperEvolution) {
                     // Normal evolution
-                    CopyNNFiles(previousTrainingDir.ToString(), currentTrainingDir.ToString(), overwrite: true);
+                    CopyNNFolders(previousTrainingDir.ToString(), currentTrainingDir.ToString(), overwrite: true);
                 } else {
                     // Super evolution
                     string[] epochDirectories = Directory.GetDirectories(sessionTrainingDir.ToString());
-                    List<Utils.FileData> epochDirs = Utils.ExtractFileNameInts(epochDirectories);
+                    List<Utils.FileData> epochDirs = Utils.ExtractFileData(epochDirectories);
                     epochDirs.Sort();
                     epochDirs.Reverse();
                     int maxI = (SUPER_EVOLUTION_CYCLE + 1 < epochDirs.Count) ? SUPER_EVOLUTION_CYCLE + 1 : epochDirs.Count;
                     for (int i = 1; i < maxI; i++) { // Start at index 1 so that we don't copy elements from/to same dir
-                        CopyNNFiles(epochDirs.ElementAt(i).fullFilePath, currentTrainingDir.ToString(), overwrite: false);
+                        CopyNNFolders(epochDirs.ElementAt(i).fullFilePath, currentTrainingDir.ToString(), overwrite: false);
                     }
                     CullNNS(currentTrainingDir.ToString(), Master.GetDroneCount);
                     for (int i = 1; i < maxI; i++) {
@@ -181,12 +186,12 @@ namespace SimServer {
                 Networking.lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
                 while (dronesWaitingToReceiveNN.Count > 0) {
                     ConnectedDrone drone = dronesWaitingToReceiveNN.Dequeue();
-                    string nnPath = currentTrainingDir + "/" + drone.id + NN_FILE_EXTENSION;
+                    string nnPath = currentTrainingDir + "/" + drone.id;
 
                     JObject responseToDrone = new JObject(
                         new JProperty("id", drone.id),
                         new JProperty("opcode", Master.RESPONSE_OPCODE_LOAD_NN),
-                        new JProperty("file", nnPath));
+                        new JProperty("nnFolder", nnPath));
 
                     drone.ReceiveMessageFromSimulation(responseToDrone);
 
@@ -195,74 +200,59 @@ namespace SimServer {
             }
         }
 
-        private void CopyNNFiles(string from, string to, bool overwrite) {
+        private void CopyNNFolders(string from, string to, bool overwrite) {
             // Copy files over to target folder
-            string[] previousNNs = Directory.GetFiles(from);
+            string[] previousNNs = Directory.GetDirectories(from);
 
             if (overwrite) {
-                foreach (var fileNN in previousNNs) {
-                    string file = fileNN.ToString();
-                    string copyTo = file.Replace(from, to);
-                    if (File.Exists(copyTo)) {
-                        File.Delete(copyTo);
+                foreach (var dirNN in previousNNs) {
+                    DirectoryInfo nnDirInfo = new DirectoryInfo(dirNN);
+                    string copyTo = dirNN.Replace(from, to);
+                    if (Directory.Exists(copyTo)) {
+                        Directory.Delete(copyTo, true);
                     }
-                    File.Copy(file, copyTo);
+                    nnDirInfo.DeepCopy(copyTo);
                 }
             } else {
-                string[] NNSInTargetFolder = Directory.GetFiles(to);
-                int maxFileI = 0;
-                List<Utils.FileData> existingFiles = Utils.ExtractFileNameInts(NNSInTargetFolder);
-                foreach (Utils.FileData fd in existingFiles) {
-                    if (fd.fileNameInt > maxFileI) {
-                        maxFileI = fd.fileNameInt;
+                string[] NNSInTargetFolder = Directory.GetDirectories(to);
+                int maxI = 0;
+                List<Utils.FileData> existingFolders = Utils.ExtractFileData(NNSInTargetFolder);
+                foreach (Utils.FileData fd in existingFolders) {
+                    if (fd.fileNameInt > maxI) {
+                        maxI = fd.fileNameInt;
                     }
                 }
 
-                if (maxFileI <= Master.GetDroneCount) {
-                    maxFileI = Master.GetDroneCount + 1;    // Reserve the low indices so that we don't overwrite when writing back there
+                if (maxI <= Master.GetDroneCount) {
+                    maxI = Master.GetDroneCount + 1;    // Reserve the low indices so that we don't overwrite when writing back there
                 }
 
-                List<Utils.FileData> previousNNFiles = Utils.ExtractFileNameInts(previousNNs);
-                foreach (Utils.FileData fd in previousNNFiles) {
-                    string copyTo = fd.fullFilePath.Replace(from, to);
-
-                    copyTo = copyTo.Replace(
-                        fd.fileNameInt + "." + fd.fileExtension,
-                        (fd.fileNameInt + maxFileI + 1) + "." + fd.fileExtension);
-
-                    File.Copy(fd.fullFilePath, copyTo);
+                List<Utils.FileData> previousNNFolders = Utils.ExtractFileData(previousNNs);
+                foreach (Utils.FileData fd in previousNNFolders) {
+                    DirectoryInfo nnDirInfo = new DirectoryInfo(fd.fullFilePath);
+                    string copyTo = to + "/" + (fd.fileNameInt + maxI + 1);
+                    nnDirInfo.DeepCopy(copyTo);
                 }
             }
         }
 
         private void CullNNS(string inDirectory, int keepCount) {
-            string[] fileNames = Directory.GetFiles(inDirectory);
-            List<Utils.FileData> nnsFileData = Utils.ExtractFileNameInts(fileNames);
+            List<Utils.FileData> nnsFDs = Utils.ExtractFileData(Directory.GetDirectories(inDirectory));
             List<NNMetaData> nns = new List<NNMetaData>();
-            string nnMetaFileExtensionWithoutDot = NN_META_FILE_EXTENSION.Replace(".", "");
-            for (int i = 0; i < nnsFileData.Count; i++) {
-                if (nnsFileData.ElementAt(i).fileExtension.Equals(nnMetaFileExtensionWithoutDot)) {
-                    nns.Add(new NNMetaData(nnsFileData.ElementAt(i)));
-                }
+            for (int i = 0; i < nnsFDs.Count; i++) {
+                nns.Add(new NNMetaData(new Utils.FileData(nnsFDs[i].fullFilePath + "/" + META_FILE + NN_META_FILE_EXTENSION)));
             }
 
             nns.Sort();
 
             for (int i = nns.Count - 1; i >= keepCount; i--) {
-                File.Delete(nns[i].nnMetaFile.fullFilePath);
-                File.Delete(nns[i].nnMetaFile.fullFilePath.Replace(NN_META_FILE_EXTENSION, NN_FILE_EXTENSION));
+                Directory.Delete(nns[i].nnMetaFile.enclosingDir, true);
             }
 
-            // Rename files
+            // Rename NN folders
             for (int i = keepCount - 1; i >= 0; i--) {
-                Utils.FileData metaFile = nns[i].nnMetaFile;
-                File.Move(
-                    metaFile.fullFilePath,
-                    metaFile.enclosingDir + "/" + i + "." + metaFile.fileExtension);
-
-                File.Move(
-                    metaFile.enclosingDir + "/" + metaFile.fileName + NN_FILE_EXTENSION,
-                    metaFile.enclosingDir + "/" + i + NN_FILE_EXTENSION);
+                Utils.FileData nnFolderFD = new Utils.FileData(nns[i].nnMetaFile.enclosingDir);
+                Directory.Move(nnFolderFD.fullFilePath, nnFolderFD.enclosingDir + "/" + i);
             }
         }
 
@@ -270,12 +260,10 @@ namespace SimServer {
         /// Applies the genetic algorithm and evolves the contents of a given directory.
         /// </summary>
         public void EvolveDirectoryContents(string targetDirectory) {
-            string[] fileNames = Directory.GetFiles(targetDirectory);
-            List<NNData> nns = new List<NNData>();
-            for (int i = 0; i < fileNames.Length; i++) {
-                if (fileNames[i].Contains(NN_FILE_EXTENSION) && !fileNames[i].Contains(NN_META_FILE_EXTENSION)) {
-                    nns.Add(new NNData(fileNames[i], fileNames[i].Replace(NN_FILE_EXTENSION, NN_META_FILE_EXTENSION)));
-                }
+            List<Utils.FileData> nnFDs = Utils.ExtractFileData(Directory.GetDirectories(targetDirectory)); // nn folders
+            List<NNGroupData> nns = new List<NNGroupData>();
+            for (int i = 0; i < nnFDs.Count; i++) {
+                nns.Add(new NNGroupData(nnFDs[i].fullFilePath, nnFDs[i].fullFilePath + "/" + META_FILE + NN_META_FILE_EXTENSION));
             }
 
             nns.Sort();
@@ -303,10 +291,8 @@ namespace SimServer {
                 int a = (int) Utils.RandomRange(0, totalCount * keep);
                 int b = (int)Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
 
-                //Console.WriteLine("Cross over: " + a + ":" + b);
-
                 if (a != b) {
-                    NNData.CrossOver(nns[a], nns[b], crossOverAmount);
+                    NNGroupData.CrossOver(nns[a], nns[b], crossOverAmount);
                 }
             }
 
@@ -319,10 +305,11 @@ namespace SimServer {
 
             // Write changes to NN file
             Console.Write("Writing NN files: ");
-            foreach (NNData nd in nns) {
+            foreach (NNGroupData ngd in nns) {
                 Console.Write(".");
-                File.Delete(nd.nnFile);
-                nd.WriteToFile();
+                Directory.Delete(ngd.nnFolder, true);
+                Directory.CreateDirectory(ngd.nnFolder);
+                ngd.WriteToFile();
             }
             Console.WriteLine(" Finished");
         }
@@ -399,9 +386,68 @@ namespace SimServer {
 
 
 
+        // Represents a complex NN consisting of multiple NN shapes
+        public class NNGroupData : IComparable<NNGroupData> {
+            public string nnFolder;
 
+            private Dictionary<string, NNData> nns = new Dictionary<string, NNData>(); // NN name : nnData
 
-        public class NNData: IComparable<NNData> {
+            private double fitness; // Higher is better
+
+            public NNGroupData(string _nnFolder, string metaFile) {
+                this.nnFolder = _nnFolder;
+
+                // Fetch all NNs in nnFolder
+                List<Utils.FileData> filesInNNFolder = Utils.ExtractFileData(Directory.GetFiles(_nnFolder));
+                string nnFileExtensionWithoutDot = NN_FILE_EXTENSION.Replace(".", "");
+                foreach (Utils.FileData fd in filesInNNFolder) {
+                    if (fd.fileExtension.Equals(nnFileExtensionWithoutDot)) {
+                        nns.Add(fd.fileName, new NNData(fd.fullFilePath));
+                    }
+                }
+
+                // Get fitness from meta file
+                string meta = File.ReadAllText(metaFile);
+                JObject metaJson = JObject.Parse(meta);
+                fitness = metaJson.GetValue("fitness").Value<double>();
+            }
+
+            public void CopyData(NNGroupData from, bool useOriginal = true) {
+                foreach (string nnKey in from.nns.Keys) {
+                    if (nns.ContainsKey(nnKey)) {
+                        nns[nnKey].CopyData(from.nns[nnKey], useOriginal);
+                    }
+                }
+            }
+
+            public static void CrossOver(NNGroupData a, NNGroupData b, double crossOverProbability) {
+                foreach (string nnKey in a.nns.Keys) {
+                    if (b.nns.ContainsKey(nnKey)) {
+                        NNData.CrossOver(a.nns[nnKey], b.nns[nnKey], crossOverProbability);
+                    }
+                }
+            }
+
+            public void Mutate(double mutationProbability, double mutationAmount) {
+                foreach (NNData nn in nns.Values) {
+                    nn.Mutate(mutationProbability, mutationAmount);
+                }
+            }
+
+            public void WriteToFile() {
+                foreach (NNData nn in nns.Values) {
+                    nn.WriteToFile();
+                }
+            }
+
+            // Sort in descending order of fitness
+            public int CompareTo(NNGroupData other) {
+                return other.fitness.CompareTo(this.fitness);
+            }
+        }
+
+        // Represents a single NN shape
+        public class NNData {
             public string nnFile;
 
             public byte[] rawHeader;
@@ -409,9 +455,7 @@ namespace SimServer {
             public double[] modifiedData;
             public int geneticDataIndex; // The start index of data that should be modified (i.e. after header)
 
-            double fitness; // Higher is better
-
-            public NNData(string fromNNFile, string metaFile) {
+            public NNData(string fromNNFile) {
                 nnFile = fromNNFile;
 
                 byte[] rawData = File.ReadAllBytes(fromNNFile);
@@ -435,11 +479,6 @@ namespace SimServer {
                     originalData[i] = BitConverter.ToDouble(rawData, geneticDataIndex + (i * 8)); // 8bytes
                     modifiedData[i] = originalData[i];
                 }
-
-                // Get fitness from meta file
-                string meta = File.ReadAllText(metaFile);
-                JObject metaJson = JObject.Parse(meta);
-                fitness = metaJson.GetValue("fitness").Value<double>();
             }
 
             public void WriteToFile() {
@@ -482,14 +521,9 @@ namespace SimServer {
                     }
                 }
             }
-
-            // Sort in descending order of fitness
-            public int CompareTo(NNData other) {
-                return other.fitness.CompareTo(this.fitness);
-            }
         }
 
-        // Lightweight version of NNData class - Only loads meta data from text file
+        // Lightweight class that only loads meta data from text file
         public class NNMetaData : IComparable<NNMetaData> {
             public Utils.FileData nnMetaFile;
 
