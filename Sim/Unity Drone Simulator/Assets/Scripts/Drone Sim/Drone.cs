@@ -8,6 +8,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private const float SENSOR_DIST_FROM_CENTER = 0.15f;
     private const float SENSOR_MAX_RANGE = 2f;
 
+    private const int SMOOTHNESSS_ROTATION_BUFFER_COUNT = 8;
+
     private const int SPAWN_ROWS_COUNT = 5;
     private const float SPAWN_SPACING = 4f;
 
@@ -33,24 +35,29 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     /// Fitness Vars /////////////////////////////////////////
     private float airborneFitness = 0;
     private float rotationFitness = 0;
+    private float smoothnessFitness = 0;
     private float distFitness = 0;
 
     public float SumFitness {
         get {
-            return airborneFitness + rotationFitness + distFitness;
+            return airborneFitness + rotationFitness + smoothnessFitness + distFitness;
         }
     }
 
     public float AirborneFitness { get { return airborneFitness; } }
     public float RotationFitness { get { return rotationFitness; } }
+    public float SmoothnessFitness { get { return smoothnessFitness; } }
     public float DistFitness { get { return distFitness; } }
     /// Fitness Vars /////////////////////////////////////////
 
-    /// Debug Vars /////////////////////////////////////////
+    /// Debug & Simulation Vars /////////////////////////////////////////
     private DroneUI droneUI;
 
     private Queue<Vector3> collisionPoints = new Queue<Vector3>();
     private float debug_NextCollisionPointRemoveTime = 0;
+
+
+    private List<Quaternion> rotationBuffer = new List<Quaternion>();
     /// Debug Vars /////////////////////////////////////////
 
     /// Properties /////////////////////////////////////////
@@ -79,8 +86,6 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
 
     public void Update() {
-
-
         /// DEBUG UPDATE //////////////////////////////////////
         if (Time.time > debug_NextCollisionPointRemoveTime && collisionPoints.Count > 0) {
             debug_NextCollisionPointRemoveTime = Time.time + 0.2f;
@@ -97,6 +102,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         dData.upsideDown = dData.angle > 90f;
         if (dData.angle > 90f)
             dData.angle = 180f - dData.angle;
+
+        if (rotationBuffer.Count > 0) {
+            rotationBuffer.RemoveAt(0);
+            rotationBuffer.Add(transform.rotation);
+        }
 
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FL]) * motorStrength, bladeFL.position);
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FR]) * motorStrength, bladeFR.position);
@@ -177,18 +187,26 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     public void CalculateFitness() {
         if (!IsInContact && transform.position.y < 14f) {
-            airborneFitness += Time.deltaTime;
+            airborneFitness += Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
 
-            rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime;
+            rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime * DroneServerHandler.StaticInstance.rotationFitnessScaler;
+
+            float sumRotationDelta = 0f;
+            for (int i = 1; i < rotationBuffer.Count; i++) {
+                sumRotationDelta += Quaternion.Angle(rotationBuffer[i - 1], rotationBuffer[i]);
+            }
+            sumRotationDelta = sumRotationDelta / 360f;
+            smoothnessFitness -= sumRotationDelta * Time.deltaTime * DroneServerHandler.StaticInstance.smoothnessFitnessScaler;
 
             float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
             distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
-            distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime  * 0.5f;
+            distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime  * DroneServerHandler.StaticInstance.distanceFitnessScaler;
         }
 
         if (transform.position.y > 18f || transform.position.y < -1f) {
             airborneFitness = 0;
             rotationFitness = 0;
+            smoothnessFitness = 0;
             distFitness = 0;
         }
 
@@ -203,6 +221,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
         distFitness = 0;
         rotationFitness = 0;
+        smoothnessFitness = 0;
         airborneFitness = 0;
         Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
 
@@ -212,6 +231,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
                 (Vector3.forward * Mathf.FloorToInt(data.id / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
 
         transform.rotation = Quaternion.identity;
+
+        rotationBuffer.Clear();
+        for (int i = 0; i < SMOOTHNESSS_ROTATION_BUFFER_COUNT; i++) {
+            rotationBuffer.Add(transform.rotation);
+        }
 
         if (rb != null) {
             rb.velocity = Vector3.zero;

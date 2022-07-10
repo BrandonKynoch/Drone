@@ -14,6 +14,8 @@ public class DroneUI : MonoBehaviour {
     [SerializeField]
     private Text rotationFitnessText;
     [SerializeField]
+    private Text smoothnesFitnessText;
+    [SerializeField]
     private Text airborneFitnessText;
 
     private CanvasGroup cg;
@@ -32,8 +34,8 @@ public class DroneUI : MonoBehaviour {
     public void Update() {
         distFitnessText.text = drone.DistFitness.ToString();
         rotationFitnessText.text = drone.RotationFitness.ToString();
+        smoothnesFitnessText.text = drone.SmoothnessFitness.ToString();
         airborneFitnessText.text = drone.AirborneFitness.ToString();
-
 
         transform.position = drone.transform.position;
         transform.rotation = Quaternion.LookRotation(-(Camera.main.transform.position - transform.position), Vector3.up);

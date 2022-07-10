@@ -269,7 +269,7 @@ namespace SimServer {
             nns.Sort();
 
             int totalCount = nns.Count;
-            double keep = 0.3; // Keep the top percentage completely unmodified
+            double keep = 0.2; // Keep the top percentage completely unmodified
             double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
             //double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
             double crossOverPopulation = 1.3f;
@@ -283,7 +283,7 @@ namespace SimServer {
 
             // Discard bottom
             for (int i = 0; i < discardCount; i++) {
-                nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, keepCount)]);
+                nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, totalCount - discardCount)]);
             }
 
             // Perform crossovers

@@ -13,6 +13,11 @@ public class DroneServerHandler : MonoBehaviour {
     public GameObject dronePrefab;
     public Transform spawnTransform;
 
+    public float distanceFitnessScaler = 1;
+    public float rotationFitnessScaler = 1;
+    public float smoothnessFitnessScaler = 1;
+    public float airborneFitnessScaler = 1;
+
     //private List<Drone> drones = new List<Drone>();
     private Drone[] drones = new Drone[MAX_DRONE_COUNT];
     private int droneCount = 0;

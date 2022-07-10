@@ -63,15 +63,28 @@ void drone_logic_loop() {
     struct json_object* response_NN_folder_json;
     char* response_NN_folder;
 
+    struct timeval timea, timeb;
+    gettimeofday(&timea, 0);
+
     while (TRUE) {
         motor_output(&drone_data);
 
         // Receive sensore data respone from server - position, distance sensors etc.
         server_response = receive_server_message(&drone_data);
 
-        // TODO: Implement VSync - subtract computation time from last cycle to keep refresh rate constant
+        gettimeofday(&timeb, 0);
+
+        useconds_t elapsed_time = timeb.tv_usec - timea.tv_usec;
+        useconds_t sleep_time = 32000 - elapsed_time;
+        if (sleep_time > 32000) {
+            sleep_time = 32000;
+        }
+        printf("Sleep time: %d\n", (int) sleep_time);
+
         // usleep(32000); // sleep for 32 milliseconds - 30HZ
-        usleep(20000);
+        usleep(sleep_time);
+
+        gettimeofday(&timea, 0);
 
         // Decode server response
         json_response = json_tokener_parse(server_response);
@@ -210,6 +223,9 @@ void motor_output_from_controller(struct drone_data* drone, double x_in, double 
         x_out = x_out / v_length;
         y_out = y_out / v_length;
     }
+
+    x_out = x_out * fabs(x_out);
+    y_out = y_out * fabs(y_out);
 
     // Convert
     drone->m_fl = compute_motor_output_from_offset(x_out, y_out, -1, 1);

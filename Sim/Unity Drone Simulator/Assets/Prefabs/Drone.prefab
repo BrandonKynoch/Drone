@@ -226,7 +226,7 @@ Transform:
   m_Children:
   - {fileID: 2773806315465792529}
   - {fileID: 2282108832137225285}
-  - {fileID: 3295762524695774405}
+  - {fileID: 3483996633781920868}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -595,7 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e6915d139835e347b46cddd4e5f84ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &1648348868977111726
+--- !u!1001 &794144707637613071
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -636,7 +636,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4277568752142612075, guid: fa8c1f808a22f433f82691926fb5b986, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 230
+      value: 290
       objectReference: {fileID: 0}
     - target: {fileID: 4277568752142612075, guid: fa8c1f808a22f433f82691926fb5b986, type: 3}
       propertyPath: m_LocalPosition.x
@@ -686,6 +686,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4277568752142612077, guid: fa8c1f808a22f433f82691926fb5b986, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4277568752142612079, guid: fa8c1f808a22f433f82691926fb5b986, type: 3}
       propertyPath: m_Name
       value: DroneUI
@@ -696,8 +700,8 @@ PrefabInstance:
       objectReference: {fileID: 8360048411996139126}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fa8c1f808a22f433f82691926fb5b986, type: 3}
---- !u!224 &3295762524695774405 stripped
+--- !u!224 &3483996633781920868 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4277568752142612075, guid: fa8c1f808a22f433f82691926fb5b986, type: 3}
-  m_PrefabInstance: {fileID: 1648348868977111726}
+  m_PrefabInstance: {fileID: 794144707637613071}
   m_PrefabAsset: {fileID: 0}
