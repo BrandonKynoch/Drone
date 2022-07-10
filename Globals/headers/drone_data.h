@@ -24,12 +24,22 @@ struct drone_data {
     struct neural_data* rotation_neural;
     struct neural_data* combine_neural;
 
-    // Sensor readings
+    /// SENSOR READINGS /////////////////////////////////////////
     double circle_sensor_array[DRONE_CIRCLE_SENSOR_COUNT];
     double sensor_top;
     double sensor_bottom;
+    /// SENSOR READINGS /////////////////////////////////////////
 
-    struct time_buffer* sensor_time_buffer; // Used as input to NN
+    /// ROTATION READINGS ///////////////////////////////////////
+    double rotation_x;
+    double rotation_y;
+    double rotation_z;
+    /// ROTATION READINGS ///////////////////////////////////////
+
+    /// NN INPUTS ///////////////////////////////////////////////
+    struct time_buffer* sensor_time_buffer;
+    struct time_buffer* rotation_time_buffer;
+    /// NN INPUTS ///////////////////////////////////////////////
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs
     struct json_object* m_json; // Motor json for unity sim

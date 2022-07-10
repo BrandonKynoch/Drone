@@ -7,6 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
+ 
 # GNU Make 3.81
 # Copyright (C) 2006  Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.
@@ -14,8 +15,9 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 # PARTICULAR PURPOSE.
 
 # This program built for i386-apple-darwin11.3.0
+ 
 
-# Make data base, printed on Fri Jul  8 21:23:20 2022
+# Make data base, printed on Sun Jul 10 12:08:49 2022
 
 # Variables
 
@@ -64,7 +66,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.N2ay4ciVhV/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.yVnuC6WzDV/Listeners
 # makefile (from `makefile', line 5)
 headers_dir = ./headers
 # automatic
@@ -174,7 +176,7 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1347
+VSCODE_PID = 1573
 # variable set hash-table stats:
 # Load=78/1024=8%, Rehash=0, Collisions=2/135=1%
 
@@ -283,7 +285,6 @@ clean:
 # ? := 
 # variable set hash-table stats:
 # Load=8/32=25%, Rehash=0, Collisions=1/14=7%
- 
 #  commands to execute (from `makefile', line 60):
 	rm -r $(obj_dir)
 	mkdir $(obj_dir)
@@ -307,6 +308,7 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 #  File has not been updated.
 
 # Not a target:
+ 
 ../Globals/obj/utilities.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
@@ -325,10 +327,10 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Fri Jul  8 21:23:20 2022
+# Finished Make data base on Sun Jul 10 12:08:49 2022
 
 
-# Make data base, printed on Fri Jul  8 21:23:20 2022
+# Make data base, printed on Sun Jul 10 12:08:49 2022
 
 # Variables
 
@@ -363,7 +365,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.N2ay4ciVhV/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.yVnuC6WzDV/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -447,7 +449,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1347
+VSCODE_PID = 1573
 # variable set hash-table stats:
 # Load=58/1024=6%, Rehash=0, Collisions=1/92=1%
 
@@ -532,7 +534,7 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Fri Jul  8 21:23:20 2022
+# Finished Make data base on Sun Jul 10 12:08:49 2022
 
  
 make: *** [all] Error 1

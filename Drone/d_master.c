@@ -39,19 +39,21 @@ void init_and_test_NN_from_folder(char* folder) {
     print_matrix("NN output", drone_data.combine_neural->output_layer, drone_data.combine_neural->weights_row_count[drone_data.combine_neural->weights_matrix_count-1], 1);
     printf("\n\n");
 
-    printf("Creating sensor timebuffer\n");
+    // INIT INPUT LAYERS
+    int sensor_input_size = DRONE_CIRCLE_SENSOR_COUNT + 2; // Circle sensors + top sensor + bottom sensor
+    ASSERT((int) network_input_layer_size(drone_data.sensor_neural) % sensor_input_size == 0);
+    int sensor_timesteps = (int) (network_input_layer_size(drone_data.sensor_neural) / sensor_input_size);
+    drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, sensor_timesteps);
 
-    // input layer size 
-    // drone_data.neural->weights_row_count[0]
-    int sensor_input_size = DRONE_CIRCLE_SENSOR_COUNT + 2;
-    ASSERT((int) (drone_data.sensor_neural->weights_row_count[0]) % sensor_input_size == 0);
-
-    int timesteps = (int) (drone_data.sensor_neural->weights_row_count[0] / sensor_input_size) - 1; // IMPORTANT: Remember to -1
-    drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, timesteps);
+    int rotation_input_size = 3; // x, y, z axis
+    ASSERT((int) network_input_layer_size(drone_data.rotation_neural) % rotation_input_size == 0);
+    int rotation_timesteps = (int) (network_input_layer_size(drone_data.rotation_neural) / rotation_input_size);
+    drone_data.rotation_time_buffer = init_timebuffer(rotation_input_size, rotation_timesteps);
 }
 
 void drone_logic_loop() {
     ASSERT(network_input_layer_size(drone_data.sensor_neural) % (DRONE_CIRCLE_SENSOR_COUNT + 2) == 0);
+    ASSERT(network_input_layer_size(drone_data.rotation_neural) % 3 == 0);
 
     char* server_response;
     struct json_object* json_response;
@@ -83,6 +85,9 @@ void drone_logic_loop() {
                 free(drone_data.sensor_neural);
                 free(drone_data.rotation_neural);
                 free(drone_data.combine_neural);
+
+                free(drone_data.sensor_time_buffer);
+                free(drone_data.rotation_time_buffer);
 
                 json_object_object_get_ex(json_response, "nnFolder", &response_NN_folder_json);
                 
@@ -124,6 +129,7 @@ void drone_logic_loop() {
 }
 
 void init_drone_sensor_data(struct drone_data* drone) {
+    /// INFARED SENSORS //////////////////////////////////////
     for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
         drone->circle_sensor_array[i] = SENSOR_DEFAULT;
     }
@@ -134,9 +140,21 @@ void init_drone_sensor_data(struct drone_data* drone) {
     for (int i = 0; i < timebuffer_total_size(drone->sensor_time_buffer); i++) {
         drone->sensor_time_buffer->full_buffer[i] = SENSOR_DEFAULT;
     }
+    /// INFARED SENSORS //////////////////////////////////////
+
+    /// ROTATION DATA ////////////////////////////////////////
+    drone->rotation_x = 0;
+    drone->rotation_y = 0;
+    drone->rotation_z = 0;
+
+    for (int i = 0; i < timebuffer_total_size(drone->rotation_time_buffer); i++) {
+        drone->rotation_time_buffer->full_buffer[i] = 0;
+    }
+    /// ROTATION DATA ////////////////////////////////////////
 }
 
 void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
+    /// INFARED SENSORS //////////////////////////////////////
     struct json_object* sensor_data_array;
     struct json_object* sensor_data;
     json_object_object_get_ex(json_in, "circleSensorData", &sensor_data_array);
@@ -150,22 +168,33 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
         drone->circle_sensor_array[i] = json_object_get_double(sensor_data);
     }
 
-    struct json_object* sensor_top;
-    json_object_object_get_ex(json_in, "sensorTop", &sensor_top);
-    drone->sensor_top = json_object_get_double(sensor_top);
+    assign_double_from_json(json_in, "sensorTop", &drone->sensor_top);
+    assign_double_from_json(json_in, "sensorBottom", &drone->sensor_bottom);
+    /// INFARED SENSORS //////////////////////////////////////
 
-    struct json_object* sensor_bottom;
-    json_object_object_get_ex(json_in, "sensorBottom", &sensor_bottom);
-    drone->sensor_bottom = json_object_get_double(sensor_bottom);
+    /// ROTATION DATA ////////////////////////////////////////
+    assign_double_from_json(json_in, "rotationX", &drone->rotation_x);
+    assign_double_from_json(json_in, "rotationY", &drone->rotation_y);
+    assign_double_from_json(json_in, "rotationZ", &drone->rotation_z);
+    /// ROTATION DATA ////////////////////////////////////////
 }
 
 void set_NN_input_from_sensor_data(struct drone_data* drone) {
+    /// INFARED SENSORS //////////////////////////////////////
     timebuffer_set(drone->sensor_time_buffer, drone_data.circle_sensor_array, DRONE_CIRCLE_SENSOR_COUNT, 0);
     drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone_data.sensor_top;
     drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone_data.sensor_bottom;
     timebuffer_increment(drone->sensor_time_buffer);
 
     timebuffer_copy_corrected(drone->sensor_time_buffer, drone_data.sensor_neural->input_layer);
+    /// INFARED SENSORS //////////////////////////////////////
+
+    /// ROTATION DATA ////////////////////////////////////////
+    drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x;
+    drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y;
+    drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z;
+    timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);
+    /// ROTATION DATA ////////////////////////////////////////
 }
 
 void motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {
@@ -260,6 +289,12 @@ char* request_target_NN_folder_from_server() {
     printf("NN target file:\n\t%s\n", target_folder_copy);
 
     return target_folder_copy;
+}
+
+void assign_double_from_json(struct json_object* json_in, const char* field_name, double* d) {
+    struct json_object* j;
+    json_object_object_get_ex(json_in, field_name, &j);
+    *d = json_object_get_double(j);
 }
 
 void test_motor_controller() {

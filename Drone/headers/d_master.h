@@ -67,6 +67,8 @@ void init_and_test_NN_from_folder(char* folder);
 // returns the file address of the NN to load
 char* request_target_NN_folder_from_server();
 
+void assign_double_from_json(struct json_object* json_in, const char* field_name, double* d);
+
 void test_motor_controller();
 
 // ############################################################################

@@ -35,7 +35,7 @@ struct time_buffer* init_timebuffer(int size, int time_steps) {
     tb->single_timestep_size = size;
     tb->timesteps = time_steps;
 
-    tb->full_buffer = malloc(size * time_steps);
+    tb->full_buffer = malloc(size * sizeof(double) * time_steps);
     tb->buffer = tb->full_buffer;
     tb->buffer_i = 0;
 
