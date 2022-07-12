@@ -33,18 +33,20 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private int contactsCount = 0;
 
     /// Fitness Vars /////////////////////////////////////////
-    private float airborneFitness = 0;
+    private const float IDEAL_HEIGHT = 1.1f;
+
+    private float heightFitness = 0;
     private float rotationFitness = 0;
     private float smoothnessFitness = 0;
     private float distFitness = 0;
 
     public float SumFitness {
         get {
-            return airborneFitness + rotationFitness + smoothnessFitness + distFitness;
+            return heightFitness + rotationFitness + smoothnessFitness + distFitness;
         }
     }
 
-    public float AirborneFitness { get { return airborneFitness; } }
+    public float AirborneFitness { get { return heightFitness; } }
     public float RotationFitness { get { return rotationFitness; } }
     public float SmoothnessFitness { get { return smoothnessFitness; } }
     public float DistFitness { get { return distFitness; } }
@@ -58,6 +60,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
 
     private List<Quaternion> rotationBuffer = new List<Quaternion>();
+
+    private float distFromGround = 0;
     /// Debug Vars /////////////////////////////////////////
 
     /// Properties /////////////////////////////////////////
@@ -106,6 +110,14 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         if (rotationBuffer.Count > 0) {
             rotationBuffer.RemoveAt(0);
             rotationBuffer.Add(transform.rotation);
+        }
+
+        RaycastHit groundHit = new RaycastHit();
+        Physics.Raycast(transform.position, Vector3.down, out groundHit);
+        if (groundHit.collider != null) {
+            distFromGround = groundHit.distance;
+        } else {
+            distFromGround = float.PositiveInfinity;
         }
 
         rb.AddForceAtPosition(transform.up * ((float) data.motorOutputs[DroneData.FL]) * motorStrength, bladeFL.position);
@@ -186,25 +198,28 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void CalculateFitness() {
-        if (!IsInContact && transform.position.y < 14f) {
-            airborneFitness += Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
+        if (!IsInContact) {
+            // ax^2 + c
+            heightFitness += (Utilities.ClampMin((20 + (-0.7f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f) * Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
 
-            rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime * DroneServerHandler.StaticInstance.rotationFitnessScaler;
+            if (!dData.upsideDown) {
+                rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime * DroneServerHandler.StaticInstance.rotationFitnessScaler;
 
-            float sumRotationDelta = 0f;
-            for (int i = 1; i < rotationBuffer.Count; i++) {
-                sumRotationDelta += Quaternion.Angle(rotationBuffer[i - 1], rotationBuffer[i]);
+                float sumRotationDelta = 0f;
+                for (int i = 1; i < rotationBuffer.Count; i++) {
+                    sumRotationDelta += Quaternion.Angle(rotationBuffer[i - 1], rotationBuffer[i]);
+                }
+                sumRotationDelta = sumRotationDelta / 360f;
+                smoothnessFitness -= sumRotationDelta * Time.deltaTime * DroneServerHandler.StaticInstance.smoothnessFitnessScaler;
             }
-            sumRotationDelta = sumRotationDelta / 360f;
-            smoothnessFitness -= sumRotationDelta * Time.deltaTime * DroneServerHandler.StaticInstance.smoothnessFitnessScaler;
 
             float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
             distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
             distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime  * DroneServerHandler.StaticInstance.distanceFitnessScaler;
         }
 
-        if (transform.position.y > 18f || transform.position.y < -1f) {
-            airborneFitness = 0;
+        if (transform.position.y < -1f) {
+            heightFitness = 0;
             rotationFitness = 0;
             smoothnessFitness = 0;
             distFitness = 0;
@@ -222,7 +237,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         distFitness = 0;
         rotationFitness = 0;
         smoothnessFitness = 0;
-        airborneFitness = 0;
+        heightFitness = 0;
         Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
 
         transform.position =

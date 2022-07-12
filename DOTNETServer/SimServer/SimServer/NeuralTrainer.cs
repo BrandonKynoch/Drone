@@ -270,21 +270,21 @@ namespace SimServer {
 
             int totalCount = nns.Count;
             double keep = 0.2; // Keep the top percentage completely unmodified
-            double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
+            //double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
             //double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
-            double crossOverPopulation = 1.3f;
-            double crossOverAmount = 0.2f; // Amount of genes to take when crossing over
-            double mutationProbability = 0.5; // Likelyhood that a specimin will have any mutation
-            double speciminMutationProbability = 0.1f; // When a specimin is mutating, what amount of genes should change
-            double speciminMutationAmount = 0.5f; // When a specimin is mutating, by how much should a single genome change
+            double crossOverPopulation = 0.9f;
+            double crossOverAmount = 0.1f; // Amount of genes to take when crossing over
+            double mutationProbability = 0.6; // Likelyhood that a specimin will have any mutation
+            double speciminMutationProbability = 0.2f; // When a specimin is mutating, what amount of genes should change
+            double speciminMutationAmount = 0.1f; // When a specimin is mutating, by how much should a single genome change
 
             int keepCount = (int)Math.Ceiling(((double)totalCount) * keep);
-            int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
+            //int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
 
             // Discard bottom
-            for (int i = 0; i < discardCount; i++) {
-                nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, totalCount - discardCount)]);
-            }
+            //for (int i = 0; i < discardCount; i++) {
+            //    nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, totalCount - discardCount)]);
+            //}
 
             // Perform crossovers
             for (int i = 0; i < totalCount * crossOverPopulation; i++) {

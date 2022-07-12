@@ -45,7 +45,7 @@ void init_and_test_NN_from_folder(char* folder) {
     int sensor_timesteps = (int) (network_input_layer_size(drone_data.sensor_neural) / sensor_input_size);
     drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, sensor_timesteps);
 
-    int rotation_input_size = 3; // x, y, z axis
+    int rotation_input_size = 2; // x, y, z axis
     ASSERT((int) network_input_layer_size(drone_data.rotation_neural) % rotation_input_size == 0);
     int rotation_timesteps = (int) (network_input_layer_size(drone_data.rotation_neural) / rotation_input_size);
     drone_data.rotation_time_buffer = init_timebuffer(rotation_input_size, rotation_timesteps);
@@ -53,7 +53,7 @@ void init_and_test_NN_from_folder(char* folder) {
 
 void drone_logic_loop() {
     ASSERT(network_input_layer_size(drone_data.sensor_neural) % (DRONE_CIRCLE_SENSOR_COUNT + 2) == 0);
-    ASSERT(network_input_layer_size(drone_data.rotation_neural) % 3 == 0);
+    ASSERT(network_input_layer_size(drone_data.rotation_neural) % 2 == 0);
 
     char* server_response;
     struct json_object* json_response;
@@ -129,6 +129,11 @@ void drone_logic_loop() {
                     drone_data.combine_neural->output_layer[3]
                 );
 
+                // drone_data.m_fl = (drone_data.combine_neural->output_layer[0] * 2) - 1;
+                // drone_data.m_fr = (drone_data.combine_neural->output_layer[1] * 2) - 1;
+                // drone_data.m_br = (drone_data.combine_neural->output_layer[2] * 2) - 1;
+                // drone_data.m_bl = (drone_data.combine_neural->output_layer[3] * 2) - 1;
+
                 printf("\n\n\n\n");
                 print_motor_output(&drone_data);
                 break;
@@ -203,9 +208,10 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     /// INFARED SENSORS //////////////////////////////////////
 
     /// ROTATION DATA ////////////////////////////////////////
-    drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x;
-    drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y;
-    drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z;
+    drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x / 90;
+    drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y / 90;
+    // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z / 90;
+    timebuffer_increment(drone->rotation_time_buffer);
     timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);
     /// ROTATION DATA ////////////////////////////////////////
 }
