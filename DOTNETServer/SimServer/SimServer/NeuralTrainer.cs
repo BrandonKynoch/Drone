@@ -105,10 +105,12 @@ namespace SimServer {
 
                         Console.WriteLine("CONTINUING FROM:\n\t" + continueFromDirFull + "\n\n");
 
-                        previousTrainingDir = new DirectoryInfo(continueFromDirFull);
-                    }
+                        currentTrainingDir = new DirectoryInfo(continueFromDirFull);
 
-                    GeneticNNUpdates(startNew: true);
+                        GeneticNNUpdates(startNew: false);
+                    } else {
+                        GeneticNNUpdates(startNew: true);
+                    }
                 }
             }
         }
@@ -120,7 +122,7 @@ namespace SimServer {
         /// <param name="continueFrom"></param>
         /// <param name="targetFolder"></param>
         public void GeneticNNUpdates(bool startNew = false) {
-            bool isSuperEvolution = (currentEpoch % SUPER_EVOLUTION_CYCLE) == 0;
+            bool isSuperEvolution = (currentEpoch % SUPER_EVOLUTION_CYCLE) == 0 && sessionStarted;
 
             string targetFolderName = currentEpoch.ToString();
             if (isSuperEvolution)
@@ -238,6 +240,11 @@ namespace SimServer {
 
         private void CullNNS(string inDirectory, int keepCount) {
             List<Utils.FileData> nnsFDs = Utils.ExtractFileData(Directory.GetDirectories(inDirectory));
+
+            if (nnsFDs.Count <= keepCount) {
+                return; // There is nothing to cull
+            }
+
             List<NNMetaData> nns = new List<NNMetaData>();
             for (int i = 0; i < nnsFDs.Count; i++) {
                 nns.Add(new NNMetaData(new Utils.FileData(nnsFDs[i].fullFilePath + "/" + META_FILE + NN_META_FILE_EXTENSION)));
