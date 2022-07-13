@@ -71,11 +71,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/CSVConverter/CSVConverter.csproj",
+      "projectUniqueName": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/CSVConverter/CSVConverter.csproj",
       "projectName": "CSVConverter",
-      "projectPath": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/CSVConverter/CSVConverter.csproj",
+      "projectPath": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/CSVConverter/CSVConverter.csproj",
       "packagesPath": "/Users/brandonkynoch/.nuget/packages/",
-      "outputPath": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/CSVConverter/obj/",
+      "outputPath": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/CSVConverter/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/brandonkynoch/.nuget/NuGet/NuGet.Config"
@@ -90,8 +90,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj": {
-              "projectPath": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj"
+            "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj": {
+              "projectPath": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj"
             }
           }
         }
@@ -120,7 +120,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.203/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.301/RuntimeIdentifierGraph.json"
       }
     }
   }
