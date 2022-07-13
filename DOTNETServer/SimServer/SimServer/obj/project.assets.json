@@ -53,11 +53,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj",
+      "projectUniqueName": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj",
       "projectName": "SimServer",
-      "projectPath": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj",
+      "projectPath": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/SimServer/SimServer.csproj",
       "packagesPath": "/Users/brandonkynoch/.nuget/packages/",
-      "outputPath": "/Users/brandonkynoch/Desktop/Projects/Drone/DOTNETServer/SimServer/SimServer/obj/",
+      "outputPath": "/Users/brandonkynoch/Desktop/Repositories/Drone/DOTNETServer/SimServer/SimServer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/brandonkynoch/.nuget/NuGet/NuGet.Config"
@@ -104,7 +104,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.301/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.203/RuntimeIdentifierGraph.json"
       }
     }
   }

@@ -11,9 +11,9 @@ namespace SimServer {
 
         /// CONSTANTS //////////////////////////////////////////////////////////
         private const string ROOT_TRAINING_DIR = "/Users/brandonkynoch/Desktop/Projects/Drone/Training Data";
-        private const string META_FILE = "Drone";
-        private const string NN_FILE_EXTENSION = ".NN";
-        private const string NN_META_FILE_EXTENSION = ".NNM";
+        public const string META_FILE = "Drone";
+        public const string NN_FILE_EXTENSION = ".NN";
+        public const string NN_META_FILE_EXTENSION = ".NNM";
 
         private const double EPOCH_RUN_TIME = 6;   // Time for a single epoch to execute in seconds
         private const int SUPER_EVOLUTION_CYCLE = 10; // Super evolution every n epochs
@@ -307,8 +307,8 @@ namespace SimServer {
             Console.Write("Writing NN files: ");
             foreach (NNGroupData ngd in nns) {
                 Console.Write(".");
-                Directory.Delete(ngd.nnFolder, true);
-                Directory.CreateDirectory(ngd.nnFolder);
+                Directory.Delete(ngd.nnFolder.fullFilePath, true);
+                Directory.CreateDirectory(ngd.nnFolder.fullFilePath);
                 ngd.WriteToFile();
             }
             Console.WriteLine(" Finished");
@@ -383,164 +383,169 @@ namespace SimServer {
                 }
             }
         }
+    }
 
 
 
-        // Represents a complex NN consisting of multiple NN shapes
-        public class NNGroupData : IComparable<NNGroupData> {
-            public string nnFolder;
 
-            private Dictionary<string, NNData> nns = new Dictionary<string, NNData>(); // NN name : nnData
 
-            private double fitness; // Higher is better
+    // Represents a complex NN consisting of multiple NN shapes
+    public class NNGroupData : IComparable<NNGroupData> {
+        public Utils.FileData nnFolder;
 
-            public NNGroupData(string _nnFolder, string metaFile) {
-                this.nnFolder = _nnFolder;
+        private Dictionary<string, NNData> nns = new Dictionary<string, NNData>(); // NN name : nnData
+        public Dictionary<string, NNData>.ValueCollection NNs {
+            get { return nns.Values; }
+        }
 
-                // Fetch all NNs in nnFolder
-                List<Utils.FileData> filesInNNFolder = Utils.ExtractFileData(Directory.GetFiles(_nnFolder));
-                string nnFileExtensionWithoutDot = NN_FILE_EXTENSION.Replace(".", "");
-                foreach (Utils.FileData fd in filesInNNFolder) {
-                    if (fd.fileExtension.Equals(nnFileExtensionWithoutDot)) {
-                        nns.Add(fd.fileName, new NNData(fd.fullFilePath));
-                    }
-                }
+        private double fitness; // Higher is better
 
-                // Get fitness from meta file
-                string meta = File.ReadAllText(metaFile);
-                JObject metaJson = JObject.Parse(meta);
-                fitness = metaJson.GetValue("fitness").Value<double>();
-            }
+        public NNGroupData(string _nnFolder, string metaFile) {
+            this.nnFolder = new Utils.FileData(_nnFolder);
 
-            public void CopyData(NNGroupData from, bool useOriginal = true) {
-                foreach (string nnKey in from.nns.Keys) {
-                    if (nns.ContainsKey(nnKey)) {
-                        nns[nnKey].CopyData(from.nns[nnKey], useOriginal);
-                    }
+            // Fetch all NNs in nnFolder
+            List<Utils.FileData> filesInNNFolder = Utils.ExtractFileData(Directory.GetFiles(_nnFolder));
+            string nnFileExtensionWithoutDot = NeuralTrainer.NN_FILE_EXTENSION.Replace(".", "");
+            foreach (Utils.FileData fd in filesInNNFolder) {
+                if (fd.fileExtension.Equals(nnFileExtensionWithoutDot)) {
+                    nns.Add(fd.fileName, new NNData(fd.fullFilePath));
                 }
             }
 
-            public static void CrossOver(NNGroupData a, NNGroupData b, double crossOverProbability) {
-                foreach (string nnKey in a.nns.Keys) {
-                    if (b.nns.ContainsKey(nnKey)) {
-                        NNData.CrossOver(a.nns[nnKey], b.nns[nnKey], crossOverProbability);
-                    }
-                }
-            }
+            // Get fitness from meta file
+            string meta = File.ReadAllText(metaFile);
+            JObject metaJson = JObject.Parse(meta);
+            fitness = metaJson.GetValue("fitness").Value<double>();
+        }
 
-            public void Mutate(double mutationProbability, double mutationAmount) {
-                foreach (NNData nn in nns.Values) {
-                    nn.Mutate(mutationProbability, mutationAmount);
+        public void CopyData(NNGroupData from, bool useOriginal = true) {
+            foreach (string nnKey in from.nns.Keys) {
+                if (nns.ContainsKey(nnKey)) {
+                    nns[nnKey].CopyData(from.nns[nnKey], useOriginal);
                 }
-            }
-
-            public void WriteToFile() {
-                foreach (NNData nn in nns.Values) {
-                    nn.WriteToFile();
-                }
-            }
-
-            // Sort in descending order of fitness
-            public int CompareTo(NNGroupData other) {
-                return other.fitness.CompareTo(this.fitness);
             }
         }
 
-        // Represents a single NN shape
-        public class NNData {
-            public string nnFile;
-
-            public byte[] rawHeader;
-            public double[] originalData;
-            public double[] modifiedData;
-            public int geneticDataIndex; // The start index of data that should be modified (i.e. after header)
-
-            public NNData(string fromNNFile) {
-                nnFile = fromNNFile;
-
-                byte[] rawData = File.ReadAllBytes(fromNNFile);
-                Int32 neuralSize = BitConverter.ToInt32(rawData, 0);
-
-                geneticDataIndex = 4 * // size of int
-                    (1 + // neural size
-                    neuralSize + // neural shape
-                    (neuralSize - 1)); // activations
-
-                rawHeader = new byte[geneticDataIndex];
-                for (int i = 0; i < geneticDataIndex; i++) {
-                    rawHeader[i] = rawData[i];
-                }
-
-                int doubleCount = (rawData.Length - geneticDataIndex) / 8; // number of doubles in weights and biases combined
-                originalData = new double[doubleCount];
-                modifiedData = new double[doubleCount];
-
-                for (int i = 0; i < doubleCount; i++) {
-                    originalData[i] = BitConverter.ToDouble(rawData, geneticDataIndex + (i * 8)); // 8bytes
-                    modifiedData[i] = originalData[i];
+        public static void CrossOver(NNGroupData a, NNGroupData b, double crossOverProbability) {
+            foreach (string nnKey in a.nns.Keys) {
+                if (b.nns.ContainsKey(nnKey)) {
+                    NNData.CrossOver(a.nns[nnKey], b.nns[nnKey], crossOverProbability);
                 }
             }
+        }
 
-            public void WriteToFile() {
-                if (File.Exists(nnFile)) {
-                    File.Delete(nnFile);
-                }
-                using (FileStream fs = new FileStream(nnFile, FileMode.CreateNew, FileAccess.Write)) {
-                    fs.Write(rawHeader, 0, rawHeader.Length);
-                    byte[] dataBytes = new byte[originalData.Length * 8];
-                    Buffer.BlockCopy(modifiedData, 0, dataBytes, 0, dataBytes.Length);
-                    fs.Write(dataBytes, 0, dataBytes.Length);
-                    fs.Close();
-                }
+        public void Mutate(double mutationProbability, double mutationAmount) {
+            foreach (NNData nn in nns.Values) {
+                nn.Mutate(mutationProbability, mutationAmount);
+            }
+        }
+
+        public void WriteToFile() {
+            foreach (NNData nn in nns.Values) {
+                nn.WriteToFile();
+            }
+        }
+
+        // Sort in descending order of fitness
+        public int CompareTo(NNGroupData other) {
+            return other.fitness.CompareTo(this.fitness);
+        }
+    }
+
+    // Represents a single NN shape
+    public class NNData {
+        public string nnFile;
+
+        public byte[] rawHeader;
+        public double[] originalData;
+        public double[] modifiedData;
+        public int geneticDataIndex; // The start index of data that should be modified (i.e. after header)
+
+        public NNData(string fromNNFile) {
+            nnFile = fromNNFile;
+
+            byte[] rawData = File.ReadAllBytes(fromNNFile);
+            Int32 neuralSize = BitConverter.ToInt32(rawData, 0);
+
+            geneticDataIndex = 4 * // size of int
+                (1 + // neural size
+                neuralSize + // neural shape
+                (neuralSize - 1)); // activations
+
+            rawHeader = new byte[geneticDataIndex];
+            for (int i = 0; i < geneticDataIndex; i++) {
+                rawHeader[i] = rawData[i];
             }
 
-            public void CopyData(NNData from, bool useOriginal = true) {
-                if (useOriginal) {
-                    for (int i = 0; i < modifiedData.Length; i++) {
-                        modifiedData[i] = from.originalData[i];
-                    }
-                } else {
-                    for (int i = 0; i < modifiedData.Length; i++) {
-                        modifiedData[i] = from.modifiedData[i];
-                    }
-                }
-            }
+            int doubleCount = (rawData.Length - geneticDataIndex) / 8; // number of doubles in weights and biases combined
+            originalData = new double[doubleCount];
+            modifiedData = new double[doubleCount];
 
-            public static void CrossOver(NNData from, NNData to, double crossOverProbability) {
-                for (int i = 0; i < from.originalData.Length; i++) {
-                    if (Utils.Random01Double() < crossOverProbability) {
-                        to.modifiedData[i] = from.modifiedData[i];
-                    }
-                }
+            for (int i = 0; i < doubleCount; i++) {
+                originalData[i] = BitConverter.ToDouble(rawData, geneticDataIndex + (i * 8)); // 8bytes
+                modifiedData[i] = originalData[i];
             }
+        }
 
-            public void Mutate(double mutationProbability, double mutationAmount) {
+        public void WriteToFile() {
+            if (File.Exists(nnFile)) {
+                File.Delete(nnFile);
+            }
+            using (FileStream fs = new FileStream(nnFile, FileMode.CreateNew, FileAccess.Write)) {
+                fs.Write(rawHeader, 0, rawHeader.Length);
+                byte[] dataBytes = new byte[originalData.Length * 8];
+                Buffer.BlockCopy(modifiedData, 0, dataBytes, 0, dataBytes.Length);
+                fs.Write(dataBytes, 0, dataBytes.Length);
+                fs.Close();
+            }
+        }
+
+        public void CopyData(NNData from, bool useOriginal = true) {
+            if (useOriginal) {
                 for (int i = 0; i < modifiedData.Length; i++) {
-                    if (Utils.Random01Double() < mutationProbability) {
-                        modifiedData[i] += Utils.RandomRange(-mutationAmount, mutationAmount);
-                    }
+                    modifiedData[i] = from.originalData[i];
+                }
+            } else {
+                for (int i = 0; i < modifiedData.Length; i++) {
+                    modifiedData[i] = from.modifiedData[i];
                 }
             }
         }
 
-        // Lightweight class that only loads meta data from text file
-        public class NNMetaData : IComparable<NNMetaData> {
-            public Utils.FileData nnMetaFile;
-
-            double fitness; // Higher is better
-
-            public NNMetaData(Utils.FileData metaFile) {
-                nnMetaFile = metaFile;
-
-                // Get fitness from meta file
-                string meta = File.ReadAllText(metaFile.fullFilePath);
-                JObject metaJson = JObject.Parse(meta);
-                fitness = metaJson.GetValue("fitness").Value<double>();
+        public static void CrossOver(NNData from, NNData to, double crossOverProbability) {
+            for (int i = 0; i < from.originalData.Length; i++) {
+                if (Utils.Random01Double() < crossOverProbability) {
+                    to.modifiedData[i] = from.modifiedData[i];
+                }
             }
+        }
 
-            public int CompareTo(NNMetaData other) {
-                return other.fitness.CompareTo(this.fitness);
+        public void Mutate(double mutationProbability, double mutationAmount) {
+            for (int i = 0; i < modifiedData.Length; i++) {
+                if (Utils.Random01Double() < mutationProbability) {
+                    modifiedData[i] += Utils.RandomRange(-mutationAmount, mutationAmount);
+                }
             }
+        }
+    }
+
+    // Lightweight class that only loads meta data from text file
+    public class NNMetaData : IComparable<NNMetaData> {
+        public Utils.FileData nnMetaFile;
+
+        double fitness; // Higher is better
+
+        public NNMetaData(Utils.FileData metaFile) {
+            nnMetaFile = metaFile;
+
+            // Get fitness from meta file
+            string meta = File.ReadAllText(metaFile.fullFilePath);
+            JObject metaJson = JObject.Parse(meta);
+            fitness = metaJson.GetValue("fitness").Value<double>();
+        }
+
+        public int CompareTo(NNMetaData other) {
+            return other.fitness.CompareTo(this.fitness);
         }
     }
 }
