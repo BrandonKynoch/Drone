@@ -342,6 +342,20 @@ extension Bool {
 
 
 
+extension URL {
+    var isDirectory: Bool? {
+        do {
+            return (try resourceValues(forKeys: [URLResourceKey.isDirectoryKey]).isDirectory)
+        }
+        catch let error {
+            print(error.localizedDescription)
+            return nil
+        }
+    }
+}
+
+
+
 
 
 

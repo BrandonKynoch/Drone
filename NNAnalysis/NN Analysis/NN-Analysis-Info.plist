@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ATSApplicationFontsPath</key>
+	<string>Fonts/</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fonts/Diavlo_BLACK.otf</string>
+		<string>Fonts/Diavlo_BOLD.otf</string>
+		<string>Fonts/Diavlo_BOOK.otf</string>
+		<string>Fonts/Diavlo_LIGHT.otf</string>
+		<string>Fonts/Diavlo_MEDIUM.otf</string>
+	</array>
+</dict>
+</plist>

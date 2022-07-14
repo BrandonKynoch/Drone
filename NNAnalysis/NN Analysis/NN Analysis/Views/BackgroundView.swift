@@ -8,10 +8,14 @@
 import SwiftUI
 
 struct BackgroundView: View {
+    @State var viewMode: ViewMode
+    
     var body: some View {
         ZStack {
             Rectangle()
-                .foregroundColor(S_COL_BACKGROUND)
+                .foregroundColor((viewMode == .light ? S_COL_BACKGROUND2: S_COL_BACKGROUND).opacity(0.2))
+            
+            PanelView(type: .behindWindow)
         }
         .ignoresSafeArea()
     }
@@ -19,6 +23,6 @@ struct BackgroundView: View {
 
 struct BackgroundView_Previews: PreviewProvider {
     static var previews: some View {
-        BackgroundView()
+        BackgroundView(viewMode: .light)
     }
 }

@@ -16,7 +16,8 @@ struct TextModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .font(.system(size: size, weight: weight, design: .default))
+//            .font(.system(size: size, weight: weight, design: .default))
+            .font(Font.custom("PT Mono", size: size).weight(weight))
             .modifier(ShadowModifier())
     }
 }
@@ -59,27 +60,48 @@ struct ShadowModifier: ViewModifier {
 
 
 
-
-//struct Blur: UIViewRepresentable {
-//    var effect: UIVisualEffect?
-//    func makeUIView(context: UIViewRepresentableContext<Self>) -> UIVisualEffectView { UIVisualEffectView()
-//    }
-//    func updateUIView(_ uiView: UIVisualEffectView, context: UIViewRepresentableContext<Self>) {
-//        uiView.effect = effect
-//    }
-//}
-
 struct PanelView: View {
+    var type: NSVisualEffectView.BlendingMode
     var body: some View {
         Rectangle()
-//            .background(
-//                Blur(effect: UIBlurEffect(style: .systemMaterialDark))
-//            )
+            .backgroundGaussianBlur(type: type)
             .foregroundColor(Color.clear)
             .cornerRadius(S_CORNER_RADIUS)
             .modifier(ShadowModifier())
     }
 }
+
+@available(OSX 11.0, *)
+public extension View {
+    func backgroundGaussianBlur(type: NSVisualEffectView.BlendingMode = .withinWindow) -> some View {
+        self
+            .background( VisualEffectView(type: type) )
+    }
+}
+
+@available(OSX 10.15, *)
+public struct VisualEffectView: NSViewRepresentable {
+    let type: NSVisualEffectView.BlendingMode
+    
+    public init(type: NSVisualEffectView.BlendingMode = .withinWindow) {
+        self.type = type
+    }
+    
+    public func makeNSView(context: Context) -> NSVisualEffectView {
+        NSVisualEffectView()
+    }
+    
+    public func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.blendingMode = type
+        nsView.material = .popover
+    }
+    
+    public typealias NSViewType = NSVisualEffectView
+}
+
+
+
+
 
 struct PanelSolidView: View {
     public let colour: Color
@@ -571,7 +593,7 @@ struct CustomProgressView: View {
     var body: some View {
         GeometryReader { g in
             ZStack {
-                PanelView()
+                PanelView(type: .withinWindow)
                 
                 HStack {
                     Rectangle()

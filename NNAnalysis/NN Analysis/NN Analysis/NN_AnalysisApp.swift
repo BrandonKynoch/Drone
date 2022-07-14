@@ -9,9 +9,21 @@ import SwiftUI
 
 @main
 struct NN_AnalysisApp: App {
+    init() {
+        let _ = DataHandler.singleton
+    }
+    
     var body: some Scene {
         WindowGroup {
             MainView()
+                .environmentObject(DataHandler.singleton)
+            //                .onAppear() {
+            //                    for family in NSFontManager.shared.availableFontFamilies {
+            //                        print(family)
+            //                    }
+            //                }
+        }.commands {
+            SidebarCommands()
         }
     }
 }

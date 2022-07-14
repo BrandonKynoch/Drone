@@ -15,10 +15,15 @@
 		6A46CD65287B24B300444ED3 /* SwiftUIExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD63287B24B300444ED3 /* SwiftUIExtras.swift */; };
 		6A46CD67287B268000444ED3 /* ValidationFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD66287B268000444ED3 /* ValidationFields.swift */; };
 		6A46CD6C287B299500444ED3 /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD6B287B299500444ED3 /* BackgroundView.swift */; };
+		6AD346D6287FA6FD008B6179 /* SideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD346D5287FA6FD008B6179 /* SideBarView.swift */; };
+		6AE903D7287F93340090D4C6 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 6AE903D6287F93340090D4C6 /* Fonts */; };
+		6AE903D9287F9E3E0090D4C6 /* NNGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903D8287F9E3E0090D4C6 /* NNGraphView.swift */; };
+		6AE903DB287F9FCC0090D4C6 /* FolderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */; };
+		6AE903DE287FA0FC0090D4C6 /* DataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903DD287FA0FC0090D4C6 /* DataHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		6A46CD4F287B242700444ED3 /* NN Analysis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NN Analysis.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A46CD4F287B242700444ED3 /* Neural Analysis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Neural Analysis.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A46CD52287B242700444ED3 /* NN_AnalysisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NN_AnalysisApp.swift; sourceTree = "<group>"; };
 		6A46CD54287B242700444ED3 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		6A46CD56287B242900444ED3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -28,6 +33,11 @@
 		6A46CD63287B24B300444ED3 /* SwiftUIExtras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftUIExtras.swift; sourceTree = "<group>"; };
 		6A46CD66287B268000444ED3 /* ValidationFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationFields.swift; sourceTree = "<group>"; };
 		6A46CD6B287B299500444ED3 /* BackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
+		6AD346D5287FA6FD008B6179 /* SideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideBarView.swift; sourceTree = "<group>"; };
+		6AE903D6287F93340090D4C6 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Fonts; path = "NN Analysis/Fonts"; sourceTree = SOURCE_ROOT; };
+		6AE903D8287F9E3E0090D4C6 /* NNGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NNGraphView.swift; sourceTree = "<group>"; };
+		6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSelectionView.swift; sourceTree = "<group>"; };
+		6AE903DD287FA0FC0090D4C6 /* DataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +62,7 @@
 		6A46CD50287B242700444ED3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6A46CD4F287B242700444ED3 /* NN Analysis.app */,
+				6A46CD4F287B242700444ED3 /* Neural Analysis.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,6 +70,8 @@
 		6A46CD51287B242700444ED3 /* NN Analysis */ = {
 			isa = PBXGroup;
 			children = (
+				6AE903DC287FA0E50090D4C6 /* Models */,
+				6AE903D6287F93340090D4C6 /* Fonts */,
 				6A46CD68287B297500444ED3 /* Views */,
 				6A46CD61287B24A600444ED3 /* Extras */,
 				6A46CD52287B242700444ED3 /* NN_AnalysisApp.swift */,
@@ -93,16 +105,27 @@
 			isa = PBXGroup;
 			children = (
 				6A46CD6B287B299500444ED3 /* BackgroundView.swift */,
+				6AE903D8287F9E3E0090D4C6 /* NNGraphView.swift */,
+				6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */,
+				6AD346D5287FA6FD008B6179 /* SideBarView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		6AE903DC287FA0E50090D4C6 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6AE903DD287FA0FC0090D4C6 /* DataHandler.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6A46CD4E287B242700444ED3 /* NN Analysis */ = {
+		6A46CD4E287B242700444ED3 /* Neural Analysis */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A46CD5E287B242900444ED3 /* Build configuration list for PBXNativeTarget "NN Analysis" */;
+			buildConfigurationList = 6A46CD5E287B242900444ED3 /* Build configuration list for PBXNativeTarget "Neural Analysis" */;
 			buildPhases = (
 				6A46CD4B287B242700444ED3 /* Sources */,
 				6A46CD4C287B242700444ED3 /* Frameworks */,
@@ -112,9 +135,9 @@
 			);
 			dependencies = (
 			);
-			name = "NN Analysis";
+			name = "Neural Analysis";
 			productName = "NN Analysis";
-			productReference = 6A46CD4F287B242700444ED3 /* NN Analysis.app */;
+			productReference = 6A46CD4F287B242700444ED3 /* Neural Analysis.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -132,7 +155,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 6A46CD4A287B242700444ED3 /* Build configuration list for PBXProject "NN Analysis" */;
+			buildConfigurationList = 6A46CD4A287B242700444ED3 /* Build configuration list for PBXProject "Neural Analysis" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -145,7 +168,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6A46CD4E287B242700444ED3 /* NN Analysis */,
+				6A46CD4E287B242700444ED3 /* Neural Analysis */,
 			);
 		};
 /* End PBXProject section */
@@ -155,6 +178,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6AE903D7287F93340090D4C6 /* Fonts in Resources */,
 				6A46CD5A287B242900444ED3 /* Preview Assets.xcassets in Resources */,
 				6A46CD57287B242900444ED3 /* Assets.xcassets in Resources */,
 			);
@@ -168,11 +192,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				6A46CD65287B24B300444ED3 /* SwiftUIExtras.swift in Sources */,
+				6AE903DB287F9FCC0090D4C6 /* FolderSelectionView.swift in Sources */,
 				6A46CD67287B268000444ED3 /* ValidationFields.swift in Sources */,
+				6AD346D6287FA6FD008B6179 /* SideBarView.swift in Sources */,
 				6A46CD64287B24B300444ED3 /* SwiftExtras.swift in Sources */,
+				6AE903DE287FA0FC0090D4C6 /* DataHandler.swift in Sources */,
 				6A46CD55287B242700444ED3 /* MainView.swift in Sources */,
 				6A46CD53287B242700444ED3 /* NN_AnalysisApp.swift in Sources */,
 				6A46CD6C287B299500444ED3 /* BackgroundView.swift in Sources */,
+				6AE903D9287F9E3E0090D4C6 /* NNGraphView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,11 +334,13 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "NN-Analysis-Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.BrandonKynoch.NN-Analysis";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -333,11 +363,13 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "NN-Analysis-Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.BrandonKynoch.NN-Analysis";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -349,7 +381,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6A46CD4A287B242700444ED3 /* Build configuration list for PBXProject "NN Analysis" */ = {
+		6A46CD4A287B242700444ED3 /* Build configuration list for PBXProject "Neural Analysis" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6A46CD5C287B242900444ED3 /* Debug */,
@@ -358,7 +390,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6A46CD5E287B242900444ED3 /* Build configuration list for PBXNativeTarget "NN Analysis" */ = {
+		6A46CD5E287B242900444ED3 /* Build configuration list for PBXNativeTarget "Neural Analysis" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6A46CD5F287B242900444ED3 /* Debug */,
