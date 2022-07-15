@@ -93,6 +93,30 @@ public func getAllFilesInDirectory(bundleDirectory: FileManager.SearchPathDirect
 }
 
 
+public func getAllFilesInDirectory(directory: URL, extensionWanted: String) -> (names: [String], paths: [URL]) {
+    do {
+        directory.startAccessingSecurityScopedResource()
+        
+        // Get the directory contents urls (including subfolders urls)
+        let directoryContents = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: [])
+
+        // Filter the directory contents
+        let filesPath = directoryContents.filter{ $0.pathExtension == extensionWanted }
+        let fileNames = filesPath.map{ $0.deletingPathExtension().lastPathComponent }
+
+        directory.stopAccessingSecurityScopedResource()
+        
+        return (names: fileNames, paths: filesPath);
+
+    } catch {
+        print("Failed to fetch contents of directory: \(error.localizedDescription)")
+    }
+
+    return (names: [], paths: [])
+}
+
+
+
 
 public func urlRemovingBundleSubDirectory(bundleDirectory: FileManager.SearchPathDirectory, _ url: URL) -> URL {
     var path = url.path
@@ -354,6 +378,14 @@ extension URL {
     }
 }
 
+
+extension UnsafeRawBufferPointer {
+    public func ReadBytes<T>(_ type: T.Type, offset: inout Int) -> T {
+        let returnVal = self.load(fromByteOffset: offset, as: type)
+        offset += MemoryLayout<T>.size
+        return returnVal
+    }
+}
 
 
 

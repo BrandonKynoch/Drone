@@ -16,7 +16,7 @@ let S_COL_BACKGROUND2: Color = Color(nsColor: NSColor(hex: "#F2F2F2")!)
 let S_COL_CANCEL: Color = Color(nsColor: NSColor(hex: "#DE1D12")!)
 let S_COL_APPROVE: Color = Color(nsColor: NSColor(hex: "#49DE1D")!)
 
-let S_SHADOW_COL: Color = Color.black.opacity(0.1)
+let S_SHADOW_COL: Color = Color.black.opacity(0.5)
 
 let S_CORNER_RADIUS: CGFloat = 12
 
@@ -26,6 +26,8 @@ enum ViewMode {
 }
 
 struct MainView: View {
+    @EnvironmentObject var dataHandler: DataHandler
+    
     var body: some View {
         NavigationView {
             SideBarView()
@@ -37,7 +39,11 @@ struct MainView: View {
                 }
             }
             
-            NNGraphView()
+            if dataHandler.currentViewingTrainingFolder?.nng != nil {
+                NNGroupView(nnGroup: dataHandler.currentViewingTrainingFolder!.nng!)
+            } else {
+                EmptyMainView()
+            }
         }
     }
     

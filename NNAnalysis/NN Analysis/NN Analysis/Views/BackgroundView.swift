@@ -12,10 +12,10 @@ struct BackgroundView: View {
     
     var body: some View {
         ZStack {
-            Rectangle()
-                .foregroundColor((viewMode == .light ? S_COL_BACKGROUND2: S_COL_BACKGROUND).opacity(0.2))
-            
             PanelView(type: .behindWindow)
+            
+            Rectangle()
+                .foregroundColor((viewMode == .light ? S_COL_BACKGROUND2: S_COL_BACKGROUND).opacity(0.3))
         }
         .ignoresSafeArea()
     }

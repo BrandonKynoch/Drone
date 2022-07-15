@@ -24,7 +24,6 @@ mkdir obj
 rm -r ../Globals/obj
 mkdir ../Globals/obj
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Projects/Drone/Server'
- 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Server'
 cc -c -o obj/server.o server.c -g -I./headers -I../Globals/headers -ljson-c -w
 cc -c -o ../Globals/obj/drone_data.o ../Globals/drone_data.c -g -I./headers -I../Globals/headers -ljson-c -w

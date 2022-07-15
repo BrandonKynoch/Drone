@@ -15,11 +15,17 @@
 		6A46CD65287B24B300444ED3 /* SwiftUIExtras.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD63287B24B300444ED3 /* SwiftUIExtras.swift */; };
 		6A46CD67287B268000444ED3 /* ValidationFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD66287B268000444ED3 /* ValidationFields.swift */; };
 		6A46CD6C287B299500444ED3 /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD6B287B299500444ED3 /* BackgroundView.swift */; };
+		6A95E100287FE143003C3421 /* DirectoryTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */; };
 		6AD346D6287FA6FD008B6179 /* SideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD346D5287FA6FD008B6179 /* SideBarView.swift */; };
 		6AE903D7287F93340090D4C6 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 6AE903D6287F93340090D4C6 /* Fonts */; };
-		6AE903D9287F9E3E0090D4C6 /* NNGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903D8287F9E3E0090D4C6 /* NNGraphView.swift */; };
+		6AE903D9287F9E3E0090D4C6 /* NNGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903D8287F9E3E0090D4C6 /* NNGroupView.swift */; };
 		6AE903DB287F9FCC0090D4C6 /* FolderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */; };
 		6AE903DE287FA0FC0090D4C6 /* DataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903DD287FA0FC0090D4C6 /* DataHandler.swift */; };
+		6AF2A0692880C3C500865D11 /* SwipableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF2A0682880C3C500865D11 /* SwipableView.swift */; };
+		6AF2A06B2880CCD900865D11 /* NN.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF2A06A2880CCD900865D11 /* NN.swift */; };
+		6AF2A06D2880D54800865D11 /* NNGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF2A06C2880D54800865D11 /* NNGroup.swift */; };
+		6AF2A0702880E4B000865D11 /* LineChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF2A06F2880E4B000865D11 /* LineChartView.swift */; };
+		6AF2A0722880E57500865D11 /* EmptyMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF2A0712880E57500865D11 /* EmptyMainView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,11 +39,17 @@
 		6A46CD63287B24B300444ED3 /* SwiftUIExtras.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftUIExtras.swift; sourceTree = "<group>"; };
 		6A46CD66287B268000444ED3 /* ValidationFields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationFields.swift; sourceTree = "<group>"; };
 		6A46CD6B287B299500444ED3 /* BackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
+		6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryTileView.swift; sourceTree = "<group>"; };
 		6AD346D5287FA6FD008B6179 /* SideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideBarView.swift; sourceTree = "<group>"; };
 		6AE903D6287F93340090D4C6 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Fonts; path = "NN Analysis/Fonts"; sourceTree = SOURCE_ROOT; };
-		6AE903D8287F9E3E0090D4C6 /* NNGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NNGraphView.swift; sourceTree = "<group>"; };
+		6AE903D8287F9E3E0090D4C6 /* NNGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NNGroupView.swift; sourceTree = "<group>"; };
 		6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSelectionView.swift; sourceTree = "<group>"; };
 		6AE903DD287FA0FC0090D4C6 /* DataHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataHandler.swift; sourceTree = "<group>"; };
+		6AF2A0682880C3C500865D11 /* SwipableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipableView.swift; sourceTree = "<group>"; };
+		6AF2A06A2880CCD900865D11 /* NN.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NN.swift; sourceTree = "<group>"; };
+		6AF2A06C2880D54800865D11 /* NNGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NNGroup.swift; sourceTree = "<group>"; };
+		6AF2A06F2880E4B000865D11 /* LineChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineChartView.swift; sourceTree = "<group>"; };
+		6AF2A0712880E57500865D11 /* EmptyMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyMainView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +109,7 @@
 				6A46CD62287B24B200444ED3 /* SwiftExtras.swift */,
 				6A46CD63287B24B300444ED3 /* SwiftUIExtras.swift */,
 				6A46CD66287B268000444ED3 /* ValidationFields.swift */,
+				6AF2A0682880C3C500865D11 /* SwipableView.swift */,
 			);
 			path = Extras;
 			sourceTree = "<group>";
@@ -104,10 +117,13 @@
 		6A46CD68287B297500444ED3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				6AF2A06E2880E48600865D11 /* Graphs */,
 				6A46CD6B287B299500444ED3 /* BackgroundView.swift */,
-				6AE903D8287F9E3E0090D4C6 /* NNGraphView.swift */,
+				6AE903D8287F9E3E0090D4C6 /* NNGroupView.swift */,
 				6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */,
 				6AD346D5287FA6FD008B6179 /* SideBarView.swift */,
+				6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */,
+				6AF2A0712880E57500865D11 /* EmptyMainView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -116,8 +132,18 @@
 			isa = PBXGroup;
 			children = (
 				6AE903DD287FA0FC0090D4C6 /* DataHandler.swift */,
+				6AF2A06A2880CCD900865D11 /* NN.swift */,
+				6AF2A06C2880D54800865D11 /* NNGroup.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		6AF2A06E2880E48600865D11 /* Graphs */ = {
+			isa = PBXGroup;
+			children = (
+				6AF2A06F2880E4B000865D11 /* LineChartView.swift */,
+			);
+			path = Graphs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,9 +224,15 @@
 				6A46CD64287B24B300444ED3 /* SwiftExtras.swift in Sources */,
 				6AE903DE287FA0FC0090D4C6 /* DataHandler.swift in Sources */,
 				6A46CD55287B242700444ED3 /* MainView.swift in Sources */,
+				6AF2A06D2880D54800865D11 /* NNGroup.swift in Sources */,
+				6AF2A0692880C3C500865D11 /* SwipableView.swift in Sources */,
 				6A46CD53287B242700444ED3 /* NN_AnalysisApp.swift in Sources */,
+				6AF2A06B2880CCD900865D11 /* NN.swift in Sources */,
+				6AF2A0702880E4B000865D11 /* LineChartView.swift in Sources */,
+				6A95E100287FE143003C3421 /* DirectoryTileView.swift in Sources */,
+				6AF2A0722880E57500865D11 /* EmptyMainView.swift in Sources */,
 				6A46CD6C287B299500444ED3 /* BackgroundView.swift in Sources */,
-				6AE903D9287F9E3E0090D4C6 /* NNGraphView.swift in Sources */,
+				6AE903D9287F9E3E0090D4C6 /* NNGroupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

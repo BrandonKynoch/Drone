@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class DataHandler: ObservableObject {
     // SINGLETON PATTERN ///////////////////////////////////
@@ -18,8 +19,11 @@ class DataHandler: ObservableObject {
     }()
     // SINGLETON PATTERN ///////////////////////////////////
     
+    @Published private(set) var openTrainingFolders = [NNGroupFolder]()
     
-    @Published private(set) var openTrainingFolders = [URL]()
+    @Published public var currentViewingTrainingFolder: NNGroupFolder? = nil
+    
+    
     
     init() {
         guard DataHandler.privateSingleton == nil else {
@@ -30,15 +34,55 @@ class DataHandler: ObservableObject {
     }
     
     public func openTrainingFolder(fromPath path: URL) {
-        if path.isDirectory == true {
-            // path is a directory
-            openTrainingFolders.append(path)
-        } else {
-            // path is a file
-            let enclosingFolder = path.deletingLastPathComponent()
-            if !openTrainingFolders.contains(enclosingFolder) {
-                openTrainingFolders.append(enclosingFolder)
+        withAnimation {
+            var correctPath: URL
+            if path.isDirectory == true {
+                // path is a directory
+                correctPath = path
+            } else {
+                // path is a file
+                correctPath = path.deletingLastPathComponent()
+            }
+            
+            if !openTrainingFolders.contains(NNGroupFolder(folder: correctPath)) {
+                let nngFolder = NNGroupFolder(folder: correctPath)       // = NNGroup(folder: correctPath)
+                nngFolder.FetchNNGroup()
+                
+                if let nng = nngFolder.nng, nng.loadedSuccessfully {
+                    openTrainingFolders.append(nngFolder)
+                    currentViewingTrainingFolder = nngFolder
+                }
             }
         }
+    }
+    
+    public func closeTrainingFolder(path: URL) {
+        withAnimation {
+            openTrainingFolders.removeAll(where: { folder in
+                return folder.folder == path
+            })
+        }
+    }
+}
+
+class NNGroupFolder: Equatable, Hashable {
+    private(set) var folder: URL
+    public var nng: NNGroup?
+    
+    init(folder: URL) {
+        self.folder = folder
+        self.nng = nil
+    }
+    
+    public func FetchNNGroup() {
+        self.nng = NNGroup(folder: folder)
+    }
+    
+    static func == (lhs: NNGroupFolder, rhs: NNGroupFolder) -> Bool {
+        return lhs.folder == rhs.folder
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(folder)
     }
 }

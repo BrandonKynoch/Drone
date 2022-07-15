@@ -33,21 +33,17 @@ struct FolderSelectionView: View {
 struct SelectFolderButton: View {
     var body: some View {
         ZStack {
-            PanelSolidView(colour: S_COL_MAIN)
-            
-            PanelView(type: .behindWindow)
-                .mask(
-                    Text("Select training folder")
-                        .modifier(TextModifier(size: 20, weight: .semibold))
-                )
+            PanelSolidView(colour: S_COL_BACKGROUND2)
+
+            Text("Select training folder")
+                .modifier(TextModifier(size: 16, weight: .medium))
+                .foregroundColor(S_COL_MAIN)
         }
         .frame(width: 500, height: 60)
         .onTapGesture {
             selectFolder(onCompletion: { files in
-                withAnimation {
-                    for file in files {
-                        DataHandler.singleton.openTrainingFolder(fromPath: file)
-                    }
+                for file in files {
+                    DataHandler.singleton.openTrainingFolder(fromPath: file)
                 }
             })
         }
