@@ -37,17 +37,21 @@ struct NNGroupView: View {
                     
                     Spacer().frame(height: 10)
                     
-                    CustomStringPickerView(rowHeight: 40, selected: .init(get: { return selectedNN }, set: { val in
-                        selectedNN = val
-                        nnGroup.SetCurrentViewingNNFromName(fileName: val)
-                    }), selectionOptions: nnGroup.nnNames, canEdit: .constant(true))
+                    NNGraph(nnGroup: nnGroup)
                     
                     Spacer().frame(height: 10)
-
-                    NNGraph(nnGroup: nnGroup)
-                        .frame(height: 500)
                     
-                    Spacer()
+                    ScrollView {
+                        VStack {
+                            CustomStringPickerView(rowHeight: 40, selected: .init(get: { return selectedNN }, set: { val in
+                                selectedNN = val
+                                nnGroup.SetCurrentViewingNNFromName(fileName: val)
+                            }), selectionOptions: nnGroup.nnNames, canEdit: .constant(true))
+                            
+                            Spacer()
+                        }
+                    }
+                    .frame(height: 200)
                 }
                 .padding()
             } else {
