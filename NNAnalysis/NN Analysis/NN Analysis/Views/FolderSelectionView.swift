@@ -15,8 +15,8 @@ struct FolderSelectionView: View {
             HStack {
                 Spacer()
                 Text("Neural Network Analysis & Shit")
-                    .modifier(TextModifier(size: 30, weight: .bold))
-                    .foregroundColor(S_COL_MAIN)
+                    .modifier(TitleTextModifier())
+                    .foregroundColor(S_COL_TEXT)
                 Spacer()
             }
             
@@ -36,8 +36,8 @@ struct SelectFolderButton: View {
             PanelSolidView(colour: S_COL_BACKGROUND2)
 
             Text("Select training folder")
-                .modifier(TextModifier(size: 16, weight: .medium))
-                .foregroundColor(S_COL_MAIN)
+                .modifier(BodyTextModifier())
+                .foregroundColor(S_COL_TEXT)
         }
         .frame(width: 500, height: 60)
         .onTapGesture {

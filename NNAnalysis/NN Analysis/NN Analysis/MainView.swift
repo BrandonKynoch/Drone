@@ -7,11 +7,13 @@
 
 import SwiftUI
 
-let S_COL_MAIN: Color = Color(nsColor: NSColor(hex: "#F20519")!)
-let S_COL_ACC1: Color = Color(nsColor: NSColor(hex: "#F22738")!)
-let S_COL_ACC2: Color = Color(nsColor: NSColor(hex: "#F27E7E")!)
-let S_COL_BACKGROUND: Color = Color(nsColor: NSColor(hex: "#262223")!)
-let S_COL_BACKGROUND2: Color = Color(nsColor: NSColor(hex: "#F2F2F2")!)
+let S_COL_TEXT: Color = .white
+let S_COL_ACC0: Color = Color(nsColor: NSColor(hex: "#F20544")!)
+let S_COL_ACC1: Color = Color(nsColor: NSColor(hex: "#D90467")!)
+let S_COL_ACC2: Color = Color(nsColor: NSColor(hex: "#F26200")!)
+let S_COL_ACC3: Color = Color(nsColor: NSColor(hex: "#F2A516")!)
+let S_COL_BACKGROUND: Color = Color(nsColor: NSColor(hex: "#26000A")!)
+let S_COL_BACKGROUND2: Color = Color(nsColor: NSColor(hex: "#750020")!)
 
 let S_COL_CANCEL: Color = Color(nsColor: NSColor(hex: "#DE1D12")!)
 let S_COL_APPROVE: Color = Color(nsColor: NSColor(hex: "#49DE1D")!)

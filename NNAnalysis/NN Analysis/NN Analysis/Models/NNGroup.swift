@@ -12,6 +12,9 @@ class NNGroup : ObservableObject {
     let folder: URL
     let loadedSuccessfully: Bool
     let nns: [NN]
+    let nnNames: [String]
+    
+    @Published public var currentViewingNN: NN? = nil
     
     init(folder: URL) {
         self.folder = folder
@@ -21,20 +24,33 @@ class NNGroup : ObservableObject {
         
         if nnFiles.paths.count > 0 {
             var tmpNNs = [NN]()
-            for nn in nnFiles.paths {
+            var tmpNNNames = [String]()
+            for nnPath in nnFiles.paths {
                 do {
-                    let nn = try NN(fromFile: nn)
+                    let nn = try NN(fromFile: nnPath)
                     tmpNNs.append(nn)
+                    tmpNNNames.append(nnPath.lastPathComponent)
                 } catch {
                     print("Failed to create NN")
                 }
             }
             nns = tmpNNs
+            nnNames = tmpNNNames
         } else {
             nns = [NN]()
+            nnNames = [String]()
             errorWhileLoading = true
         }
         
         loadedSuccessfully = !errorWhileLoading
+    }
+    
+    public func SetCurrentViewingNNFromName(fileName: String) {
+        for nn in nns {
+            if nn.name == fileName {
+                currentViewingNN = nn
+                break
+            }
+        }
     }
 }

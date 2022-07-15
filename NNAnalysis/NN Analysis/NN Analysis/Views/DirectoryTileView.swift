@@ -24,8 +24,8 @@ struct DirectoryTileView: View {
             ZStack {
                 PanelSolidView(colour: S_COL_BACKGROUND2)
                 Text(targetDirName)
-                    .modifier(TextModifier(size: 16, weight: .medium))
-                    .foregroundColor(S_COL_MAIN)
+                    .modifier(BodyTextModifier())
+                    .foregroundColor(S_COL_TEXT)
             }
             
         }),
@@ -37,7 +37,7 @@ struct DirectoryTileView: View {
                 PanelSolidView(colour: S_COL_CANCEL)
                 
                 Image(systemName: "multiply.square")
-                    .foregroundColor(S_COL_BACKGROUND2)
+                    .foregroundColor(S_COL_BACKGROUND)
                     .modifier(TextModifier(size: 20, weight: .bold))
             }
             .padding(.leading)

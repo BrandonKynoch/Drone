@@ -58,6 +58,12 @@ class DataHandler: ObservableObject {
     
     public func closeTrainingFolder(path: URL) {
         withAnimation {
+            if let currentViewingTrainingFolder = currentViewingTrainingFolder {
+                if currentViewingTrainingFolder.folder == path {
+                    self.currentViewingTrainingFolder = nil
+                }
+            }
+            
             openTrainingFolders.removeAll(where: { folder in
                 return folder.folder == path
             })

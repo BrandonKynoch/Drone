@@ -46,8 +46,21 @@ struct ItalicTextModifier: ViewModifier {
 struct TitleTextModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.system(size: 32, weight: .bold, design: .default))
-            .modifier(ShadowModifier())
+            .modifier(TextModifier(size: 24, weight: .bold))
+    }
+}
+
+struct BodyTextModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .modifier(TextModifier(size: 16, weight: .medium))
+    }
+}
+
+struct LightTextModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .modifier(TextModifier(size: 16, weight: .ultraLight))
     }
 }
 
@@ -255,7 +268,7 @@ struct EditTextView<T>: View {
                     HStack {
                         if !isEditing {
                             Text(content! as? String ?? "")
-                                .foregroundColor(S_COL_MAIN)
+                                .foregroundColor(S_COL_ACC0)
                                 .modifier(TextModifier(size: fontSize, weight: fontWeight))
                             Spacer()
                         } else {
@@ -564,6 +577,199 @@ struct CustomPickerView<E: CaseIterable & Hashable>: View {
         }
     }
 }
+
+
+
+
+struct CustomStringPickerView: View {
+    let rowHeight: CGFloat
+    @Binding var selected: String
+    let selectionOptions: [String]
+    @Binding var canEdit: Bool
+    @State var isEditing: Bool = false
+    @State var isEditingNoAnim: Bool = false
+    @State var isEditingDelayed: Bool = false
+    @State var index: Int = 0
+    
+    init(rowHeight: CGFloat, selected: Binding<String>, selectionOptions: [String], canEdit: Binding<Bool>) {
+        self.rowHeight = rowHeight
+        self._selected = selected
+        self.selectionOptions = selectionOptions
+        self._canEdit = canEdit
+        self.isEditing = false
+        self.isEditingNoAnim = false
+        self.isEditingDelayed = false
+    }
+    
+    var body: some View {
+        ZStack {
+            GeometryReader { geometry in
+                let cr = S_CORNER_RADIUS * 1.5
+                let pp: CGFloat = 2 // path padding
+                // Background
+                Path() { p in
+                    p.move(to: CGPoint(
+                        x: pp,
+                        y: cr)
+                    )
+                    
+                    p.addQuadCurve(
+                        to: CGPoint(
+                            x: cr,
+                            y: pp),
+                        control: CGPoint(
+                            x: pp,
+                            y: pp
+                        ))
+                    
+                    p.addLine(to: CGPoint(
+                        x: geometry.size.width - cr,
+                        y: pp)
+                    )
+                    
+                    p.addQuadCurve(
+                        to: CGPoint(
+                            x: geometry.size.width - pp,
+                            y: cr),
+                        control: CGPoint(
+                            x: geometry.size.width - pp,
+                            y: pp
+                        ))
+                    
+                    p.addLine(to: CGPoint(
+                        x: geometry.size.width - pp,
+                        y: geometry.size.height - cr)
+                    )
+                    
+                    p.addQuadCurve(
+                        to: CGPoint(
+                            x: geometry.size.width - cr,
+                            y: geometry.size.height - pp),
+                        control: CGPoint(
+                            x: geometry.size.width - pp,
+                            y: geometry.size.height - pp
+                        ))
+                    
+                    p.addLine(to: CGPoint(
+                        x: cr,
+                        y: geometry.size.height - pp)
+                    )
+                    
+                    p.addQuadCurve(
+                        to: CGPoint(
+                            x: pp,
+                            y: geometry.size.height - cr),
+                        control: CGPoint(
+                            x: pp,
+                            y: geometry.size.height - pp
+                        ))
+                    
+                    p.addLine(to: CGPoint(
+                        x: pp,
+                        y: cr)
+                    )
+                }
+                .stroke(S_COL_ACC2.opacity(isEditing ? 1 : 0), lineWidth: 3)
+                .modifier(ShadowModifier())
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                
+                // Selected Panel
+                VStack {
+                    Spacer()
+                        .frame(height: isEditing ? rowHeight * CGFloat(selectionOptions.firstIndex(of: selected) as! Int) : 0)
+                    Rectangle()
+                        .frame(height: rowHeight)
+                        .cornerRadius(S_CORNER_RADIUS)
+                        .foregroundColor(S_COL_ACC2)
+                        .modifier(ShadowModifier())
+                    if !isEditing {
+                        Spacer()
+                    }
+                }
+                
+                VStack (spacing: 0) {
+                    ForEach(selectionOptions, id: \.self) { s in
+                        let showSPred = isEditing || (!isEditing && s == selected)
+                        
+                        HStack (spacing: 0) {
+                            Spacer()
+                            Text(s)
+                                .foregroundColor((s == selected) ? .white : S_COL_ACC2)
+                                .modifier(TextModifier(size: 15, weight: .bold))
+                                .scaleEffect((s == selected) ? CGSize(width: 1.2, height: 1.2) : CGSize(width: 1, height: 1))
+                            Spacer()
+                        }
+                        .frame(height: (showSPred) ? rowHeight : 0)
+                        .opacity((showSPred) ? 1 : 0)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if isEditingNoAnim {
+                                withAnimation {
+                                    selected = s
+                                }
+                                
+                                setEdit(val: false)
+                            } else {
+                                setEdit(val: true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .frame(height: rowHeight * (isEditingDelayed ? CGFloat(selectionOptions.count) : 1))
+        .onChange(of: self.canEdit, perform: { newValue in
+            if !newValue {
+                setEdit(val: newValue)
+            }
+        })
+    }
+    
+    func setEdit(val: Bool) {
+        if !val {
+            index += 1
+            let i = index
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5, execute: {
+                withAnimation() {
+                    if self.index == i {
+                        isEditing = false
+                    }
+                }
+            })
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+                withAnimation() {
+                    if self.index == i {
+                        isEditingDelayed = false
+                    }
+                }
+            })
+            isEditingNoAnim = isEditing
+        } else {
+            if canEdit {
+                index += 1
+                let i2 = index
+                withAnimation {
+                    isEditing = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5, execute: {
+                    withAnimation() {
+                        if self.index == i2 {
+                            isEditing = true
+                        }
+                    }
+                })
+                withAnimation() {
+                    if self.index == i2 {
+                        isEditingDelayed = true
+                    }
+                }
+                isEditingNoAnim = isEditing
+            }
+        }
+    }
+}
+
+
 
 struct CustomDividierView: View {
     let geometrySize: CGSize

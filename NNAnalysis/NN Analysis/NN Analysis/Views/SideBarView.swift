@@ -12,7 +12,8 @@ struct SideBarView: View {
     
     var body: some View {
         ZStack {
-            BackgroundView(viewMode: .dark)
+            Rectangle()
+                .foregroundColor(S_COL_BACKGROUND)
             
             if dataHandler.openTrainingFolders.count == 0 {
                 FolderSelectionView()
@@ -21,8 +22,8 @@ struct SideBarView: View {
                 VStack {
                     HStack {
                         Text("Open Training Folders")
-                            .modifier(TextModifier(size: 25, weight: .bold))
-                            .foregroundColor(S_COL_BACKGROUND2)
+                            .modifier(TitleTextModifier())
+                            .foregroundColor(S_COL_TEXT)
                         Spacer()
                     }
                         
