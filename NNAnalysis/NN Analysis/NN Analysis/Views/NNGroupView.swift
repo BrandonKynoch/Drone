@@ -10,6 +10,8 @@ import SwiftUI
 //https://blog.logrocket.com/building-custom-charts-swiftui/
 
 struct NNGroupView: View {
+    @EnvironmentObject var analysisHandler: AnalysisHandler
+    
     @ObservedObject var nnGroup: NNGroup
     @State var selectedNN: String
     
@@ -31,7 +33,7 @@ struct NNGroupView: View {
                     HStack {
                         Text(nnGroup.folder.lastPathComponent)
                             .modifier(TitleTextModifier())
-                            .foregroundColor(S_COL_TEXT)
+                            .foregroundColor(COL_TEXT)
                         Spacer()
                     }
                     
@@ -48,10 +50,24 @@ struct NNGroupView: View {
                                 nnGroup.SetCurrentViewingNNFromName(fileName: val)
                             }), selectionOptions: nnGroup.nnNames, canEdit: .constant(true))
                             
+                            if let currentNN = nnGroup.currentViewingNN {
+                                Spacer().frame(height: ELEMENT_SPACING)
+                                
+                                HStack {
+                                    Text("Opacity Scaler: ")
+                                        .foregroundColor(COL_TEXT)
+                                        .modifier(BodyTextModifier())
+                                    Spacer().frame(width: ELEMENT_SPACING)
+                                    CustomSliderView(initialVal: analysisHandler.weightOpacityScaler, minVal: 0.1, maxVal: 3, onValueChange: { val in
+                                        analysisHandler.weightOpacityScaler = val
+                                    })
+                                }
+                            }
+                            
                             Spacer()
                         }
                     }
-                    .frame(height: 200)
+                    .frame(height: 300)
                 }
                 .padding()
             } else {
@@ -60,7 +76,7 @@ struct NNGroupView: View {
                     HStack {
                         Text(nnGroup.folder.lastPathComponent)
                             .modifier(TitleTextModifier())
-                            .foregroundColor(S_COL_ACC0)
+                            .foregroundColor(COL_ACC0)
                         Spacer()
                     }
                     Spacer()

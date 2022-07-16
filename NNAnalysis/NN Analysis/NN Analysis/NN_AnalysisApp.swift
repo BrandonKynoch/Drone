@@ -11,12 +11,14 @@ import SwiftUI
 struct NN_AnalysisApp: App {
     init() {
         let _ = DataHandler.singleton
+        let _ = AnalysisHandler.singleton
     }
     
     var body: some Scene {
         WindowGroup {
             MainView()
                 .environmentObject(DataHandler.singleton)
+                .environmentObject(AnalysisHandler.singleton)
             //                .onAppear() {
             //                    for family in NSFontManager.shared.availableFontFamilies {
             //                        print(family)

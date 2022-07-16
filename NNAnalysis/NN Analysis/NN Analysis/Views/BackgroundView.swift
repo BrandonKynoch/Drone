@@ -27,7 +27,7 @@ struct BackgroundView: View {
             PanelView(type: .behindWindow)
             
             Rectangle()
-                .foregroundColor((viewMode == .light ? S_COL_BACKGROUND2: S_COL_BACKGROUND).opacity(opacity))
+                .foregroundColor((viewMode == .light ? COL_BACKGROUND2: COL_BACKGROUND).opacity(opacity))
         }
         .ignoresSafeArea()
     }

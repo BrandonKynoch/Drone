@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NN {
+class NN: ObservableObject {
     public let name: String
     
     private(set) var neuralSize: Int = 0
@@ -17,7 +17,9 @@ class NN {
     
     private(set) var maxShape: Int = 0
     
-    // UI VARS ///////////////////////////////////
+    private(set) var maximumWeightMagnitude: Double = 1
+    
+    // UI VARS ///////////////////////////////////    
     private(set) var UIIndexArray = [Int]() // Used for foreach loops in UI
     private(set) var UICountArray = [Int]() // Used for foreach loops in UI
     // UI VARS ///////////////////////////////////
@@ -56,8 +58,30 @@ class NN {
                     index: &index)
                 )
             }
+            
+            self.FindMaximumWeight()
         })
     }
+    
+    private func FindMaximumWeight() {
+        for layer in layers {
+            layer.FindMaximumWeight()
+        }
+        
+        maximumWeightMagnitude = 0
+        
+        for layer in layers {
+            if layer.maximumWeightMagnitude! > maximumWeightMagnitude {
+                maximumWeightMagnitude = layer.maximumWeightMagnitude!
+            }
+        }
+        
+        if maximumWeightMagnitude == 0 {
+            maximumWeightMagnitude = 1
+        }
+    }
+    
+    
     
     // Represents the weights and biases used for transitioning from layer i to (i+1)
     class NNLayer {
@@ -66,12 +90,15 @@ class NN {
         var weights = [[Double]]()
         var biases = [Double]()
         
+        private(set) var maximumWeightMagnitude: Double? = nil
+        
+        // Grouping measures how many values have been reduced into a single element
         private(set) var rowsGrouping: Int = 1 // For matrix reduction
         private(set) var colsGrouping: Int = 1 // For matrix reduction
         
         // Index arrays just used for drawing UI
-        private(set) var UIRowsArray = [Int]()
-        private(set) var UIColsArray = [Int]()
+        private(set) var UIRowsArray = [Int]() // Size of original matrix
+        private(set) var UIColsArray = [Int]() // Size of original matrix
         
         private(set) var UIReduceRowsArray = [Int]()
         private(set) var UIReduceColsArray = [Int]()
@@ -107,6 +134,7 @@ class NN {
             UIReduceColsArray = UIColsArray
             UIReduceRowsArray = UIRowsArray
             
+            // NOTE: FindMaximumWeight is called inside ReduceLayerSize
             self.ReduceLayerSize()
         }
         
@@ -141,6 +169,28 @@ class NN {
             }
             
             self.weights = tmpWeights
+            
+            FindMaximumWeight()
+        }
+        
+        public func FindMaximumWeight() {
+            guard maximumWeightMagnitude == nil else {
+                return
+            }
+            
+            maximumWeightMagnitude = 0
+            
+            for a in weights { // Cols
+                for d in a { // Rows
+                    if d > maximumWeightMagnitude! {
+                        maximumWeightMagnitude = d
+                    }
+                }
+            }
+            
+            if maximumWeightMagnitude == 0 {
+                maximumWeightMagnitude = 1
+            }
         }
     }
 }

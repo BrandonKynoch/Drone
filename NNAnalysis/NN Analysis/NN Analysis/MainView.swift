@@ -7,20 +7,22 @@
 
 import SwiftUI
 
-let S_COL_TEXT: Color = .white
-let S_COL_ACC0: Color = Color(nsColor: NSColor(hex: "#F20544")!)
-let S_COL_ACC1: Color = Color(nsColor: NSColor(hex: "#D90467")!)
-let S_COL_ACC2: Color = Color(nsColor: NSColor(hex: "#F26200")!)
-let S_COL_ACC3: Color = Color(nsColor: NSColor(hex: "#F2A516")!)
-let S_COL_BACKGROUND: Color = Color(nsColor: NSColor(hex: "#26000A")!)
-let S_COL_BACKGROUND2: Color = Color(nsColor: NSColor(hex: "#750020")!)
+let COL_TEXT: Color = .white
+let COL_ACC0: Color = Color(nsColor: NSColor(hex: "#F20544")!)
+let COL_ACC1: Color = Color(nsColor: NSColor(hex: "#D90467")!)
+let COL_ACC2: Color = Color(nsColor: NSColor(hex: "#F26200")!)
+let COL_ACC3: Color = Color(nsColor: NSColor(hex: "#F2A516")!)
+let COL_BACKGROUND: Color = Color(nsColor: NSColor(hex: "#26000A")!)
+let COL_BACKGROUND2: Color = Color(nsColor: NSColor(hex: "#750020")!)
 
-let S_COL_CANCEL: Color = Color(nsColor: NSColor(hex: "#DE1D12")!)
-let S_COL_APPROVE: Color = Color(nsColor: NSColor(hex: "#49DE1D")!)
+let COL_CANCEL: Color = Color(nsColor: NSColor(hex: "#DE1D12")!)
+let COL_APPROVE: Color = Color(nsColor: NSColor(hex: "#49DE1D")!)
 
-let S_SHADOW_COL: Color = Color.black.opacity(0.5)
+let SHADOW_COL: Color = Color.black.opacity(0.5)
 
-let S_CORNER_RADIUS: CGFloat = 12
+let CORNER_RADIUS: CGFloat = 12
+
+let ELEMENT_SPACING: CGFloat = 10
 
 enum ViewMode {
     case light

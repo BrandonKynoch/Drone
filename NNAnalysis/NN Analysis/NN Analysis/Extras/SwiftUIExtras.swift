@@ -67,7 +67,7 @@ struct LightTextModifier: ViewModifier {
 struct ShadowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .shadow(color: S_SHADOW_COL, radius: 8, x: 0, y: -3)
+            .shadow(color: SHADOW_COL, radius: 8, x: 0, y: -3)
     }
 }
 
@@ -79,7 +79,7 @@ struct PanelView: View {
         Rectangle()
             .backgroundGaussianBlur(type: type)
             .foregroundColor(Color.clear)
-            .cornerRadius(S_CORNER_RADIUS)
+            .cornerRadius(CORNER_RADIUS)
             .modifier(ShadowModifier())
     }
 }
@@ -122,7 +122,7 @@ struct PanelSolidView: View {
     var body: some View {
         Rectangle()
             .foregroundColor(colour)
-            .cornerRadius(S_CORNER_RADIUS)
+            .cornerRadius(CORNER_RADIUS)
             .modifier(ShadowModifier())
     }
 }
@@ -242,7 +242,7 @@ struct EditTextView<T>: View {
                     HStack {
                         Text(description)
                             .modifier(TextModifier(size: 16, weight: .light))
-                            .foregroundColor(validationField.valid ? .black : S_COL_CANCEL)
+                            .foregroundColor(validationField.valid ? .black : COL_CANCEL)
                         Spacer()
                     }
                     
@@ -254,8 +254,8 @@ struct EditTextView<T>: View {
                             TextField(description, text: .init(
                                 get: { return (content as? String) ?? "" },
                                 set: { val in self.content = val as? T }))
-                                .foregroundColor(validationField.valid ? S_COL_ACC2 : S_COL_CANCEL)
-                                .background(validationField.valid ? .clear : S_COL_CANCEL.opacity(0.3))
+                                .foregroundColor(validationField.valid ? COL_ACC2 : COL_CANCEL)
+                                .background(validationField.valid ? .clear : COL_CANCEL.opacity(0.3))
                                 .modifier(TextModifier(size: 16, weight: .bold))
                                 .mask(Rectangle().cornerRadius(4))
                                 .offset(y: -11)
@@ -268,14 +268,14 @@ struct EditTextView<T>: View {
                     HStack {
                         if !isEditing {
                             Text(content! as? String ?? "")
-                                .foregroundColor(S_COL_ACC0)
+                                .foregroundColor(COL_ACC0)
                                 .modifier(TextModifier(size: fontSize, weight: fontWeight))
                             Spacer()
                         } else {
                             TextEditor(text: .init(
                                 get: { return (content as? String) ?? "" },
                                 set: { val in self.content = val as? T }))
-                                .foregroundColor(validationField.valid ? S_COL_ACC2 : S_COL_CANCEL)
+                                .foregroundColor(validationField.valid ? COL_ACC2 : COL_CANCEL)
                                 .background(.clear)
                                 .modifier(TextModifierNoShadow(size: fontSize, weight: fontWeight))
                         }
@@ -298,7 +298,7 @@ struct EditTextView<T>: View {
                                         self.content = int as? T
                                     }
                                 }))
-                                .foregroundColor(validationField.valid ? S_COL_ACC2 : S_COL_CANCEL)
+                                .foregroundColor(validationField.valid ? COL_ACC2 : COL_CANCEL)
                                 .modifier(TextModifier(size: 27, weight: .bold))
                         }
                         Spacer()
@@ -375,7 +375,7 @@ struct TextSuggestionView<T>: View {
                         HStack {
                             Text(suggestion.key.capitalized)
                                 .modifier(TextModifier(size: 16, weight: .light))
-                                .foregroundColor(S_COL_ACC2)
+                                .foregroundColor(COL_ACC2)
                             
                             Spacer()
                         }
@@ -413,7 +413,7 @@ struct CustomPickerView<E: CaseIterable & Hashable>: View {
         // TODO: FINISH THIS FOR OPS DETAIL VIEW OP TYPE
         ZStack {
             GeometryReader { geometry in
-                let cr = S_CORNER_RADIUS * 1.5
+                let cr = CORNER_RADIUS * 1.5
                 let pp: CGFloat = 2 // path padding
                 // Background
                 Path() { p in
@@ -478,7 +478,7 @@ struct CustomPickerView<E: CaseIterable & Hashable>: View {
                         y: cr)
                     )
                 }
-                .stroke(S_COL_ACC2.opacity(isEditing ? 1 : 0), lineWidth: 3)
+                .stroke(COL_ACC2.opacity(isEditing ? 1 : 0), lineWidth: 3)
                 .modifier(ShadowModifier())
                 .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 
@@ -488,8 +488,8 @@ struct CustomPickerView<E: CaseIterable & Hashable>: View {
                         .frame(height: isEditing ? rowHeight * CGFloat(E.allCases.firstIndex(of: selected) as! Int) : 0)
                     Rectangle()
                         .frame(height: rowHeight)
-                        .cornerRadius(S_CORNER_RADIUS)
-                        .foregroundColor(S_COL_ACC2)
+                        .cornerRadius(CORNER_RADIUS)
+                        .foregroundColor(COL_ACC2)
                         .modifier(ShadowModifier())
                     if !isEditing {
                         Spacer()
@@ -503,7 +503,7 @@ struct CustomPickerView<E: CaseIterable & Hashable>: View {
                         HStack (spacing: 0) {
                             Spacer()
                             Text("\(s)" as String)
-                                .foregroundColor((s == selected) ? .white : S_COL_ACC2)
+                                .foregroundColor((s == selected) ? .white : COL_ACC2)
                                 .modifier(TextModifier(size: 15, weight: .bold))
                                 .scaleEffect((s == selected) ? CGSize(width: 1.2, height: 1.2) : CGSize(width: 1, height: 1))
                             Spacer()
@@ -604,7 +604,7 @@ struct CustomStringPickerView: View {
     var body: some View {
         ZStack {
             GeometryReader { geometry in
-                let cr = S_CORNER_RADIUS * 1.5
+                let cr = CORNER_RADIUS * 1.5
                 let pp: CGFloat = 2 // path padding
                 // Background
                 Path() { p in
@@ -669,7 +669,7 @@ struct CustomStringPickerView: View {
                         y: cr)
                     )
                 }
-                .stroke(S_COL_ACC2.opacity(isEditing ? 1 : 0), lineWidth: 3)
+                .stroke(COL_ACC2.opacity(isEditing ? 1 : 0), lineWidth: 3)
                 .modifier(ShadowModifier())
                 .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 
@@ -679,8 +679,8 @@ struct CustomStringPickerView: View {
                         .frame(height: isEditing ? rowHeight * CGFloat(selectionOptions.firstIndex(of: selected) as! Int) : 0)
                     Rectangle()
                         .frame(height: rowHeight)
-                        .cornerRadius(S_CORNER_RADIUS)
-                        .foregroundColor(S_COL_ACC2)
+                        .cornerRadius(CORNER_RADIUS)
+                        .foregroundColor(COL_ACC2)
                         .modifier(ShadowModifier())
                     if !isEditing {
                         Spacer()
@@ -694,7 +694,7 @@ struct CustomStringPickerView: View {
                         HStack (spacing: 0) {
                             Spacer()
                             Text(s)
-                                .foregroundColor((s == selected) ? .white : S_COL_ACC2)
+                                .foregroundColor((s == selected) ? .white : COL_ACC2)
                                 .modifier(TextModifier(size: 15, weight: .bold))
                                 .scaleEffect((s == selected) ? CGSize(width: 1.2, height: 1.2) : CGSize(width: 1, height: 1))
                             Spacer()

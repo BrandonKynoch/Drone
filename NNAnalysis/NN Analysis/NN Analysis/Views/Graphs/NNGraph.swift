@@ -18,14 +18,14 @@ struct NNGraph: View {
                 VStack {
                     // Neural shape
                     ZStack {
-                        PanelSolidView(colour: S_COL_BACKGROUND2)
+                        PanelSolidView(colour: COL_BACKGROUND2)
                         
                         HStack {
                             ForEach(currentViewingNN.UICountArray, id: \.self) { i in
                                 Spacer()
                                 Text("\(currentViewingNN.neuralShape[i])")
                                     .modifier(BodyTextModifier())
-                                    .foregroundColor(S_COL_TEXT)
+                                    .foregroundColor(COL_TEXT)
                                 Spacer()
                             }
                         }
@@ -40,7 +40,7 @@ struct NNGraph: View {
                     }
                     .padding()
                 }
-            }.cornerRadius(S_CORNER_RADIUS)
+            }.cornerRadius(CORNER_RADIUS)
         }
     }
 }
@@ -54,7 +54,7 @@ struct BiasView: View {
             let frameWidth = geometry.size.width
             
             let layerSpacing = frameWidth / CGFloat(nn.neuralSize)
-            let xAxisScale = 5 * (frameWidth / 500)
+            let xAxisScale = 2.5 * (frameWidth / 500)
 
             ForEach(nn.UIIndexArray, id: \.self) { i in
                 let baseX = layerSpacing * (CGFloat(i) + 1.5)
@@ -74,7 +74,7 @@ struct BiasView: View {
                     }
                 }
                 .stroke(
-                    S_COL_ACC2,
+                    COL_ACC1,
                     style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
                 )
                 
@@ -88,7 +88,7 @@ struct BiasView: View {
                     path.addLine(to: CGPoint(x: baseX, y: baseY + CGFloat(nn.layers[i].biases.count - 1) * ySegmentSpacing))
                 }
                 .stroke(
-                    S_COL_ACC1,
+                    COL_ACC1,
                     style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round, miterLimit: 3, dash: [10], dashPhase: 0)
                 )
             }
@@ -137,19 +137,25 @@ struct WeightView: View {
             baseXRight: baseXRight,
             baseYLeft: baseYLeft,
             baseYRight: baseYRight,
-            ySegmentSpacing: ySegmentSpacing
+            ySegmentSpacing: ySegmentSpacing,
+            maxWeightMagnitude: CGFloat(nn.maximumWeightMagnitude)
         )
     }
 }
 
 
 struct WeightLayerView: View {
+    @EnvironmentObject var analysisHandler: AnalysisHandler
+    
     let nnLayer: NN.NNLayer
+    
     let baseXLeft: CGFloat
     let baseXRight: CGFloat
     let baseYLeft: CGFloat
     let baseYRight: CGFloat
     let ySegmentSpacing: CGFloat
+    
+    let maxWeightMagnitude: CGFloat
     
     var body: some View {
         ForEach (nnLayer.UIReduceColsArray, id: \.self) { j in
@@ -166,7 +172,7 @@ struct WeightLayerView: View {
                         ))
                 }
                 .stroke(
-                    S_COL_ACC2.opacity(nnLayer.weights[j][k]), // MARK: TODO: FIX SCALING SO THAT ITS SCALED RELATIVE TO MAX VALUE
+                    COL_ACC2.opacity((nnLayer.weights[j][k] / maxWeightMagnitude) * analysisHandler.weightOpacityScaler), // MARK: TODO: FIX SCALING SO THAT ITS SCALED RELATIVE TO MAX VALUE
                     style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
                 )
             }

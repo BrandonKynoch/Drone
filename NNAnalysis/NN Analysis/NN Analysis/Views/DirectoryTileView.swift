@@ -22,10 +22,10 @@ struct DirectoryTileView: View {
         SwipableView(mainView: AnyView(VStack {
             // Main View
             ZStack {
-                PanelSolidView(colour: S_COL_BACKGROUND2)
+                PanelSolidView(colour: COL_BACKGROUND2)
                 Text(targetDirName)
                     .modifier(BodyTextModifier())
-                    .foregroundColor(S_COL_TEXT)
+                    .foregroundColor(COL_TEXT)
             }
             
         }),
@@ -34,10 +34,10 @@ struct DirectoryTileView: View {
             // Swipe left view
             
             ZStack {
-                PanelSolidView(colour: S_COL_CANCEL)
+                PanelSolidView(colour: COL_CANCEL)
                 
                 Image(systemName: "multiply.square")
-                    .foregroundColor(S_COL_BACKGROUND)
+                    .foregroundColor(COL_BACKGROUND)
                     .modifier(TextModifier(size: 20, weight: .bold))
             }
             .padding(.leading)

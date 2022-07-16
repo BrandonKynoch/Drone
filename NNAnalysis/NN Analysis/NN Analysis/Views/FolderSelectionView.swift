@@ -16,7 +16,7 @@ struct FolderSelectionView: View {
                 Spacer()
                 Text("Neural Network Analysis & Shit")
                     .modifier(TitleTextModifier())
-                    .foregroundColor(S_COL_TEXT)
+                    .foregroundColor(COL_TEXT)
                 Spacer()
             }
             
@@ -33,11 +33,11 @@ struct FolderSelectionView: View {
 struct SelectFolderButton: View {
     var body: some View {
         ZStack {
-            PanelSolidView(colour: S_COL_BACKGROUND2)
+            PanelSolidView(colour: COL_BACKGROUND2)
 
             Text("Select training folder")
                 .modifier(BodyTextModifier())
-                .foregroundColor(S_COL_TEXT)
+                .foregroundColor(COL_TEXT)
         }
         .frame(width: 500, height: 60)
         .onTapGesture {
