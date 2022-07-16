@@ -1,24 +1,19 @@
 ﻿<Properties StartupConfiguration="{31E21F89-6C30-44D7-A681-4871B2CE752E}|Default">
   <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
-  <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workbench ActiveDocument="CSVConverter/CSVConverter.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimServer/NeuralTrainer.cs">
     <Files>
-      <File FileName="CSVConverter/CSVConverter.cs" Line="184" Column="54" />
-      <File FileName="SimServer/NeuralTrainer.cs" Line="1" Column="28" />
+      <File FileName="SimServer/NeuralTrainer.cs" Line="180" Column="83" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="SimServer" expanded="True">
-            <Node name="CSVConverter" expanded="True">
-              <Node name="CSVConverter.cs" selected="True" />
+            <Node name="CSVConverter" expanded="True" />
+            <Node name="SimServer" expanded="True">
+              <Node name="NeuralTrainer.cs" selected="True" />
             </Node>
-            <Node name="SimServer" expanded="True" />
           </Node>
         </State>
       </Pad>
@@ -27,4 +22,8 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.SimServer PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
 </Properties>

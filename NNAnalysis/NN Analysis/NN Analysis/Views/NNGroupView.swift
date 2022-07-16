@@ -19,6 +19,7 @@ struct NNGroupView: View {
         self.nnGroup = nnGroup
         if nnGroup.nnNames.count > 0 {
             self.selectedNN = nnGroup.nnNames[0]
+            nnGroup.SetCurrentViewingNNFromName(fileName: selectedNN)
         } else {
             self.selectedNN = "NULL"
         }
@@ -50,7 +51,7 @@ struct NNGroupView: View {
                                 nnGroup.SetCurrentViewingNNFromName(fileName: val)
                             }), selectionOptions: nnGroup.nnNames, canEdit: .constant(true))
                             
-                            if let currentNN = nnGroup.currentViewingNN {
+                            if nnGroup.currentViewingNN != nil {
                                 Spacer().frame(height: ELEMENT_SPACING)
                                 
                                 HStack {

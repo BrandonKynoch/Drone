@@ -27,7 +27,9 @@ struct DirectoryTileView: View {
                     .modifier(BodyTextModifier())
                     .foregroundColor(COL_TEXT)
             }
-            
+            .onTapGesture {
+                dataHandler.setCurrentViewingTrainingFolder(path: targetDir)
+            }
         }),
                      leftSide: nil,
                      rightSide: AnyView(VStack {

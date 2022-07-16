@@ -45,13 +45,24 @@ class DataHandler: ObservableObject {
             }
             
             if !openTrainingFolders.contains(NNGroupFolder(folder: correctPath)) {
-                let nngFolder = NNGroupFolder(folder: correctPath)       // = NNGroup(folder: correctPath)
+                let nngFolder = NNGroupFolder(folder: correctPath)
                 nngFolder.FetchNNGroup()
                 
                 if let nng = nngFolder.nng, nng.loadedSuccessfully {
                     openTrainingFolders.append(nngFolder)
                     currentViewingTrainingFolder = nngFolder
                 }
+            }
+        }
+    }
+    
+    public func setCurrentViewingTrainingFolder(path: URL) {
+        for folder in openTrainingFolders {
+            if folder.folder == path {
+                withAnimation {
+                    currentViewingTrainingFolder = folder
+                }
+                break
             }
         }
     }

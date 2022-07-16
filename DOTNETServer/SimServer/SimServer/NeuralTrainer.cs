@@ -159,12 +159,11 @@ namespace SimServer {
                     List<Utils.FileData> epochDirs = Utils.ExtractFileData(epochDirectories);
                     epochDirs.Sort();
                     epochDirs.Reverse();
-                    int maxI = (SUPER_EVOLUTION_CYCLE + 1 < epochDirs.Count) ? SUPER_EVOLUTION_CYCLE + 1 : epochDirs.Count;
-                    for (int i = 1; i < maxI; i++) { // Start at index 1 so that we don't copy elements from/to same dir
+                    for (int i = 1; i < SUPER_EVOLUTION_CYCLE + 1; i++) { // Start at index 1 so that we don't copy elements from/to same dir
                         CopyNNFolders(epochDirs.ElementAt(i).fullFilePath, currentTrainingDir.ToString(), overwrite: false);
                     }
                     CullNNS(currentTrainingDir.ToString(), Master.GetDroneCount);
-                    for (int i = 1; i < maxI; i++) {
+                    for (int i = 1; i < SUPER_EVOLUTION_CYCLE; i++) {
                         Directory.Delete(epochDirs.ElementAt(i).fullFilePath, true);
                     }
                 }
