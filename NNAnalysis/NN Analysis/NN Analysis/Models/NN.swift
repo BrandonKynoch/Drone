@@ -60,15 +60,31 @@ class NN {
     }
     
     // Represents the weights and biases used for transitioning from layer i to (i+1)
-    struct NNLayer {
+    class NNLayer {
+        var originalLayerSizeLeft: Int // Number of cols
+        let originalLayerSizeRight: Int // Number of rows
         var weights = [[Double]]()
         var biases = [Double]()
+        
+        private(set) var rowsGrouping: Int = 1 // For matrix reduction
+        private(set) var colsGrouping: Int = 1 // For matrix reduction
         
         // Index arrays just used for drawing UI
         private(set) var UIRowsArray = [Int]()
         private(set) var UIColsArray = [Int]()
         
+        private(set) var UIReduceRowsArray = [Int]()
+        private(set) var UIReduceColsArray = [Int]()
+        // Index arrays just used for drawing UI
+        
+        // CONSTANTS //////////////////////////////////
+        private let MAX_LAYER_SIZE = 20
+        // CONSTANTS //////////////////////////////////
+        
         init(pointer: UnsafeRawBufferPointer, shapeLeft: Int, shapeRight: Int, index: inout Int) {
+            originalLayerSizeLeft = shapeLeft
+            originalLayerSizeRight = shapeRight
+            
             // shapeLeft = number of columns
             // shapeRight = number of rows
             for _ in 0..<shapeLeft {
@@ -87,6 +103,44 @@ class NN {
                 biases.append(pointer.ReadBytes(Double.self, offset: &index))
                 UIRowsArray.append(i)
             }
+            
+            UIReduceColsArray = UIColsArray
+            UIReduceRowsArray = UIRowsArray
+            
+            self.ReduceLayerSize()
+        }
+        
+        func ReduceLayerSize() {
+            var tmpWeights = [[Double]]()
+            
+            colsGrouping = (weights.count > MAX_LAYER_SIZE) ? (Int(Double(weights.count) / Double(MAX_LAYER_SIZE)) + 1): 1
+            rowsGrouping = (weights[0].count > MAX_LAYER_SIZE) ? (Int(Double(weights[0].count) / Double(MAX_LAYER_SIZE)) + 1): 1
+            let kernelSize = Double(rowsGrouping * colsGrouping)
+            
+            UIReduceColsArray = [Int]()
+            UIReduceRowsArray = [Int]()
+            
+            for i in 0..<(originalLayerSizeLeft / colsGrouping) {
+                tmpWeights.append([Double]())
+                UIReduceColsArray.append(i)
+                for j in 0..<(originalLayerSizeRight / rowsGrouping) {
+                    let iIn = i * colsGrouping
+                    let jIn = j * rowsGrouping
+                    var sum : Double = 0
+                    for k in 0..<colsGrouping {
+                        for l in 0..<rowsGrouping {
+                            sum += weights[iIn + k][jIn + l]
+                        }
+                    }
+                    tmpWeights[i].append(sum / kernelSize)
+                }
+            }
+            
+            for i in 0..<(originalLayerSizeRight / rowsGrouping) {
+                UIReduceRowsArray.append(i)
+            }
+            
+            self.weights = tmpWeights
         }
     }
 }

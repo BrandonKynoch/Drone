@@ -106,27 +106,39 @@ struct WeightView: View {
                 let frameWidth = geometry.size.width
                 
                 let layerSpacing = frameWidth / CGFloat(nn.neuralSize)
-                let xAxisScale = 5 * (frameWidth / 500)
 
                 ForEach(nn.UIIndexArray, id: \.self) { i in
-                    let baseXLeft = layerSpacing * (CGFloat(i) + 0.5)
-                    let baseXRight = layerSpacing * (CGFloat(i + 1) + 0.5)
-                    let ySegmentSpacing = frameHeight / CGFloat(nn.maxShape)
-                    let baseYLeft = (frameHeight / 2) - ((CGFloat(nn.layers[i].weights.count) / 2) * ySegmentSpacing)
-                    let baseYRight = (frameHeight / 2) - ((CGFloat(nn.layers[i].weights[0].count) / 2) * ySegmentSpacing)
-                    
-                    WeightLayerView(
+                    SubView(
                         nnLayer: nn.layers[i],
-                        baseXLeft: baseXLeft,
-                        baseXRight: baseXRight,
-                        baseYLeft: baseYLeft,
-                        baseYRight: baseYRight,
-                        ySegmentSpacing: ySegmentSpacing
+                        maxShape: nn.maxShape,
+                        i: i,
+                        layerSpacing: layerSpacing,
+                        frameHeight: frameHeight,
+                        frameWidth: frameWidth
                     )
                 }
             }
         }
         .drawingGroup()
+    }
+    
+    // View is too complex to represent in a single view
+    @ViewBuilder
+    func SubView(nnLayer: NN.NNLayer, maxShape: Int, i: Int, layerSpacing: CGFloat, frameHeight: CGFloat, frameWidth: CGFloat) -> some View {
+        let baseXLeft = layerSpacing * (CGFloat(i) + 0.5)
+        let baseXRight = layerSpacing * (CGFloat(i + 1) + 0.5)
+        let ySegmentSpacing = frameHeight / CGFloat(maxShape)
+        let baseYLeft : CGFloat = (frameHeight / 2) - ((CGFloat(nnLayer.weights.count) / 2) * ySegmentSpacing * CGFloat(nnLayer.colsGrouping))
+        let baseYRight : CGFloat = (frameHeight / 2) - ((CGFloat(nnLayer.weights[0].count) / 2) * ySegmentSpacing * CGFloat(nnLayer.rowsGrouping))
+        
+        WeightLayerView(
+            nnLayer: nn.layers[i],
+            baseXLeft: baseXLeft,
+            baseXRight: baseXRight,
+            baseYLeft: baseYLeft,
+            baseYRight: baseYRight,
+            ySegmentSpacing: ySegmentSpacing
+        )
     }
 }
 
@@ -140,23 +152,21 @@ struct WeightLayerView: View {
     let ySegmentSpacing: CGFloat
     
     var body: some View {
-//                    for j in 0..<nn.layers[i].weights.count { // Column
-        ForEach (nnLayer.UIColsArray, id: \.self) { j in
-//                        for k in 0..<nn.layers[i].weights[j].count { // Row
-            ForEach (nnLayer.UIRowsArray, id: \.self) { k in
+        ForEach (nnLayer.UIReduceColsArray, id: \.self) { j in
+            ForEach (nnLayer.UIReduceRowsArray, id: \.self) { k in
                 Path { path in
                         path.move(to: CGPoint(
                             x: baseXLeft,
-                            y: baseYLeft + (CGFloat(j) * ySegmentSpacing)
+                            y: baseYLeft + (CGFloat(j) * ySegmentSpacing * CGFloat(nnLayer.colsGrouping))
                         ))
                         
                         path.addLine(to: CGPoint(
                             x: baseXRight,
-                            y: baseYRight + (CGFloat(k) * ySegmentSpacing)
+                            y: baseYRight + (CGFloat(k) * ySegmentSpacing * CGFloat(nnLayer.rowsGrouping))
                         ))
                 }
                 .stroke(
-                    S_COL_ACC2.opacity(nnLayer.weights[j][k] * 0.1),
+                    S_COL_ACC2.opacity(nnLayer.weights[j][k]), // MARK: TODO: FIX SCALING SO THAT ITS SCALED RELATIVE TO MAX VALUE
                     style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
                 )
             }
