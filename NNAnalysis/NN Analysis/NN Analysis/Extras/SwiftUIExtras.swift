@@ -815,6 +815,31 @@ struct CustomProgressView: View {
     }
 }
 
+struct CustomToggleView: View {
+    public let description: String
+    @Binding public var val: Bool
+    
+    var body: some View {
+        HStack {
+            Image(systemName: val ? "checkmark.square.fill" : "square")
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation {
+                        val = !val
+                    }
+                }
+            
+            Spacer().frame(width: ELEMENT_SPACING)
+            
+            Text(description)
+            
+            Spacer()
+        }
+        .modifier(BodyTextModifier())
+        .foregroundColor(COL_TEXT)
+    }
+}
+
 struct CustomSliderView: View {
     @State private var progress: Double
     @State private var scaledProgress: Double
@@ -852,7 +877,7 @@ struct CustomSliderView: View {
             CustomProgressView(progress: $scaledProgress)
             
             Text("\(Int(round(progress * 100)))%")
-                .font(.body.bold())
+                .modifier(BodyTextModifier())
                 .foregroundColor(.white)
                 .frame(width: 50)
         }

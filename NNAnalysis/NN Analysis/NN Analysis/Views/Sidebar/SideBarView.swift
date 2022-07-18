@@ -15,7 +15,7 @@ struct SideBarView: View {
             Rectangle()
                 .foregroundColor(COL_BACKGROUND)
             
-            if dataHandler.openTrainingFolders.count == 0 {
+            if dataHandler.openNetworkEntityFolders.count == 0 {
                 FolderSelectionView()
                     .padding()
             } else {
@@ -30,11 +30,15 @@ struct SideBarView: View {
                     Spacer().frame(height: 20)
                     
                     ScrollView {
-                        ForEach (dataHandler.openTrainingFolders, id: \.self) { folder in
-                            DirectoryTileView(targetDir: folder.folder)
-                                .frame(height: 50)
-                                .padding(.leading)
-                                .padding(.trailing)
+//                        ForEach (dataHandler.openNetworkEntityFolders, id: \.self) { folder in
+//                            DirectoryTileView(targetDir: folder.folder)
+//                                .frame(height: 30)
+//                                .padding(.leading)
+//                                .padding(.trailing)
+//                        }
+                        ForEach (dataHandler.epochFolders, id: \.self) { epochFolder in
+                            EpochTileView(epoch: epochFolder)
+                                .padding()
                         }
                     }
                     

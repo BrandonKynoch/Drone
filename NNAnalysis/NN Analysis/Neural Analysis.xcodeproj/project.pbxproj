@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6A46B4FF2885144400B933C3 /* EpochTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46B4FE2885144400B933C3 /* EpochTileView.swift */; };
+		6A46B50228851E1600B933C3 /* PrefsMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46B50128851E1600B933C3 /* PrefsMainView.swift */; };
+		6A46B5042885222E00B933C3 /* PrefsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46B5032885222E00B933C3 /* PrefsHandler.swift */; };
 		6A46CD53287B242700444ED3 /* NN_AnalysisApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD52287B242700444ED3 /* NN_AnalysisApp.swift */; };
 		6A46CD55287B242700444ED3 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A46CD54287B242700444ED3 /* MainView.swift */; };
 		6A46CD57287B242900444ED3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6A46CD56287B242900444ED3 /* Assets.xcassets */; };
@@ -31,6 +34,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6A46B4FE2885144400B933C3 /* EpochTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpochTileView.swift; sourceTree = "<group>"; };
+		6A46B50128851E1600B933C3 /* PrefsMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefsMainView.swift; sourceTree = "<group>"; };
+		6A46B5032885222E00B933C3 /* PrefsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefsHandler.swift; sourceTree = "<group>"; };
 		6A46CD4F287B242700444ED3 /* Neural Analysis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Neural Analysis.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A46CD52287B242700444ED3 /* NN_AnalysisApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NN_AnalysisApp.swift; sourceTree = "<group>"; };
 		6A46CD54287B242700444ED3 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -67,6 +73,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6A46B4FD2885142300B933C3 /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */,
+				6AD346D5287FA6FD008B6179 /* SideBarView.swift */,
+				6A46B4FE2885144400B933C3 /* EpochTileView.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		6A46B50028851E0100B933C3 /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				6A46B50128851E1600B933C3 /* PrefsMainView.swift */,
+			);
+			path = Preferences;
+			sourceTree = "<group>";
+		};
 		6A46CD46287B242700444ED3 = {
 			isa = PBXGroup;
 			children = (
@@ -121,12 +145,12 @@
 		6A46CD68287B297500444ED3 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				6A46B50028851E0100B933C3 /* Preferences */,
+				6A46B4FD2885142300B933C3 /* Sidebar */,
 				6AF2A06E2880E48600865D11 /* Graphs */,
 				6A46CD6B287B299500444ED3 /* BackgroundView.swift */,
 				6AE903D8287F9E3E0090D4C6 /* NNGroupView.swift */,
 				6AE903DA287F9FCC0090D4C6 /* FolderSelectionView.swift */,
-				6AD346D5287FA6FD008B6179 /* SideBarView.swift */,
-				6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */,
 				6AF2A0712880E57500865D11 /* EmptyMainView.swift */,
 			);
 			path = Views;
@@ -139,6 +163,7 @@
 				6AF2A06A2880CCD900865D11 /* NN.swift */,
 				6AF2A06C2880D54800865D11 /* NNGroup.swift */,
 				6A944BDA2883451E0084FB46 /* AnalysisHandler.swift */,
+				6A46B5032885222E00B933C3 /* PrefsHandler.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -223,10 +248,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A46B4FF2885144400B933C3 /* EpochTileView.swift in Sources */,
 				6A944BDB2883451E0084FB46 /* AnalysisHandler.swift in Sources */,
 				6A46CD65287B24B300444ED3 /* SwiftUIExtras.swift in Sources */,
 				6AE903DB287F9FCC0090D4C6 /* FolderSelectionView.swift in Sources */,
 				6A46CD67287B268000444ED3 /* ValidationFields.swift in Sources */,
+				6A46B5042885222E00B933C3 /* PrefsHandler.swift in Sources */,
 				6A95E1022881232A003C3421 /* NNGraph.swift in Sources */,
 				6AD346D6287FA6FD008B6179 /* SideBarView.swift in Sources */,
 				6A46CD64287B24B300444ED3 /* SwiftExtras.swift in Sources */,
@@ -236,6 +263,7 @@
 				6AF2A0692880C3C500865D11 /* SwipableView.swift in Sources */,
 				6A46CD53287B242700444ED3 /* NN_AnalysisApp.swift in Sources */,
 				6AF2A06B2880CCD900865D11 /* NN.swift in Sources */,
+				6A46B50228851E1600B933C3 /* PrefsMainView.swift in Sources */,
 				6AF2A0702880E4B000865D11 /* LineChartView.swift in Sources */,
 				6A95E100287FE143003C3421 /* DirectoryTileView.swift in Sources */,
 				6AF2A0722880E57500865D11 /* EmptyMainView.swift in Sources */,

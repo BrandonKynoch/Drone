@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct NN_AnalysisApp: App {
     init() {
+        let _ = PrefsHandler.singleton
         let _ = DataHandler.singleton
         let _ = AnalysisHandler.singleton
     }
@@ -19,6 +20,7 @@ struct NN_AnalysisApp: App {
             MainView()
                 .environmentObject(DataHandler.singleton)
                 .environmentObject(AnalysisHandler.singleton)
+                .environmentObject(PrefsHandler.singleton)
             //                .onAppear() {
             //                    for family in NSFontManager.shared.availableFontFamilies {
             //                        print(family)
@@ -26,6 +28,13 @@ struct NN_AnalysisApp: App {
             //                }
         }.commands {
             SidebarCommands()
+        }
+        
+        Settings {
+            PrefsMainView()
+                .environmentObject(DataHandler.singleton)
+                .environmentObject(AnalysisHandler.singleton)
+                .environmentObject(PrefsHandler.singleton)
         }
     }
 }

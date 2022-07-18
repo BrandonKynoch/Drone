@@ -93,15 +93,20 @@ public func getAllFilesInDirectory(bundleDirectory: FileManager.SearchPathDirect
 }
 
 
-public func getAllFilesInDirectory(directory: URL, extensionWanted: String) -> (names: [String], paths: [URL]) {
+public func getAllFilesInDirectory(directory: URL, extensionWanted: String?) -> (names: [String], paths: [URL]) {
     do {
         directory.startAccessingSecurityScopedResource()
         
         // Get the directory contents urls (including subfolders urls)
         let directoryContents = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: [])
-
-        // Filter the directory contents
-        let filesPath = directoryContents.filter{ $0.pathExtension == extensionWanted }
+        
+        var filesPath = directoryContents
+        
+        if let extensionWanted = extensionWanted {
+            // Filter the directory contents
+            filesPath = directoryContents.filter{ $0.pathExtension == extensionWanted }
+        }
+        
         let fileNames = filesPath.map{ $0.deletingPathExtension().lastPathComponent }
 
         directory.stopAccessingSecurityScopedResource()

@@ -11,10 +11,16 @@ struct DirectoryTileView: View {
     @EnvironmentObject var dataHandler: DataHandler
     
     let targetDir: URL
+    var dirString: String
     let targetDirName: String
     
     init(targetDir: URL) {
         self.targetDir = targetDir
+        let pathComponents: [String] = targetDir.pathComponents.reversed()
+        self.dirString = ""
+        for i in 1..<(min(pathComponents.count, 3)) {
+            self.dirString = "\(pathComponents[i])/\(self.dirString)"
+        }
         self.targetDirName = targetDir.lastPathComponent
     }
     
@@ -23,9 +29,16 @@ struct DirectoryTileView: View {
             // Main View
             ZStack {
                 PanelSolidView(colour: COL_BACKGROUND2)
-                Text(targetDirName)
-                    .modifier(BodyTextModifier())
-                    .foregroundColor(COL_TEXT)
+                HStack {
+                    Text(dirString)
+                        .modifier(LightTextModifier())
+                        .foregroundColor(COL_TEXT)
+                    Spacer().frame(width: ELEMENT_SPACING)
+                    Text(targetDirName)
+                        .modifier(BodyTextModifier())
+                        .foregroundColor(COL_TEXT)
+                }
+                .padding()
             }
             .onTapGesture {
                 dataHandler.setCurrentViewingTrainingFolder(path: targetDir)
