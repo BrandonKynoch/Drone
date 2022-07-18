@@ -41,7 +41,7 @@ struct DirectoryTileView: View {
                 .padding()
             }
             .onTapGesture {
-                dataHandler.setCurrentViewingTrainingFolder(path: targetDir)
+                dataHandler.SetCurrentViewingTrainingFolder(path: targetDir)
             }
         }),
                      leftSide: nil,
@@ -57,7 +57,7 @@ struct DirectoryTileView: View {
             }
             .padding(.leading)
             .onTapGesture {
-                dataHandler.closeTrainingFolder(path: targetDir)
+                dataHandler.CloseTrainingFolder(path: targetDir)
             }
         }))
     }

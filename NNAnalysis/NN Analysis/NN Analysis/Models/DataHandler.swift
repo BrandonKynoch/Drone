@@ -20,9 +20,16 @@ class DataHandler: ObservableObject {
     // SINGLETON PATTERN ///////////////////////////////////
     
     @Published private(set) var epochFolders = [EpochFolder]()
+    private var unknownEpochFolder: EpochFolder! = nil
+    
     @Published private(set) var openNetworkEntityFolders = [NNGroupFolder]() // Each folder consists of several NNs forming a single combined NN
     
-    @Published public var currentViewingTrainingFolder: NNGroupFolder? = nil
+    @Published private(set) var currentViewingEpochFolder: EpochFolder? = nil
+    @Published public var currentViewingTrainingFolder: NNGroupFolder? = nil {
+        didSet {
+            currentViewingEpochFolder = currentViewingTrainingFolder?.epochFolder ?? nil
+        }
+    }
     
     
     
@@ -31,6 +38,12 @@ class DataHandler: ObservableObject {
             print("\nError: Attempted to initialize duplicate data handler\n")
             return
         }
+        
+        if let resourceURL = Bundle.main.resourceURL {
+            unknownEpochFolder = EpochFolder(folder: resourceURL.appendingPathComponent("Unknown Epochs"))
+            epochFolders.append(unknownEpochFolder)
+        }
+        
         DataHandler.privateSingleton = self
     }
     
@@ -50,7 +63,7 @@ class DataHandler: ObservableObject {
             if nnsInFolder.names.count > 0 {
                 // Load NN entity
                 if !openNetworkEntityFolders.contains(NNGroupFolder(folder: correctPath)) {
-                    let nngFolder = NNGroupFolder(folder: correctPath)
+                    let nngFolder = NNGroupFolder(folder: correctPath, epochFolder: epochFolder)
                     nngFolder.FetchNNGroup()
                     
                     if let nng = nngFolder.nng, nng.loadedSuccessfully {
@@ -60,6 +73,8 @@ class DataHandler: ObservableObject {
                         if let epochFolder = epochFolder {
                             epochFolder.RegisterNNForEpoch(nn: nngFolder)
                         } else {
+                            unknownEpochFolder.RegisterNNForEpoch(nn: nngFolder)
+                            
                             // Sort by filename if we are not loading from epoch
                             NNGroupFolder.SortGroups(groups: &openNetworkEntityFolders)
                         }
@@ -89,7 +104,7 @@ class DataHandler: ObservableObject {
         }
     }
     
-    public func setCurrentViewingTrainingFolder(path: URL) {
+    public func SetCurrentViewingTrainingFolder(path: URL) {
         for folder in openNetworkEntityFolders {
             if folder.folder == path {
                 withAnimation {
@@ -100,7 +115,12 @@ class DataHandler: ObservableObject {
         }
     }
     
-    public func closeTrainingFolder(path: URL) {
+    public func CycleCurrentViewingEpochFolder(offset: Int) {
+        // TODO: CONTINUE FROM HERE
+        // Change current viewing trainign folder from keyboard input
+    }
+    
+    public func CloseTrainingFolder(path: URL) {
         withAnimation {
             if let currentViewingTrainingFolder = currentViewingTrainingFolder {
                 if currentViewingTrainingFolder.folder == path {
@@ -115,9 +135,11 @@ class DataHandler: ObservableObject {
     }
 }
     
-class EpochFolder: Equatable, Hashable {
+class EpochFolder: ObservableObject, Equatable, Hashable {
     private(set) var folder: URL
     private(set) var nns: [NNGroupFolder]
+    
+    @Published public var expandedView: Bool = false
     
     init(folder: URL) {
         self.folder = folder
@@ -148,10 +170,12 @@ class EpochFolder: Equatable, Hashable {
 class NNGroupFolder: Equatable, Hashable {
     private(set) var folder: URL
     public var nng: NNGroup?
+    private(set) var epochFolder: EpochFolder?
     
-    init(folder: URL) {
+    init(folder: URL, epochFolder: EpochFolder? = nil) {
         self.folder = folder
         self.nng = nil
+        self.epochFolder = epochFolder
     }
     
     public func FetchNNGroup() {

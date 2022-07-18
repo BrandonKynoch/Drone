@@ -53,6 +53,7 @@ struct MainView: View {
             // Set up keyboard buttons to cycle through epoch groups
             // Improve method of loading epochs so that it will not only load single drone if name is 0
         }
+        .background(KeyEventHandling())
     }
     
     private func toggleSidebar() { // 2

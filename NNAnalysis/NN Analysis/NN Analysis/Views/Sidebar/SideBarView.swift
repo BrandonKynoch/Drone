@@ -30,12 +30,6 @@ struct SideBarView: View {
                     Spacer().frame(height: 20)
                     
                     ScrollView {
-//                        ForEach (dataHandler.openNetworkEntityFolders, id: \.self) { folder in
-//                            DirectoryTileView(targetDir: folder.folder)
-//                                .frame(height: 30)
-//                                .padding(.leading)
-//                                .padding(.trailing)
-//                        }
                         ForEach (dataHandler.epochFolders, id: \.self) { epochFolder in
                             EpochTileView(epoch: epochFolder)
                                 .padding()

@@ -21,6 +21,7 @@
 		6A944BDB2883451E0084FB46 /* AnalysisHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A944BDA2883451E0084FB46 /* AnalysisHandler.swift */; };
 		6A95E100287FE143003C3421 /* DirectoryTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */; };
 		6A95E1022881232A003C3421 /* NNGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A95E1012881232A003C3421 /* NNGraph.swift */; };
+		6A9A68B32886222A00417861 /* InputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9A68B22886222A00417861 /* InputHandler.swift */; };
 		6AD346D6287FA6FD008B6179 /* SideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD346D5287FA6FD008B6179 /* SideBarView.swift */; };
 		6AE903D7287F93340090D4C6 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 6AE903D6287F93340090D4C6 /* Fonts */; };
 		6AE903D9287F9E3E0090D4C6 /* NNGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE903D8287F9E3E0090D4C6 /* NNGroupView.swift */; };
@@ -50,6 +51,7 @@
 		6A944BDA2883451E0084FB46 /* AnalysisHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisHandler.swift; sourceTree = "<group>"; };
 		6A95E0FF287FE143003C3421 /* DirectoryTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryTileView.swift; sourceTree = "<group>"; };
 		6A95E1012881232A003C3421 /* NNGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NNGraph.swift; sourceTree = "<group>"; };
+		6A9A68B22886222A00417861 /* InputHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputHandler.swift; sourceTree = "<group>"; };
 		6AD346D5287FA6FD008B6179 /* SideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideBarView.swift; sourceTree = "<group>"; };
 		6AE903D6287F93340090D4C6 /* Fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Fonts; path = "NN Analysis/Fonts"; sourceTree = SOURCE_ROOT; };
 		6AE903D8287F9E3E0090D4C6 /* NNGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NNGroupView.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 				6AF2A06C2880D54800865D11 /* NNGroup.swift */,
 				6A944BDA2883451E0084FB46 /* AnalysisHandler.swift */,
 				6A46B5032885222E00B933C3 /* PrefsHandler.swift */,
+				6A9A68B22886222A00417861 /* InputHandler.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 				6A46CD67287B268000444ED3 /* ValidationFields.swift in Sources */,
 				6A46B5042885222E00B933C3 /* PrefsHandler.swift in Sources */,
 				6A95E1022881232A003C3421 /* NNGraph.swift in Sources */,
+				6A9A68B32886222A00417861 /* InputHandler.swift in Sources */,
 				6AD346D6287FA6FD008B6179 /* SideBarView.swift in Sources */,
 				6A46CD64287B24B300444ED3 /* SwiftExtras.swift in Sources */,
 				6AE903DE287FA0FC0090D4C6 /* DataHandler.swift in Sources */,

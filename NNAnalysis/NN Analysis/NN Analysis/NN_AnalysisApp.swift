@@ -13,6 +13,7 @@ struct NN_AnalysisApp: App {
         let _ = PrefsHandler.singleton
         let _ = DataHandler.singleton
         let _ = AnalysisHandler.singleton
+        let _ = InputHandler.singleton
     }
     
     var body: some Scene {
