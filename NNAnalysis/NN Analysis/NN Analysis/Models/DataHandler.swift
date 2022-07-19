@@ -31,6 +31,10 @@ class DataHandler: ObservableObject {
         }
     }
     
+    // So that we can check if we have already loaded a meta file to prevent
+    // double fetching from disk
+    public var allMetaFiles = [URL: NNMeta]() // meta file path: NNMeta
+    
     
     
     init() {
@@ -92,9 +96,15 @@ class DataHandler: ObservableObject {
                         openTrainingFolder(fromPath: dir, epochFolder: epochFolder)
                     }
                 } else {
-                    let targetDir = subDirs.paths.filter({ url in url.lastPathComponent == "0"})
-                    if targetDir.count == 1 {
-                        openTrainingFolder(fromPath: targetDir[0], epochFolder: epochFolder)
+                    var metas = GetAllMetaFilesInSubdirectories(folder: epochFolder.folder)
+                    
+                    if metas.count > 0 {
+                        metas.sort()
+                        metas.reverse()
+                        
+                        openTrainingFolder(fromPath: metas[0].fileURL.deletingLastPathComponent(), epochFolder: epochFolder)
+                    } else {
+                        print("Error: meta files count is zero")
                     }
                 }
                 
@@ -116,8 +126,24 @@ class DataHandler: ObservableObject {
     }
     
     public func CycleCurrentViewingEpochFolder(offset: Int) {
-        // TODO: CONTINUE FROM HERE
-        // Change current viewing trainign folder from keyboard input
+        guard let currentViewingEpochFolder = currentViewingEpochFolder else {
+            return
+        }
+        
+        var index = GetIndexOfEpochFolder(epoch: currentViewingEpochFolder)
+        index += offset
+        if index < 0 {
+            index += epochFolders.count
+        }
+        index = index % epochFolders.count
+        
+        if index == 0 {
+            index += 1
+        }
+        
+        self.currentViewingEpochFolder = epochFolders[index]
+        
+        SetCurrentViewingTrainingFolder(path: epochFolders[index].nns[0].folder)
     }
     
     public func CloseTrainingFolder(path: URL) {
@@ -132,6 +158,45 @@ class DataHandler: ObservableObject {
                 return folder.folder == path
             })
         }
+    }
+    
+    private func GetIndexOfEpochFolder(epoch: EpochFolder) -> Int {
+        for i in 0..<epochFolders.count {
+            if epochFolders[i] == epoch {
+                return i
+            }
+        }
+        return -1
+    }
+    
+    private func GetAllMetaFilesInSubdirectories(folder: URL) -> [NNMeta] {
+        let networkGroupFolders = getAllFilesInDirectory(directory: folder, extensionWanted: nil)
+        
+        var output = [NNMeta]()
+        
+        for group in networkGroupFolders.paths {
+            let nnMetas = getAllFilesInDirectory(directory: group, extensionWanted: "NNM")
+            
+            if nnMetas.paths.count > 0 {
+                var m: NNMeta? = nil
+                if let loadedMetaFile = allMetaFiles[nnMetas.paths[0]] {
+                    // Meta file has already been loaded
+                    m = loadedMetaFile
+                } else {
+                    // Load meta file
+                    do {
+                        m = try NNMeta(fromFile: nnMetas.paths[0])
+                    } catch {
+                        print("Failed to load NN meta")
+                    }
+                }
+                if let m = m {
+                    output.append(m)
+                }
+            }
+        }
+        
+        return output
     }
 }
     

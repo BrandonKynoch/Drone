@@ -19,6 +19,7 @@ class AnalysisHandler: ObservableObject {
     // SINGLETON PATTERN ///////////////////////////////////
     
     // UI FIELDS ///////////////////////////////////
+    @Published public var selectedNNName: String? = nil
     @Published public var weightOpacityScaler: CGFloat = 1
     // UI FIELDS ///////////////////////////////////
     

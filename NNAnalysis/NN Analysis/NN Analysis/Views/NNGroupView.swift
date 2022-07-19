@@ -12,13 +12,20 @@ import SwiftUI
 struct NNGroupView: View {
     @EnvironmentObject var analysisHandler: AnalysisHandler
     
+    let nnGroupFolder: NNGroupFolder
     @ObservedObject var nnGroup: NNGroup
     @State var selectedNN: String
     
-    init (nnGroup: NNGroup) {
-        self.nnGroup = nnGroup
-        if nnGroup.nnNames.count > 0 {
-            self.selectedNN = nnGroup.nnNames[0]
+    init (nnGroupFolder: NNGroupFolder) {
+        self.nnGroupFolder = nnGroupFolder
+        self.nnGroup = nnGroupFolder.nng!
+        if nnGroupFolder.nng!.nnNames.count > 0 {
+            if let selected = AnalysisHandler.singleton.selectedNNName {
+                self.selectedNN = selected
+            } else {
+                self.selectedNN = nnGroupFolder.nng!.nnNames[0]
+                AnalysisHandler.singleton.selectedNNName = nnGroupFolder.nng!.nnNames[0]
+            }
             nnGroup.SetCurrentViewingNNFromName(fileName: selectedNN)
         } else {
             self.selectedNN = "NULL"
@@ -32,8 +39,17 @@ struct NNGroupView: View {
             if nnGroup.nns.count > 0 {
                 VStack {
                     HStack {
-                        Text(nnGroup.folder.lastPathComponent)
+                        Text("\(nnGroupFolder.epochFolder?.folder.lastPathComponent ?? "")\t\(nnGroup.folder.lastPathComponent)")
                             .modifier(TitleTextModifier())
+                            .foregroundColor(COL_TEXT)
+                        Spacer()
+                    }
+                    
+                    Spacer().frame(height: 10)
+                    
+                    HStack {
+                        Text("Fitness: \(nnGroup.meta?.fitness ?? -1)")
+                            .modifier(BodyTextModifier())
                             .foregroundColor(COL_TEXT)
                         Spacer()
                     }
@@ -49,6 +65,7 @@ struct NNGroupView: View {
                             CustomStringPickerView(rowHeight: 40, selected: .init(get: { return selectedNN }, set: { val in
                                 selectedNN = val
                                 nnGroup.SetCurrentViewingNNFromName(fileName: val)
+                                AnalysisHandler.singleton.selectedNNName = val
                             }), selectionOptions: nnGroup.nnNames, canEdit: .constant(true))
                             
                             if nnGroup.currentViewingNN != nil {

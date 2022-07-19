@@ -29,8 +29,6 @@ class InputHandler {
     }
     
     static func HandleInput(keyCode: UInt16) {
-        print(keyCode)
-        
         // left = 123
         // up = 126
         // down = 125
@@ -40,10 +38,10 @@ class InputHandler {
         
         switch (keyCode) {
         case 123, 126: // Left or Up
-            
+            DataHandler.singleton.CycleCurrentViewingEpochFolder(offset: -1)
             break
-        case 124, 125: // Right or Down
-            
+        case 124, 125, 49: // Right or Down or space
+            DataHandler.singleton.CycleCurrentViewingEpochFolder(offset: 1)
             break
         default:
             break
