@@ -22,6 +22,7 @@ struct drone_data {
 
     struct neural_data* sensor_neural;
     struct neural_data* rotation_neural;
+    struct neural_data* distance_neural;
     struct neural_data* combine_neural;
 
     /// SENSOR READINGS /////////////////////////////////////////
@@ -36,9 +37,14 @@ struct drone_data {
     double rotation_z;
     /// ROTATION READINGS ///////////////////////////////////////
 
+    /// DISTANCE READINGS ///////////////////////////////////////
+    double dist_to_target;
+    /// DISTANCE READINGS ///////////////////////////////////////    
+
     /// NN INPUTS ///////////////////////////////////////////////
     struct time_buffer* sensor_time_buffer;
     struct time_buffer* rotation_time_buffer;
+    struct time_buffer* dist_to_target_buffer;
     /// NN INPUTS ///////////////////////////////////////////////
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs

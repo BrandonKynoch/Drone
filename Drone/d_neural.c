@@ -24,10 +24,9 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         init_neural_data_from_design(file, &drone->sensor_neural);
-        int sensor_n_size = 5;
-        int sensor_n_shape[] = {200, 200, 100, 50, 20};
+        int sensor_n_size = 4;
+        int sensor_n_shape[] = {200, 100, 50, 20};
         int sensor_n_activations[] = {
-            ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
@@ -56,6 +55,27 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         drone->rotation_neural = init_matrices_from_network_design(rotation_n_size, rotation_n_shape, rotation_n_activations);
         write_neural_data_to_file(file, drone->rotation_neural);
     }
+
+
+
+
+    // Distance.NN
+    sprintf(file, "%s/Distance.NN\0", enclosing_dir);
+    if (access(file, F_OK) == 0) {
+        // File exists
+        init_neural_data_from_file(file, &drone->distance_neural);
+    } else {
+        // File does not exist
+        init_neural_data_from_design(file, &drone->distance_neural);
+        int distance_n_size = 3;
+        int distance_n_shape[] = {30, 30, 20};
+        int distance_n_activations[] = {
+            ACTIVATION_SIGMOID,
+            ACTIVATION_SIGMOID
+        };
+        drone->distance_neural = init_matrices_from_network_design(distance_n_size, distance_n_shape, distance_n_activations);
+        write_neural_data_to_file(file, drone->distance_neural);
+    }
     
     
     
@@ -68,9 +88,10 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         init_neural_data_from_design(file, &drone->combine_neural);
-        int combine_n_size = 4;
-        int combine_n_shape[] = {40, 40, 20, 4};
+        int combine_n_size = 5;
+        int combine_n_shape[] = {60, 40, 30, 20, 4};
         int combine_n_activations[] = {
+            ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
@@ -235,6 +256,7 @@ struct neural_data* init_matrices_from_network_design(int layer_count, int neura
 void feed_forward_full_network(struct drone_data* drone) {
     feed_forward_network(drone->sensor_neural);
     feed_forward_network(drone->rotation_neural);
+    feed_forward_network(drone->distance_neural);
 
     int c_i = 0;
     for (int i = 0; i < drone->sensor_neural->weights_row_count[drone->sensor_neural->weights_matrix_count-1]; i++) {
@@ -243,6 +265,10 @@ void feed_forward_full_network(struct drone_data* drone) {
     }
     for (int i = 0; i < drone->rotation_neural->weights_row_count[drone->rotation_neural->weights_matrix_count-1]; i++) {
         drone->combine_neural->input_layer[c_i] = drone->rotation_neural->output_layer[i];
+        c_i++;
+    }
+    for (int i = 0; i < drone->distance_neural->weights_row_count[drone->distance_neural->weights_matrix_count-1]; i++) {
+        drone->combine_neural->input_layer[c_i] = drone->distance_neural->output_layer[i];
         c_i++;
     }
 

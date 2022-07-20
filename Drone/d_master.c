@@ -40,15 +40,21 @@ void init_and_test_NN_from_folder(char* folder) {
     printf("\n\n");
 
     // INIT INPUT LAYERS
+    // Sensor data
     int sensor_input_size = DRONE_CIRCLE_SENSOR_COUNT + 2; // Circle sensors + top sensor + bottom sensor
     ASSERT((int) network_input_layer_size(drone_data.sensor_neural) % sensor_input_size == 0);
     int sensor_timesteps = (int) (network_input_layer_size(drone_data.sensor_neural) / sensor_input_size);
     drone_data.sensor_time_buffer = init_timebuffer(sensor_input_size, sensor_timesteps);
 
+    // Rotation data
     int rotation_input_size = 2; // x, y, z axis
     ASSERT((int) network_input_layer_size(drone_data.rotation_neural) % rotation_input_size == 0);
     int rotation_timesteps = (int) (network_input_layer_size(drone_data.rotation_neural) / rotation_input_size);
     drone_data.rotation_time_buffer = init_timebuffer(rotation_input_size, rotation_timesteps);
+
+    // Distance data
+    int dist_to_target_timesteps = (int) network_input_layer_size(drone_data.distance_neural);
+    drone_data.dist_to_target_buffer = init_timebuffer(1, dist_to_target_timesteps);
 }
 
 void drone_logic_loop() {
@@ -97,10 +103,12 @@ void drone_logic_loop() {
             case RESPONSE_CODE_LOAD_NN:
                 free(drone_data.sensor_neural);
                 free(drone_data.rotation_neural);
+                free(drone_data.distance_neural);
                 free(drone_data.combine_neural);
 
                 free(drone_data.sensor_time_buffer);
                 free(drone_data.rotation_time_buffer);
+                free(drone_data.dist_to_target_buffer);
 
                 json_object_object_get_ex(json_response, "nnFolder", &response_NN_folder_json);
                 
@@ -128,11 +136,6 @@ void drone_logic_loop() {
                     drone_data.combine_neural->output_layer[2],
                     drone_data.combine_neural->output_layer[3]
                 );
-
-                // drone_data.m_fl = (drone_data.combine_neural->output_layer[0] * 2) - 1;
-                // drone_data.m_fr = (drone_data.combine_neural->output_layer[1] * 2) - 1;
-                // drone_data.m_br = (drone_data.combine_neural->output_layer[2] * 2) - 1;
-                // drone_data.m_bl = (drone_data.combine_neural->output_layer[3] * 2) - 1;
 
                 printf("\n\n\n\n");
                 print_motor_output(&drone_data);
@@ -169,6 +172,13 @@ void init_drone_sensor_data(struct drone_data* drone) {
         drone->rotation_time_buffer->full_buffer[i] = 0;
     }
     /// ROTATION DATA ////////////////////////////////////////
+
+    /// DISTANCE DATA ////////////////////////////////////////
+    drone->dist_to_target = 0;
+    for (int i = 0; i < timebuffer_total_size(drone->dist_to_target_buffer); i++) {
+        drone->dist_to_target_buffer->full_buffer[i] = 0;
+    }
+    /// DISTANCE DATA ////////////////////////////////////////
 }
 
 void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
@@ -195,6 +205,10 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     assign_double_from_json(json_in, "rotationY", &drone->rotation_y);
     assign_double_from_json(json_in, "rotationZ", &drone->rotation_z);
     /// ROTATION DATA ////////////////////////////////////////
+
+    /// DISTANCE DATA ////////////////////////////////////////
+    assign_double_from_json(json_in, "distToTarget", &drone->dist_to_target);
+    /// DISTANCE DATA ////////////////////////////////////////
 }
 
 void set_NN_input_from_sensor_data(struct drone_data* drone) {
@@ -214,6 +228,12 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     timebuffer_increment(drone->rotation_time_buffer);
     timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);
     /// ROTATION DATA ////////////////////////////////////////
+
+    /// DISTANCE DATA ////////////////////////////////////////
+    drone->dist_to_target_buffer->buffer[0] = drone_data.dist_to_target;
+    timebuffer_increment(drone->dist_to_target_buffer);
+    timebuffer_copy_corrected(drone->dist_to_target_buffer, drone_data.distance_neural->input_layer);
+    /// DISTANCE DATA ////////////////////////////////////////
 }
 
 void motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {

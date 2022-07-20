@@ -143,6 +143,10 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void GetSensorData() {
+        /// DISTANCE DATA ////////////////////////////////////////////////////
+        data.distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
+        /// DISTANCE DATA ////////////////////////////////////////////////////
+
         /// INFARED SENSOR DATA //////////////////////////////////////////////
         // Circle sensors
         RaycastHit hit;
@@ -213,7 +217,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
                 smoothnessFitness -= sumRotationDelta * Time.deltaTime * DroneServerHandler.StaticInstance.smoothnessFitnessScaler;
             }
 
-            float distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
+
+            float distToTarget = (float) data.distToTarget;
             distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
             distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime  * DroneServerHandler.StaticInstance.distanceFitnessScaler;
         }
@@ -382,6 +387,8 @@ public class DroneData {
 
     public UInt64 id;
     public double[] motorOutputs = new double[4];
+
+    public double distToTarget;
 
     // Sensors start from directly in front and rotate around clockwise when viewed from above drone
     public double[] circleSensorData = new double[CIRCLE_circle_sensor_array_COUNT];
