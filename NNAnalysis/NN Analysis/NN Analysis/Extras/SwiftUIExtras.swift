@@ -410,7 +410,6 @@ struct CustomPickerView<E: CaseIterable & Hashable>: View {
     }
     
     var body: some View {
-        // TODO: FINISH THIS FOR OPS DETAIL VIEW OP TYPE
         ZStack {
             GeometryReader { geometry in
                 let cr = CORNER_RADIUS * 1.5

@@ -23,9 +23,18 @@ struct NNGraph: View {
                         HStack {
                             ForEach(currentViewingNN.UICountArray, id: \.self) { i in
                                 Spacer()
-                                Text("\(currentViewingNN.neuralShape[i])")
-                                    .modifier(BodyTextModifier())
-                                    .foregroundColor(COL_TEXT)
+                                VStack {
+                                    Text("\(currentViewingNN.neuralShape[i])")
+                                        .modifier(BodyTextModifier())
+                                        .foregroundColor(COL_TEXT)
+                                    if i-1 >= 0 {
+                                        Text("\(currentViewingNN.GetActivationName(atIndex: i-1))")
+                                            .modifier(BodyTextModifier())
+                                            .foregroundColor(COL_TEXT)
+                                    } else {
+                                        Spacer()
+                                    }
+                                }
                                 Spacer()
                             }
                         }
@@ -172,7 +181,7 @@ struct WeightLayerView: View {
                         ))
                 }
                 .stroke(
-                    COL_ACC2.opacity((nnLayer.weights[j][k] / maxWeightMagnitude) * analysisHandler.weightOpacityScaler), // MARK: TODO: FIX SCALING SO THAT ITS SCALED RELATIVE TO MAX VALUE
+                    COL_ACC2.opacity((nnLayer.weights[j][k] / maxWeightMagnitude) * analysisHandler.weightOpacityScaler),
                     style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
                 )
             }

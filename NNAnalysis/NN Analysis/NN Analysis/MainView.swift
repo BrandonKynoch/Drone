@@ -44,8 +44,7 @@ struct MainView: View {
             }
             
             if dataHandler.currentViewingTrainingFolder?.nng != nil {
-//                NNGroupView(nnGroup: dataHandler.currentViewingTrainingFolder!.nng!)
-                NNGroupView(nnGroupFolder: dataHandler.currentViewingTrainingFolder!)
+                ContentView()
             } else {
                 EmptyMainView()
             }

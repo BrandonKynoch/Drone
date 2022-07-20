@@ -22,6 +22,11 @@ class DataHandler: ObservableObject {
     @Published private(set) var epochFolders = [EpochFolder]()
     private var unknownEpochFolder: EpochFolder! = nil
     
+    @Published private(set) var maxFitness: Double = 0
+    
+    @Published private(set) var UIEpochsArray = [Int]() // Index array for fitness UI
+    @Published private(set) var UIFitnessYAxisArray = [Int]() // Index array for fitness UI
+    
     @Published private(set) var openNetworkEntityFolders = [NNGroupFolder]() // Each folder consists of several NNs forming a single combined NN
     
     @Published private(set) var currentViewingEpochFolder: EpochFolder? = nil
@@ -43,10 +48,14 @@ class DataHandler: ObservableObject {
             return
         }
         
+        self.maxFitness = 0
+        
         if let resourceURL = Bundle.main.resourceURL {
             unknownEpochFolder = EpochFolder(folder: resourceURL.appendingPathComponent("Unknown Epochs"))
             epochFolders.append(unknownEpochFolder)
         }
+        
+        self.UIFitnessYAxisArray = Array(0...25)
         
         DataHandler.privateSingleton = self
     }
@@ -70,24 +79,23 @@ class DataHandler: ObservableObject {
                     let nngFolder = NNGroupFolder(folder: correctPath, epochFolder: epochFolder)
                     nngFolder.FetchNNGroup()
                     
-                    if let nng = nngFolder.nng, nng.loadedSuccessfully {
-                        openNetworkEntityFolders.append(nngFolder)
-                        currentViewingTrainingFolder = nngFolder
+                    openNetworkEntityFolders.append(nngFolder)
+                    currentViewingTrainingFolder = nngFolder
+                    
+                    if let epochFolder = epochFolder {
+                        epochFolder.RegisterNNForEpoch(nn: nngFolder)
+                    } else {
+                        unknownEpochFolder.RegisterNNForEpoch(nn: nngFolder)
                         
-                        if let epochFolder = epochFolder {
-                            epochFolder.RegisterNNForEpoch(nn: nngFolder)
-                        } else {
-                            unknownEpochFolder.RegisterNNForEpoch(nn: nngFolder)
-                            
-                            // Sort by filename if we are not loading from epoch
-                            NNGroupFolder.SortGroups(groups: &openNetworkEntityFolders)
-                        }
+                        // Sort by filename if we are not loading from epoch
+                        NNGroupFolder.SortGroups(groups: &openNetworkEntityFolders)
                     }
                 }
             } else {
                 // Potentially an epoch folder -> try load NNs in subdirectory
                 let epochFolder = EpochFolder(folder: correctPath)
                 epochFolders.append(epochFolder)
+                UIEpochsArray.append(UIEpochsArray.count)
                 
                 let subDirs = getAllFilesInDirectory(directory: correctPath, extensionWanted: nil)
                 
@@ -169,6 +177,14 @@ class DataHandler: ObservableObject {
         return -1
     }
     
+    public func GetMaxFitness() {
+        for epoch in epochFolders {
+            if epoch.maxFitness > maxFitness {
+                maxFitness = epoch.maxFitness
+            }
+        }
+    }
+    
     private func GetAllMetaFilesInSubdirectories(folder: URL) -> [NNMeta] {
         let networkGroupFolders = getAllFilesInDirectory(directory: folder, extensionWanted: nil)
         
@@ -203,17 +219,24 @@ class DataHandler: ObservableObject {
 class EpochFolder: ObservableObject, Equatable, Hashable {
     private(set) var folder: URL
     private(set) var nns: [NNGroupFolder]
+    private(set) var maxFitness: Double
     
     @Published public var expandedView: Bool = false
     
     init(folder: URL) {
         self.folder = folder
         self.nns = [NNGroupFolder]()
+        self.maxFitness = 0
     }
     
     public func RegisterNNForEpoch(nn: NNGroupFolder) {
         if !nns.contains(where: { n in n == nn }) {
             nns.append(nn)
+            if let nnFitness = nn.nng?.meta?.fitness {
+                if nnFitness > maxFitness {
+                    maxFitness = nnFitness
+                }
+            }
         }
     }
     

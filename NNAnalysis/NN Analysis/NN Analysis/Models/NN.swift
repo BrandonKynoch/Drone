@@ -81,6 +81,19 @@ class NN: ObservableObject {
         }
     }
     
+    public func GetActivationName(atIndex: Int) -> String {
+        switch activations[atIndex] {
+        case 0:
+            return "Relu"
+        case 1:
+            return "Leaky Relu"
+        case 2:
+            return "Sigmoid"
+        default:
+            return "Unknown"
+        }
+    }
+    
     
     
     // Represents the weights and biases used for transitioning from layer i to (i+1)
