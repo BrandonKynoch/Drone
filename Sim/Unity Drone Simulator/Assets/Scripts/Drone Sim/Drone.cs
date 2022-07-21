@@ -233,7 +233,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         data.fitness = SumFitness;
     }
 
-    public void ResetDrone(Vector3 spawnPosition) {
+    public void ResetDrone(bool useGrid = false) {
         if (data == null) {
             Debug.LogError("Warning data is null");
             return;
@@ -245,10 +245,13 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         heightFitness = 0;
         Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
 
-        transform.position =
-                spawnPosition +
-                (Vector3.right * (data.id % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
-                (Vector3.forward * Mathf.FloorToInt(data.id / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
+        if (useGrid) {
+            transform.position =
+                    (Vector3.right * (data.id % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
+                    (Vector3.forward * Mathf.FloorToInt(data.id / SPAWN_ROWS_COUNT) * SPAWN_SPACING);
+        } else {
+            transform.position = ProceduralGenerator.GetRandomSpawnPosition();
+        }
 
         transform.rotation = Quaternion.identity;
 

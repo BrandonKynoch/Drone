@@ -67,9 +67,10 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         init_neural_data_from_design(file, &drone->distance_neural);
-        int distance_n_size = 3;
-        int distance_n_shape[] = {30, 30, 20};
+        int distance_n_size = 4;
+        int distance_n_shape[] = {50, 40, 30, 20};
         int distance_n_activations[] = {
+            ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
         };

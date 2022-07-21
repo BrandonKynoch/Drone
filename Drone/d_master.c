@@ -72,7 +72,13 @@ void drone_logic_loop() {
     struct timeval timea, timeb;
     gettimeofday(&timea, 0);
 
+    drone_data.ticker = 0;
     while (TRUE) {
+        drone_data.ticker++;
+        if (drone_data.ticker % 1000000) {
+            drone_data.ticker = 0; // Prevents integer overflow
+        }
+
         motor_output(&drone_data);
 
         // Receive sensore data respone from server - position, distance sensors etc.
@@ -81,9 +87,9 @@ void drone_logic_loop() {
         gettimeofday(&timeb, 0);
 
         useconds_t elapsed_time = timeb.tv_usec - timea.tv_usec;
-        useconds_t sleep_time = 32000 - elapsed_time;
-        if (sleep_time > 32000) {
-            sleep_time = 32000;
+        useconds_t sleep_time = TARGET_TICK_DURATION - elapsed_time;
+        if (sleep_time > TARGET_TICK_DURATION) { // This looks like unnecessary check - it is actually needed to fix timing when reseting epochs
+            sleep_time = TARGET_TICK_DURATION;
         }
         printf("Sleep time: %d\n", (int) sleep_time);
 
@@ -230,9 +236,11 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     /// ROTATION DATA ////////////////////////////////////////
 
     /// DISTANCE DATA ////////////////////////////////////////
-    drone->dist_to_target_buffer->buffer[0] = drone_data.dist_to_target;
-    timebuffer_increment(drone->dist_to_target_buffer);
-    timebuffer_copy_corrected(drone->dist_to_target_buffer, drone_data.distance_neural->input_layer);
+    if (drone->ticker % DISTANCE_NEURAL_SET_TICKER_STRIDE) {
+        drone->dist_to_target_buffer->buffer[0] = drone_data.dist_to_target;
+        timebuffer_increment(drone->dist_to_target_buffer);
+        timebuffer_copy_corrected(drone->dist_to_target_buffer, drone_data.distance_neural->input_layer);
+    }
     /// DISTANCE DATA ////////////////////////////////////////
 }
 

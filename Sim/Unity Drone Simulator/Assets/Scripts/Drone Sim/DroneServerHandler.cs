@@ -301,20 +301,22 @@ public class DroneServerHandler : MonoBehaviour {
         DroneCamHandler.StaticInstance.SetFocalPoint(newDroneGO.GetComponent<FocalPointObject>());
         MasterHandler.StaticInstance.SetUserMode(MasterHandler.UserMode.DroneCam);
 
-        newDrone.ResetDrone(spawnTransform.position);
+        newDrone.ResetDrone();
 
         return newDrone;
     }
 
     private void ResetAllDrones() {
+        ProceduralGenerator.StaticInstance.CreateMap();
+
         float maxRange = 30f;
         MasterHandler.DroneTarget.position = new Vector3(
-            30 + UnityEngine.Random.Range(-maxRange, maxRange),
+            UnityEngine.Random.Range(-maxRange, maxRange),
             MasterHandler.DroneTarget.position.y,
             UnityEngine.Random.Range(-maxRange, maxRange));
         foreach (Drone d in drones) {
             if (d != null) {
-                d.ResetDrone(spawnTransform.position);
+                d.ResetDrone();
             }
         }
     }

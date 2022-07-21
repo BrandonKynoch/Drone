@@ -16,7 +16,7 @@ namespace SimServer {
         public const string NN_META_FILE_EXTENSION = ".NNM";
 
         private const double EPOCH_RUN_TIME = 6;   // Time for a single epoch to execute in seconds
-        private const int SUPER_EVOLUTION_CYCLE = 10; // Super evolution every n epochs
+        private const int SUPER_EVOLUTION_CYCLE = 20; // Super evolution every n epochs
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// TRAINING DATA //////////////////////////////////////////////////////

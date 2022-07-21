@@ -16,6 +16,10 @@
 #define RESPONSE_CODE_SENSOR_DATA 0x4
 #define RESPONSE_CODE_LOAD_NN 0x5 // Reload the provided neural network
 
+
+#define TARGET_TICK_DURATION 32000 // Used to keep constant refresh rate in main loop (VSync) (Target time per itteration in milliseconds)
+#define DISTANCE_NEURAL_SET_TICKER_STRIDE 6 // Only set dist_to_target_buffer (timebuffer) every n ticks
+
 struct drone_data {
     uint64_t id;
     int socket;
@@ -49,6 +53,8 @@ struct drone_data {
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs
     struct json_object* m_json; // Motor json for unity sim
+
+    uint32_t ticker; // Ticks for each iteration in the main loop - Is reset to zero periodically in the main loop to prevent overflow
 
     // Used strictly in server.c
     char unity_received_message[NETWORK_STD_MSG_LEN];
