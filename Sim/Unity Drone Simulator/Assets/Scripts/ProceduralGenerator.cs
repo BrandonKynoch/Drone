@@ -73,7 +73,12 @@ public class ProceduralGenerator : MonoBehaviour {
             targetInstance.transform.position = targetPosition;
             targetInstance.transform.rotation = Quaternion.Euler(0f, Random.Range(0, 4) * 90f, 0f);
 
-            foreach (Transform t in targetInstance.transform.Find("Spawn").GetComponentsInChildren<Transform>()) {
+            Transform spawnRoot = targetInstance.transform.Find("Spawn");
+            foreach (Transform t in spawnRoot.GetComponentsInChildren<Transform>()) {
+                if (t == spawnRoot) {
+                    continue;
+                }
+
                 availableSpawnPositions.Add(t.position);
             }
         }

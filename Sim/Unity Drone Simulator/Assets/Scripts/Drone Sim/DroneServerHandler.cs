@@ -72,6 +72,7 @@ public class DroneServerHandler : MonoBehaviour {
     /// Properties ///
     public static Drone[] Drones { get { return staticInstance.drones; } }
     public static Drone FittestDrone { get { return staticInstance.fittestDrone; } }
+    public static int DroneCount { get { return staticInstance.droneCount; } }
 
     public static float MaximumDroneDistFromTarget {
         get { return staticInstance.maximumDroneDistFromTarget; }

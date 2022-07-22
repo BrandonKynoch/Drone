@@ -29,6 +29,10 @@ public class DroneCamHandler : MonoBehaviour {
     }
 
     public void Update() {
+        if (DroneServerHandler.DroneCount == 0) {
+            return;
+        }
+
         if (MasterHandler.CurrentUserMode == MasterHandler.UserMode.DroneCam) {
             if (Input.GetKeyDown(KeyCode.O)) {
                 focusOnBestFitness = false;

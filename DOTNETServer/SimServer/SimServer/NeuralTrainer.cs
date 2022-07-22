@@ -124,6 +124,10 @@ namespace SimServer {
         public void GeneticNNUpdates(bool startNew = false) {
             bool isSuperEvolution = (currentEpoch % SUPER_EVOLUTION_CYCLE) == 0 && sessionStarted;
 
+            if (isSuperEvolution) {
+                Console.WriteLine("\nSUPER EVOLUTION");
+            }
+
             string targetFolderName = currentEpoch.ToString();
             if (isSuperEvolution)
                 targetFolderName += " (Super)";

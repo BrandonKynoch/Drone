@@ -414,7 +414,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 464393156}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.56, y: 0, z: -6.38}
+  m_LocalPosition: {x: 0, y: 0, z: -6.38}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1252,8 +1252,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dronePrefab: {fileID: 1399146370127915898, guid: 8c727ff7c1e863d4ca34ec990a21883d, type: 3}
   spawnTransform: {fileID: 1666220899}
-  distanceFitnessScaler: 0.181
-  rotationFitnessScaler: 0.939
+  distanceFitnessScaler: 0.825
+  rotationFitnessScaler: 0.915
   smoothnessFitnessScaler: 0.309
   airborneFitnessScaler: 0.88
 --- !u!1 &1666220898
@@ -1902,7 +1902,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6940102409571389074, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_RootOrder
@@ -1910,7 +1910,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.978
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1918,7 +1918,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.239
+      value: -25
       objectReference: {fileID: 0}
     - target: {fileID: 7718011922182149160, guid: 34d3c11a1d8500f4aba782f8e4e5be4b, type: 3}
       propertyPath: m_LocalRotation.w

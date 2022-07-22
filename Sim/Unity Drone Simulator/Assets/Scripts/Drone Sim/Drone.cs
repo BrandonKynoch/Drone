@@ -14,6 +14,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private const float SPAWN_SPACING = 4f;
 
     public const float GIZMO_DIST_FROM_CAMERA = 5f;
+
+    public const int COLLISION_LAYERS = 0x1;
     /// Constants //////////////////////////////////////////
 
     // Simulation variables
@@ -24,6 +26,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     private Rigidbody rb;
     public Rigidbody RB { get { return rb; } }
+
+    private BoxCollider collider;
 
     public Transform bladesTransform;
     private Transform bladeFL, bladeFR, bladeBR, bladeBL;
@@ -78,6 +82,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     public void Start() {
         rb = GetComponent<Rigidbody>();
+        collider = GetComponent<BoxCollider>();
 
         bladeFL = bladesTransform.Find("FL");
         bladeFR = bladesTransform.Find("FR");
@@ -99,6 +104,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void FixedUpdate() {
+        CalculateCollision();
+
         GetSensorData();
 
         // Gyro data
@@ -129,7 +136,6 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void OnCollisionEnter(Collision collision) {
-        contactsCount++;
         foreach (ContactPoint contact in collision.contacts) {
             collisionPoints.Enqueue(contact.point);
         }
@@ -139,7 +145,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         if (collisionPoints.Count > 0) {
             collisionPoints.Dequeue();
         }
-        contactsCount--;
+    }
+
+    public void CalculateCollision() {
+        Collider[] colliders = Physics.OverlapBox(transform.position, new Vector3(collider.size.x * 1.3f, collider.size.y * 3, collider.size.z * 1.3f), transform.rotation, COLLISION_LAYERS);
+        contactsCount = colliders.Length;
     }
 
     public void GetSensorData() {
@@ -245,6 +255,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         heightFitness = 0;
         Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
 
+        contactsCount = 0;
+        collisionPoints.Clear();
+        debug_NextCollisionPointRemoveTime = Time.time;
+        distFromGround = 0;
+
         if (useGrid) {
             transform.position =
                     (Vector3.right * (data.id % SPAWN_ROWS_COUNT) * SPAWN_SPACING) +
@@ -303,7 +318,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         } else {
             Gizmos.color = new Color(0, 1, 0, 0.5f);
         }
-        Gizmos.DrawCube(transform.position, Vector3.one * gizmosScaler * 0.2f);
+        Gizmos.DrawCube(transform.position, Vector3.one * gizmosScaler * 0.35f);
         Gizmos.DrawLine(transform.position, transform.position + transform.forward * gizmosScaler);
         Gizmos.DrawLine(
             transform.position + transform.forward * gizmosScaler,
