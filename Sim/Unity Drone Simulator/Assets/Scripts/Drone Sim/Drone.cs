@@ -153,10 +153,6 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void GetSensorData() {
-        /// DISTANCE DATA ////////////////////////////////////////////////////
-        data.distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
-        /// DISTANCE DATA ////////////////////////////////////////////////////
-
         /// INFARED SENSOR DATA //////////////////////////////////////////////
         // Circle sensors
         RaycastHit hit;
@@ -209,6 +205,16 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         data.rotationY = ((transform.eulerAngles.y + 180f) % 360f) - 180f;
         data.rotationZ = ((transform.eulerAngles.z + 180f) % 360f) - 180f;
         /// ROTATION DATA ////////////////////////////////////////////////////
+
+
+        /// DISTANCE DATA ////////////////////////////////////////////////////
+        data.distToTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
+        /// DISTANCE DATA ////////////////////////////////////////////////////
+
+
+        /// VELOCITY DATA ////////////////////////////////////////////////////
+        data.velocity = rb.velocity.magnitude;
+        /// VELOCITY DATA ////////////////////////////////////////////////////
     }
 
     public void CalculateFitness() {
@@ -417,6 +423,9 @@ public class DroneData {
     public double rotationX;
     public double rotationY;
     public double rotationZ;
+
+    // Magnitude of the drones current velocity
+    public double velocity;
 
     // Sim & fitness function variables
     public double angle; // The angle of the drone relative to the horizontal plane. in the range of 0-90 degrees

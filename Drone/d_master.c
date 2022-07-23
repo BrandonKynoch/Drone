@@ -55,6 +55,10 @@ void init_and_test_NN_from_folder(char* folder) {
     // Distance data
     int dist_to_target_timesteps = (int) network_input_layer_size(drone_data.distance_neural);
     drone_data.dist_to_target_buffer = init_timebuffer(1, dist_to_target_timesteps);
+
+    // Velocity data
+    int velocity_timesteps = (int) network_input_layer_size(drone_data.velocity_neural);
+    drone_data.velocity_time_buffer = init_timebuffer(1, velocity_timesteps);
 }
 
 void drone_logic_loop() {
@@ -110,11 +114,13 @@ void drone_logic_loop() {
                 free(drone_data.sensor_neural);
                 free(drone_data.rotation_neural);
                 free(drone_data.distance_neural);
+                free(drone_data.velocity_neural);
                 free(drone_data.combine_neural);
 
                 free(drone_data.sensor_time_buffer);
                 free(drone_data.rotation_time_buffer);
                 free(drone_data.dist_to_target_buffer);
+                free(drone_data.velocity_time_buffer);
 
                 json_object_object_get_ex(json_response, "nnFolder", &response_NN_folder_json);
                 
@@ -180,9 +186,17 @@ void init_drone_sensor_data(struct drone_data* drone) {
     /// ROTATION DATA ////////////////////////////////////////
 
     /// DISTANCE DATA ////////////////////////////////////////
-    drone->dist_to_target = 0;
+    // TODO: Set to starting distance from target
+    drone->dist_to_target = 10;
     for (int i = 0; i < timebuffer_total_size(drone->dist_to_target_buffer); i++) {
-        drone->dist_to_target_buffer->full_buffer[i] = 0;
+        drone->dist_to_target_buffer->full_buffer[i] = 10;
+    }
+    /// DISTANCE DATA ////////////////////////////////////////
+
+    /// VELOCITY DATA ////////////////////////////////////////
+    drone->velocity = 0;
+    for (int i = 0; i < timebuffer_total_size(drone->velocity_time_buffer); i++) {
+        drone->velocity_time_buffer->full_buffer[i] = 0;
     }
     /// DISTANCE DATA ////////////////////////////////////////
 }
@@ -215,6 +229,10 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     /// DISTANCE DATA ////////////////////////////////////////
     assign_double_from_json(json_in, "distToTarget", &drone->dist_to_target);
     /// DISTANCE DATA ////////////////////////////////////////
+
+    /// VELOCITY DATA ////////////////////////////////////////
+    assign_double_from_json(json_in, "velocity", &drone->velocity);
+    /// VELOCITY DATA ////////////////////////////////////////
 }
 
 void set_NN_input_from_sensor_data(struct drone_data* drone) {
@@ -228,11 +246,13 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     /// INFARED SENSORS //////////////////////////////////////
 
     /// ROTATION DATA ////////////////////////////////////////
-    drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x / 90;
-    drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y / 90;
-    // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z / 90;
-    timebuffer_increment(drone->rotation_time_buffer);
-    timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);
+    if (drone->ticker % ROTATION_NEURAL_SET_TICKER_STRIDE) {
+        drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x / 90;
+        drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y / 90;
+        // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z / 90;
+        timebuffer_increment(drone->rotation_time_buffer);
+        timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);
+    }
     /// ROTATION DATA ////////////////////////////////////////
 
     /// DISTANCE DATA ////////////////////////////////////////
@@ -242,6 +262,14 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
         timebuffer_copy_corrected(drone->dist_to_target_buffer, drone_data.distance_neural->input_layer);
     }
     /// DISTANCE DATA ////////////////////////////////////////
+
+    /// VELOCITY DATA ////////////////////////////////////////
+    if (drone->ticker % VELOCITY_NEURAL_SET_TICKER_STRIDE) {
+        drone->velocity_time_buffer->buffer[0] = drone_data.velocity;
+        timebuffer_increment(drone->velocity_time_buffer);
+        timebuffer_copy_corrected(drone->velocity_time_buffer, drone_data.velocity_neural->input_layer);
+    }
+    /// VELOCITY DATA ////////////////////////////////////////
 }
 
 void motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {

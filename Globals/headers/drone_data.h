@@ -18,7 +18,9 @@
 
 
 #define TARGET_TICK_DURATION 32000 // Used to keep constant refresh rate in main loop (VSync) (Target time per itteration in milliseconds)
+#define ROTATION_NEURAL_SET_TICKER_STRIDE 3
 #define DISTANCE_NEURAL_SET_TICKER_STRIDE 6 // Only set dist_to_target_buffer (timebuffer) every n ticks
+#define VELOCITY_NEURAL_SET_TICKER_STRIDE 3
 
 struct drone_data {
     uint64_t id;
@@ -27,6 +29,8 @@ struct drone_data {
     struct neural_data* sensor_neural;
     struct neural_data* rotation_neural;
     struct neural_data* distance_neural;
+    struct neural_data* velocity_neural;
+
     struct neural_data* combine_neural;
 
     /// SENSOR READINGS /////////////////////////////////////////
@@ -45,10 +49,15 @@ struct drone_data {
     double dist_to_target;
     /// DISTANCE READINGS ///////////////////////////////////////    
 
+    /// VELOCITY READINGS ///////////////////////////////////////
+    double velocity;
+    /// VELOCITY READINGS ///////////////////////////////////////
+
     /// NN INPUTS ///////////////////////////////////////////////
-    struct time_buffer* sensor_time_buffer;
-    struct time_buffer* rotation_time_buffer;
-    struct time_buffer* dist_to_target_buffer;
+    struct time_buffer* sensor_time_buffer; // Set every 32 milliseconds
+    struct time_buffer* rotation_time_buffer; // Set every 32 milliseconds
+    struct time_buffer* dist_to_target_buffer; // Set every 192 milliseconds
+    struct time_buffer* velocity_time_buffer; // Set every 96 milliseconds
     /// NN INPUTS ///////////////////////////////////////////////
 
     double m_fl, m_fr, m_br, m_bl; // Motor outputs

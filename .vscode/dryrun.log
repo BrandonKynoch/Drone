@@ -1,7 +1,6 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone'
 cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
- 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Drone'
 rm -r obj
 mkdir obj

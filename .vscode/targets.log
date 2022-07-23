@@ -17,7 +17,7 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 # This program built for i386-apple-darwin11.3.0
  
 
-# Make data base, printed on Wed Jul 20 22:13:51 2022
+# Make data base, printed on Fri Jul 22 16:54:06 2022
 
 # Variables
 
@@ -66,7 +66,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.5UIn8cqaGl/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.vOBqj0ofJL/Listeners
 # makefile (from `makefile', line 5)
 headers_dir = ./headers
 # automatic
@@ -176,7 +176,7 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1364
+VSCODE_PID = 24042
 # variable set hash-table stats:
 # Load=78/1024=8%, Rehash=0, Collisions=2/135=1%
 
@@ -327,10 +327,10 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Wed Jul 20 22:13:51 2022
+# Finished Make data base on Fri Jul 22 16:54:06 2022
 
 
-# Make data base, printed on Wed Jul 20 22:13:51 2022
+# Make data base, printed on Fri Jul 22 16:54:06 2022
 
 # Variables
 
@@ -340,9 +340,6 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 ?F = $(notdir $?)
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
- 
-make: *** [all] Error 1
-
 # automatic
 @D = $(patsubst %/,%,$(dir $@))
 # automatic
@@ -368,7 +365,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.5UIn8cqaGl/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.vOBqj0ofJL/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -452,7 +449,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 1364
+VSCODE_PID = 24042
 # variable set hash-table stats:
 # Load=58/1024=6%, Rehash=0, Collisions=1/92=1%
 
@@ -537,6 +534,8 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Wed Jul 20 22:13:51 2022
+# Finished Make data base on Fri Jul 22 16:54:06 2022
 
  
+make: *** [all] Error 1
+
