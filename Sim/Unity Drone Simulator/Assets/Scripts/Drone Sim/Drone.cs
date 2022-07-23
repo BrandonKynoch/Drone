@@ -6,7 +6,7 @@ using UnityEngine;
 public class Drone : MonoBehaviour, IEqualityComparer {
     /// Constants //////////////////////////////////////////
     private const float SENSOR_DIST_FROM_CENTER = 0.15f;
-    private const float SENSOR_MAX_RANGE = 2f;
+    private const float SENSOR_MAX_RANGE = 3f;
 
     private const int SMOOTHNESSS_ROTATION_BUFFER_COUNT = 8;
 
@@ -218,6 +218,10 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void CalculateFitness() {
+        if (transform.position.y > MasterHandler.EnvironmentRoof.position.y) {
+            return; // Drone is invalidated if it has flown through the roof
+        }
+
         if (!IsInContact) {
             // ax^2 + c
             heightFitness += (Utilities.ClampMin((20 + (-0.7f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f) * Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;

@@ -6,6 +6,7 @@ using UnityStandardAssets.Cameras;
 public class MasterHandler : MonoBehaviour {
     public FocalPointObject playerFocalPoint;
     public Transform droneTarget;
+    public Transform environmentRoof;
 
     private bool isPlaying;
 
@@ -39,6 +40,8 @@ public class MasterHandler : MonoBehaviour {
     public static bool IsPlaying { get { return staticInstance.isPlaying; } }
     public static bool PlayerInputEnabled { get { return staticInstance.playerInputEnabled; } }
     public static UserMode CurrentUserMode { get { return staticInstance.usermode; } }
+
+    public static Transform EnvironmentRoof { get { return staticInstance.environmentRoof; } }
     /// 
 
     public void Awake() {

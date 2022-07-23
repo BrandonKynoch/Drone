@@ -128,6 +128,18 @@ void drone_logic_loop() {
 
                 init_and_test_NN_from_folder(response_NN_folder);
 
+                /// READ SENSOR DATA AT START OF SIMULATION SO THAT DRONE CAN BE INITIALIZED PROPERLY ////////////
+                // Sends and receives to sim server once
+                drone_data.m_fl = 0;
+                drone_data.m_fr = 0;
+                drone_data.m_br = 0;
+                drone_data.m_bl = 0;
+                motor_output(&drone_data);
+                server_response = receive_server_message(&drone_data);
+                json_response = json_tokener_parse(server_response);
+                read_sensor_data(&drone_data, json_response);
+                //////////////////////////////////////////////////////////////////////////////////////////////////
+
                 init_drone_sensor_data(&drone_data);
                 break;
             case RESPONSE_CODE_SENSOR_DATA:
@@ -163,15 +175,13 @@ void drone_logic_loop() {
 
 void init_drone_sensor_data(struct drone_data* drone) {
     /// INFARED SENSORS //////////////////////////////////////
-    for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
-        drone->circle_sensor_array[i] = SENSOR_DEFAULT;
-    }
-
-    drone->sensor_top = SENSOR_DEFAULT;
-    drone->sensor_bottom = 0;
-
-    for (int i = 0; i < timebuffer_total_size(drone->sensor_time_buffer); i++) {
-        drone->sensor_time_buffer->full_buffer[i] = SENSOR_DEFAULT;
+    for (int i = 0; i < drone->sensor_time_buffer->timesteps; i++) {
+        for (int j = 0; j < DRONE_CIRCLE_SENSOR_COUNT; j++) {
+            drone->sensor_time_buffer->buffer[j] = drone->circle_sensor_array[i];
+        }
+        drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT] = drone->sensor_top;
+        drone->sensor_time_buffer->buffer[DRONE_CIRCLE_SENSOR_COUNT + 1] = drone->sensor_bottom;
+        timebuffer_increment(drone->sensor_time_buffer);
     }
     /// INFARED SENSORS //////////////////////////////////////
 
@@ -186,10 +196,8 @@ void init_drone_sensor_data(struct drone_data* drone) {
     /// ROTATION DATA ////////////////////////////////////////
 
     /// DISTANCE DATA ////////////////////////////////////////
-    // TODO: Set to starting distance from target
-    drone->dist_to_target = 10;
     for (int i = 0; i < timebuffer_total_size(drone->dist_to_target_buffer); i++) {
-        drone->dist_to_target_buffer->full_buffer[i] = 10;
+        drone->dist_to_target_buffer->full_buffer[i] = drone->dist_to_target;
     }
     /// DISTANCE DATA ////////////////////////////////////////
 
@@ -213,7 +221,7 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
 
     for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
         sensor_data = json_object_array_get_idx(sensor_data_array, i);
-        drone->circle_sensor_array[i] = json_object_get_double(sensor_data);
+        drone->circle_sensor_array[i] = json_object_get_double(sensor_data) / DRONE_SENSOR_RANGE;
     }
 
     assign_double_from_json(json_in, "sensorTop", &drone->sensor_top);
@@ -224,6 +232,10 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     assign_double_from_json(json_in, "rotationX", &drone->rotation_x);
     assign_double_from_json(json_in, "rotationY", &drone->rotation_y);
     assign_double_from_json(json_in, "rotationZ", &drone->rotation_z);
+    // Normalize input
+    drone->rotation_x = drone->rotation_x / 180;
+    drone->rotation_y = drone->rotation_y / 180;
+    drone->rotation_z = drone->rotation_z / 180;
     /// ROTATION DATA ////////////////////////////////////////
 
     /// DISTANCE DATA ////////////////////////////////////////

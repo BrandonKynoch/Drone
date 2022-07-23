@@ -15,8 +15,8 @@ namespace SimServer {
         public const string NN_FILE_EXTENSION = ".NN";
         public const string NN_META_FILE_EXTENSION = ".NNM";
 
-        private const double EPOCH_RUN_TIME = 6;   // Time for a single epoch to execute in seconds
-        private const int SUPER_EVOLUTION_CYCLE = 20; // Super evolution every n epochs
+        private const double EPOCH_RUN_TIME = 12;   // Time for a single epoch to execute in seconds
+        private const int SUPER_EVOLUTION_CYCLE = 15; // Super evolution every n epochs
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// TRAINING DATA //////////////////////////////////////////////////////
@@ -371,12 +371,11 @@ namespace SimServer {
                     }
                 }
 
-                GeneticNNUpdates();
-
                 // Tell the simulation to reset all drones
                 JObject resetRequestJSON = new JObject(new JProperty("opcode", Master.CODE_RESET_ALL_DRONES));
-
                 Networking.SendStringToNetworkStream(Networking.SimStream, resetRequestJSON.ToString());
+
+                GeneticNNUpdates();
 
                 Thread.Yield();
             }
