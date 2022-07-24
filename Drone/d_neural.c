@@ -23,9 +23,11 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->sensor_neural);
     } else {
         // File does not exist
-        int sensor_n_size = 4;
-        int sensor_n_shape[] = {200, 100, 50, 20};
+        int sensor_n_size = 6;
+        int sensor_n_shape[] = {300, 210, 150, 110, 80, 40};
         int sensor_n_activations[] = {
+            ACTIVATION_SIGMOID,
+            ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
@@ -107,7 +109,7 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         int combine_n_size = 6;
-        int combine_n_shape[] = {80, 60, 40, 30, 20, 4};
+        int combine_n_shape[] = {100, 90, 80, 80, 80, 4};
         int combine_n_activations[] = {
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,

@@ -38,15 +38,17 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     /// Fitness Vars /////////////////////////////////////////
     private const float IDEAL_HEIGHT = 1.1f;
+    private const float MAX_VELOCITY = 1f;
 
     private float heightFitness = 0;
     private float rotationFitness = 0;
     private float smoothnessFitness = 0;
     private float distFitness = 0;
+    private float velocityFitness = 0;
 
     public float SumFitness {
         get {
-            return heightFitness + rotationFitness + smoothnessFitness + distFitness;
+            return heightFitness + rotationFitness + smoothnessFitness + distFitness + velocityFitness;
         }
     }
 
@@ -54,6 +56,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     public float RotationFitness { get { return rotationFitness; } }
     public float SmoothnessFitness { get { return smoothnessFitness; } }
     public float DistFitness { get { return distFitness; } }
+    public float VelocityFitness { get { return velocityFitness; } }
     /// Fitness Vars /////////////////////////////////////////
 
     /// Debug & Simulation Vars /////////////////////////////////////////
@@ -66,6 +69,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private List<Quaternion> rotationBuffer = new List<Quaternion>();
 
     private float distFromGround = 0;
+    private float initialDistFromTarget = 0;
     /// Debug Vars /////////////////////////////////////////
 
     /// Properties /////////////////////////////////////////
@@ -239,8 +243,10 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
 
             float distToTarget = (float) data.distToTarget;
-            distToTarget = 1f / (distToTarget / DroneServerHandler.MaximumDroneDistFromTarget);
-            distFitness += (Mathf.Clamp(distToTarget, 0, 20) / 20f) * Time.deltaTime  * DroneServerHandler.StaticInstance.distanceFitnessScaler;
+            distFitness -= (distToTarget / initialDistFromTarget) * Time.deltaTime * DroneServerHandler.StaticInstance.distanceFitnessScaler;
+
+            float currentVelocityFitness = (rb.velocity.magnitude > MAX_VELOCITY) ? rb.velocity.magnitude - MAX_VELOCITY : 0;
+            velocityFitness -= currentVelocityFitness * Time.deltaTime * DroneServerHandler.StaticInstance.velocityFitnessScaler;
         }
 
         if (transform.position.y < -1f) {
@@ -248,6 +254,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             rotationFitness = 0;
             smoothnessFitness = 0;
             distFitness = 0;
+            velocityFitness = 0;
         }
 
         data.fitness = SumFitness;
@@ -263,7 +270,10 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         rotationFitness = 0;
         smoothnessFitness = 0;
         heightFitness = 0;
+        velocityFitness = 0;
         Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
+
+        initialDistFromTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
 
         contactsCount = 0;
         collisionPoints.Clear();

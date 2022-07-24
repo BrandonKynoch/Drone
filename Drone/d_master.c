@@ -215,9 +215,9 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
     struct json_object* sensor_data;
     json_object_object_get_ex(json_in, "circleSensorData", &sensor_data_array);
     
-    size_t cirlce_sensor_data_count = json_object_array_length(sensor_data_array);
+    size_t circle_sensor_data_count = json_object_array_length(sensor_data_array);
 
-    ASSERT(cirlce_sensor_data_count == DRONE_CIRCLE_SENSOR_COUNT);
+    ASSERT(circle_sensor_data_count == DRONE_CIRCLE_SENSOR_COUNT);
 
     for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
         sensor_data = json_object_array_get_idx(sensor_data_array, i);
@@ -226,6 +226,8 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
 
     assign_double_from_json(json_in, "sensorTop", &drone->sensor_top);
     assign_double_from_json(json_in, "sensorBottom", &drone->sensor_bottom);
+    drone->sensor_top = drone->sensor_top / DRONE_SENSOR_RANGE;
+    drone->sensor_bottom = drone->sensor_bottom / DRONE_SENSOR_RANGE;
     /// INFARED SENSORS //////////////////////////////////////
 
     /// ROTATION DATA ////////////////////////////////////////
@@ -269,9 +271,17 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
 
     /// DISTANCE DATA ////////////////////////////////////////
     if (drone->ticker % DISTANCE_NEURAL_SET_TICKER_STRIDE) {
+        double oldest_dist_to_target = drone->dist_to_target_buffer->buffer[0];
         drone->dist_to_target_buffer->buffer[0] = drone_data.dist_to_target;
         timebuffer_increment(drone->dist_to_target_buffer);
         timebuffer_copy_corrected(drone->dist_to_target_buffer, drone_data.distance_neural->input_layer);
+
+        /// Convert absolute distance readings to delta distance ///
+        for (int i = network_input_layer_size(drone_data.distance_neural); i > 0; i--) {
+            drone_data.distance_neural->input_layer[i] = drone_data.distance_neural->input_layer[i] - drone_data.distance_neural->input_layer[i - 1];
+        }
+        drone_data.distance_neural->input_layer[0] = drone_data.distance_neural->input_layer[0] - oldest_dist_to_target;
+        /// Convert absolute distance readings to delta distance ///
     }
     /// DISTANCE DATA ////////////////////////////////////////
 

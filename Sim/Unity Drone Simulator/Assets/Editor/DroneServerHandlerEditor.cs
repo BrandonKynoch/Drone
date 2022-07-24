@@ -31,6 +31,10 @@ public class DroneServerHandlerEditor : Editor {
         dsh.airborneFitnessScaler = EditorGUILayout.Slider(dsh.airborneFitnessScaler, 0, 2f);
         EditorGUILayout.Separator();
 
+        EditorGUILayout.LabelField("Velocity fitness scaler");
+        dsh.velocityFitnessScaler = EditorGUILayout.Slider(dsh.velocityFitnessScaler, 0, 2f);
+        EditorGUILayout.Separator();
+
         if (EditorGUI.EndChangeCheck()) {
             EditorUtility.SetDirty(target);
         }

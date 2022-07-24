@@ -17,6 +17,8 @@ public class DroneUI : MonoBehaviour {
     private Text smoothnesFitnessText;
     [SerializeField]
     private Text airborneFitnessText;
+    [SerializeField]
+    private Text velocityFitnessText;
 
     private CanvasGroup cg;
 
@@ -32,17 +34,18 @@ public class DroneUI : MonoBehaviour {
     }
 
     public void Update() {
-        distFitnessText.text = drone.DistFitness.ToString();
-        rotationFitnessText.text = drone.RotationFitness.ToString();
-        smoothnesFitnessText.text = drone.SmoothnessFitness.ToString();
-        airborneFitnessText.text = drone.AirborneFitness.ToString();
-
-        transform.position = drone.transform.position;
-        transform.rotation = Quaternion.LookRotation(-(Camera.main.transform.position - transform.position), Vector3.up);
-
         float targetAlpha = 1f;
         if (Vector3.Distance(transform.position, Camera.main.transform.position) > VISIBLE_DIST_FROM_CAMERA) {
             targetAlpha = 0f;
+        } else {
+            distFitnessText.text = drone.DistFitness.ToString();
+            rotationFitnessText.text = drone.RotationFitness.ToString();
+            smoothnesFitnessText.text = drone.SmoothnessFitness.ToString();
+            airborneFitnessText.text = drone.AirborneFitness.ToString();
+            velocityFitnessText.text = drone.VelocityFitness.ToString();
+
+            transform.position = drone.transform.position;
+            transform.rotation = Quaternion.LookRotation(-(Camera.main.transform.position - transform.position), Vector3.up);
         }
         cg.alpha = Mathf.Lerp(cg.alpha, targetAlpha, 5f * TimeHandler.CorrectedDeltaTime);
     }

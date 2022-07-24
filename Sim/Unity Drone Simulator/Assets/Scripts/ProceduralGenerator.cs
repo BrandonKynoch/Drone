@@ -23,7 +23,7 @@ public class ProceduralGenerator : MonoBehaviour {
     private const float GRID_CELL_SIZE = 7;
 
     private const int TOTAL_INSTANCE_COUNT = 50;
-    private const int ACTIVE_INSTANCE_COUNT = 20;
+    private const int ACTIVE_INSTANCE_COUNT = 23;
     /// Constants ///
 
     private void Start() {
