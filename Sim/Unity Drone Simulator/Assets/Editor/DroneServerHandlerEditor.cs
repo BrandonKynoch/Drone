@@ -35,6 +35,10 @@ public class DroneServerHandlerEditor : Editor {
         dsh.velocityFitnessScaler = EditorGUILayout.Slider(dsh.velocityFitnessScaler, 0, 2f);
         EditorGUILayout.Separator();
 
+        EditorGUILayout.LabelField("Obstacle avoidance fitness scaler");
+        dsh.obstacleAvoidanceScaler = EditorGUILayout.Slider(dsh.obstacleAvoidanceScaler, 0, 2f);
+        EditorGUILayout.Separator();
+
         if (EditorGUI.EndChangeCheck()) {
             EditorUtility.SetDirty(target);
         }

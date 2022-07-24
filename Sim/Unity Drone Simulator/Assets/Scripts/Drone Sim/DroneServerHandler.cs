@@ -18,6 +18,7 @@ public class DroneServerHandler : MonoBehaviour {
     public float smoothnessFitnessScaler = 1;
     public float airborneFitnessScaler = 1;
     public float velocityFitnessScaler = 1;
+    public float obstacleAvoidanceScaler = 1;
 
     //private List<Drone> drones = new List<Drone>();
     private Drone[] drones = new Drone[MAX_DRONE_COUNT];

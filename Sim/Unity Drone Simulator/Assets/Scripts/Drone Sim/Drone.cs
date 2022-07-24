@@ -45,10 +45,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     private float smoothnessFitness = 0;
     private float distFitness = 0;
     private float velocityFitness = 0;
+    private float obstacleAvoidanceFitness = 0;
 
     public float SumFitness {
         get {
-            return heightFitness + rotationFitness + smoothnessFitness + distFitness + velocityFitness;
+            return heightFitness + rotationFitness + smoothnessFitness + distFitness + velocityFitness + obstacleAvoidanceFitness;
         }
     }
 
@@ -57,6 +58,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     public float SmoothnessFitness { get { return smoothnessFitness; } }
     public float DistFitness { get { return distFitness; } }
     public float VelocityFitness { get { return velocityFitness; } }
+    public float ObstacleAvoidanceFitness { get { return obstacleAvoidanceFitness; } }
     /// Fitness Vars /////////////////////////////////////////
 
     /// Debug & Simulation Vars /////////////////////////////////////////
@@ -168,12 +170,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
                 rotationVec,
                 out hit,
                 SENSOR_MAX_RANGE);
-
-            if (hit.collider != null) {
-                data.circleSensorData[i] = hit.distance;
-            } else {
-                data.circleSensorData[i] = SENSOR_MAX_RANGE;
-            }
+            SetDistanceSensor(ref data.circleSensorData[i], hit);
         }
 
         // Sensor top
@@ -183,11 +180,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             transform.up,
             out hit,
             SENSOR_MAX_RANGE);
-        if (hit.collider != null) {
-            data.sensorTop = hit.distance;
-        } else {
-            data.sensorTop = SENSOR_MAX_RANGE;
-        }
+        SetDistanceSensor(ref data.sensorTop, hit);
 
         // Sensor bottom
         hit = new RaycastHit();
@@ -196,11 +189,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             -transform.up,
             out hit,
             SENSOR_MAX_RANGE);
-        if (hit.collider != null) {
-            data.sensorBottom = hit.distance;
-        } else {
-            data.sensorBottom = SENSOR_MAX_RANGE;
-        }
+        SetDistanceSensor(ref data.sensorBottom, hit);
         /// INFARED SENSOR DATA //////////////////////////////////////////////
 
 
@@ -219,6 +208,25 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         /// VELOCITY DATA ////////////////////////////////////////////////////
         data.velocity = rb.velocity.magnitude;
         /// VELOCITY DATA ////////////////////////////////////////////////////
+    }
+
+    public void SetDistanceSensor(ref double sensor, RaycastHit hit) {
+        float newDist;
+        if (hit.collider != null) {
+            newDist = hit.distance;
+        } else {
+            newDist = SENSOR_MAX_RANGE;
+        }
+
+        if (!IsInContact) {
+            // If obstacle is moving away from sensor -> increase obstacle avoidance fitness
+            if (newDist > sensor) {
+                //obstacleAvoidanceFitness += (newDist - (float)sensor) * 10 * Time.deltaTime * DroneServerHandler.StaticInstance.obstacleAvoidanceScaler;
+                obstacleAvoidanceFitness += 1f * Time.deltaTime * DroneServerHandler.StaticInstance.obstacleAvoidanceScaler;
+            }
+        }
+
+        sensor = newDist;
     }
 
     public void CalculateFitness() {
@@ -247,6 +255,8 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
             float currentVelocityFitness = (rb.velocity.magnitude > MAX_VELOCITY) ? rb.velocity.magnitude - MAX_VELOCITY : 0;
             velocityFitness -= currentVelocityFitness * Time.deltaTime * DroneServerHandler.StaticInstance.velocityFitnessScaler;
+
+            // Obstacle avoidance distance is calculated in GetSensorData function
         }
 
         if (transform.position.y < -1f) {
@@ -255,6 +265,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             smoothnessFitness = 0;
             distFitness = 0;
             velocityFitness = 0;
+            obstacleAvoidanceFitness = 0;
         }
 
         data.fitness = SumFitness;
@@ -271,7 +282,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         smoothnessFitness = 0;
         heightFitness = 0;
         velocityFitness = 0;
-        Utilities.YieldAction(delegate () { data.fitness = 0; }, 0.1f);
+        obstacleAvoidanceFitness = 0;
+        Utilities.YieldAction(delegate () {
+            data.fitness = 0;
+            obstacleAvoidanceFitness = 0;
+        }, 0.1f);
 
         initialDistFromTarget = Vector3.Distance(transform.position, MasterHandler.DroneTarget.position);
 
