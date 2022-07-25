@@ -239,7 +239,7 @@ namespace SimServer {
             while (true) {
                 Thread.Yield();
 
-                if (!NeuralTrainer.SessionStarted) {
+                if (!NeuralTrainer.SessionStarted || NeuralTrainer.GeneticNNUpdateBusy) {
                     continue;
                 }
 

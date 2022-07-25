@@ -34,11 +34,13 @@ namespace SimServer {
 
         public bool continueSimulation = false;     // Set to true when the simulation is actually simulating & drones flying (This is false during genetic NN updates)
         public bool sessionStarted = false;         // Set to true once session path has been specified and simulation has started, remains true for duration of program
+        public bool geneticNNUpdateBusy = false;    // Used to check that sim isn't stale, it is just busy copying files
         /// TRAINING DATA //////////////////////////////////////////////////////
 
         /// PROPERTIES /////////////////////////////////////////////////////////
         public static bool ContinueSimulation { get { return staticInstance.continueSimulation; } }
         public static bool SessionStarted { get { return staticInstance.sessionStarted; } }
+        public static bool GeneticNNUpdateBusy { get { return staticInstance.geneticNNUpdateBusy; } }
         /// PROPERTIES /////////////////////////////////////////////////////////
 
         public NeuralTrainer() {
@@ -122,6 +124,7 @@ namespace SimServer {
         /// <param name="continueFrom"></param>
         /// <param name="targetFolder"></param>
         public void GeneticNNUpdates(bool startNew = false) {
+            geneticNNUpdateBusy = true;
             bool isSuperEvolution = (currentEpoch % SUPER_EVOLUTION_CYCLE) == 0 && sessionStarted;
 
             if (isSuperEvolution) {
@@ -174,7 +177,7 @@ namespace SimServer {
 
 
                 // Execute genetic algorithm here
-                if (firstIteration < 0 && !Networking.StaticInstance.isResettingNetwork) {
+                if (firstIteration < 0 && (!Networking.StaticInstance.isResettingNetwork || isSuperEvolution)) {
                     EvolveDirectoryContents(currentTrainingDir.ToString());
                 } else {
                     firstIteration--;
@@ -203,6 +206,10 @@ namespace SimServer {
                     Thread.Yield();
                 }
             }
+
+            // Make sure that watchdog process doesn't think simulation went stale while executing this fuction
+            Networking.lastSimPacketReceivedTimeTicks = DateTime.Now.Ticks;
+            geneticNNUpdateBusy = false;
         }
 
         private void CopyNNFolders(string from, string to, bool overwrite) {
