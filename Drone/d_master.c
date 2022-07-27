@@ -221,13 +221,13 @@ void read_sensor_data(struct drone_data* drone, struct json_object* json_in) {
 
     for (int i = 0; i < DRONE_CIRCLE_SENSOR_COUNT; i++) {
         sensor_data = json_object_array_get_idx(sensor_data_array, i);
-        drone->circle_sensor_array[i] = json_object_get_double(sensor_data) / DRONE_SENSOR_RANGE;
+        drone->circle_sensor_array[i] = 1.0 - (json_object_get_double(sensor_data) / DRONE_SENSOR_RANGE);
     }
 
     assign_double_from_json(json_in, "sensorTop", &drone->sensor_top);
     assign_double_from_json(json_in, "sensorBottom", &drone->sensor_bottom);
-    drone->sensor_top = drone->sensor_top / DRONE_SENSOR_RANGE;
-    drone->sensor_bottom = drone->sensor_bottom / DRONE_SENSOR_RANGE;
+    drone->sensor_top = 1.0 - (drone->sensor_top / DRONE_SENSOR_RANGE);
+    drone->sensor_bottom = 1.0 - (drone->sensor_bottom / DRONE_SENSOR_RANGE);
     /// INFARED SENSORS //////////////////////////////////////
 
     /// ROTATION DATA ////////////////////////////////////////
@@ -261,9 +261,9 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
 
     /// ROTATION DATA ////////////////////////////////////////
     if (drone->ticker % ROTATION_NEURAL_SET_TICKER_STRIDE) {
-        drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x / 90;
-        drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y / 90;
-        // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z / 90;
+        drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x;
+        drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y;
+        // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z;
         timebuffer_increment(drone->rotation_time_buffer);
         timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);
     }
@@ -277,7 +277,7 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
         timebuffer_copy_corrected(drone->dist_to_target_buffer, drone_data.distance_neural->input_layer);
 
         /// Convert absolute distance readings to delta distance ///
-        for (int i = network_input_layer_size(drone_data.distance_neural); i > 0; i--) {
+        for (int i = network_input_layer_size(drone_data.distance_neural) - 1; i > 0; i--) {
             drone_data.distance_neural->input_layer[i] = drone_data.distance_neural->input_layer[i] - drone_data.distance_neural->input_layer[i - 1];
         }
         drone_data.distance_neural->input_layer[0] = drone_data.distance_neural->input_layer[0] - oldest_dist_to_target;
@@ -327,7 +327,7 @@ void motor_output_from_controller(struct drone_data* drone, double x_in, double 
 }
 
 double compute_motor_output_from_offset(double direction_x, double direction_y, double m_pos_x, double m_pos_y) {
-    return sqrt(pow(m_pos_x - direction_x, 2) + pow(m_pos_y - direction_y , 2)) / sqrt2;
+    return sqrt(pow(m_pos_x - direction_x, 2) + pow(m_pos_y - direction_y , 2));
 }
 
 double compute_motor_output_from_scalers(double m_in, double m_mean, double power_scaler, double limit_scaler) {

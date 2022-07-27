@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Drone : MonoBehaviour, IEqualityComparer {
     /// Constants //////////////////////////////////////////
-    private const float SENSOR_DIST_FROM_CENTER = 0.15f;
+    private const float SENSOR_DIST_FROM_CENTER = 0.07f;
     private const float SENSOR_MAX_RANGE = 3f;
 
     private const int SMOOTHNESSS_ROTATION_BUFFER_COUNT = 8;
@@ -230,13 +230,15 @@ public class Drone : MonoBehaviour, IEqualityComparer {
     }
 
     public void CalculateFitness() {
-        if (transform.position.y > MasterHandler.EnvironmentRoof.position.y) {
+        if (transform.position.y > MasterHandler.EnvironmentRoof.position.y || rb == null) {
             return; // Drone is invalidated if it has flown through the roof
         }
 
-        if (!IsInContact) {
-            // ax^2 + c
-            heightFitness += (Utilities.ClampMin((20 + (-0.7f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f) * Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
+        if (!IsInContact || rb.velocity.magnitude > 0.02f) {
+            if (!IsInContact) {
+                // ax^2 + c
+                heightFitness += (Utilities.ClampMin((20 + (-1.3f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f) * Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
+            }
 
             if (!dData.upsideDown) {
                 rotationFitness += ((90f - (float)dData.angle) / 90f) * Time.deltaTime * DroneServerHandler.StaticInstance.rotationFitnessScaler;
@@ -250,11 +252,13 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             }
 
 
-            float distToTarget = (float) data.distToTarget;
-            distFitness -= (distToTarget / initialDistFromTarget) * Time.deltaTime * DroneServerHandler.StaticInstance.distanceFitnessScaler;
+            if (!IsInContact) {
+                float distToTarget = (float)data.distToTarget;
+                distFitness -= (distToTarget / initialDistFromTarget) * Time.deltaTime * DroneServerHandler.StaticInstance.distanceFitnessScaler;
 
-            float currentVelocityFitness = (rb.velocity.magnitude > MAX_VELOCITY) ? rb.velocity.magnitude - MAX_VELOCITY : 0;
-            velocityFitness -= currentVelocityFitness * Time.deltaTime * DroneServerHandler.StaticInstance.velocityFitnessScaler;
+                float currentVelocityFitness = (rb.velocity.magnitude > MAX_VELOCITY) ? rb.velocity.magnitude - MAX_VELOCITY : 0;
+                velocityFitness -= currentVelocityFitness * Time.deltaTime * DroneServerHandler.StaticInstance.velocityFitnessScaler;
+            }
 
             // Obstacle avoidance distance is calculated in GetSensorData function
         }
@@ -276,6 +280,11 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             Debug.LogError("Warning data is null");
             return;
         }
+
+        data.motorOutputs[0] = 0;
+        data.motorOutputs[1] = 0;
+        data.motorOutputs[2] = 0;
+        data.motorOutputs[3] = 0;
 
         distFitness = 0;
         rotationFitness = 0;
@@ -313,6 +322,10 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         if (rb != null) {
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
+        }
+
+        if (rb != null) {
+            GetSensorData();
         }
     }
 

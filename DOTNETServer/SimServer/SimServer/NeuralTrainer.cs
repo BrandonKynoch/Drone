@@ -187,6 +187,8 @@ namespace SimServer {
                 // MARK: TODO: Check that number of agents matches number of files
             }
 
+            Thread.Sleep(TimeSpan.FromSeconds(0.3));
+
             // Respond to drones with target files
             lock (dronesWaitingToReceiveNN) {
                 continueSimulation = true;
@@ -287,26 +289,28 @@ namespace SimServer {
 
             int totalCount = nns.Count;
             double keep = 0.2; // Keep the top percentage completely unmodified
-            //double discard = 0.2; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
+            double discard = 0.1; // Discard the bottom percentage, their genes will not reproduce. They will be replaced with randomly chosen genes from keep percentile
             //double reproduceWithPercentile = 0.9; // When reproducing, crossover genes will be chosen from this top percentile
-            double crossOverPopulation = 0.9f;
+            double crossOverPopulation = 1f;
             double crossOverAmount = 0.1f; // Amount of genes to take when crossing over
             double mutationProbability = 0.6; // Likelyhood that a specimin will have any mutation
-            double speciminMutationProbability = 0.2f; // When a specimin is mutating, what amount of genes should change
+            double speciminMutationProbability = 0.1f; // When a specimin is mutating, what amount of genes should change
             double speciminMutationAmount = 0.1f; // When a specimin is mutating, by how much should a single genome change
 
             int keepCount = (int)Math.Ceiling(((double)totalCount) * keep);
-            //int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
+            int discardCount = (int)Math.Ceiling(((double)totalCount) * discard);
 
             // Discard bottom
-            //for (int i = 0; i < discardCount; i++) {
-            //    nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, totalCount - discardCount)]);
-            //}
+            if (currentEpoch > 100) {
+                for (int i = 0; i < discardCount; i++) {
+                    nns[totalCount - 1 - i].CopyData(nns[(int)Utils.RandomRange(0, keepCount)]);
+                }
+            }
 
             // Perform crossovers
             for (int i = 0; i < totalCount * crossOverPopulation; i++) {
-                int a = (int) Utils.RandomRange(0, totalCount * keep);
-                int b = (int)Utils.RandomRange((keepCount + 0.1), (totalCount - 0.1));
+                int a = (int) Utils.RandomRange(0, keepCount);
+                int b = (int)Utils.RandomRange(0, (totalCount - 0.1));
 
                 if (a != b) {
                     NNGroupData.CrossOver(nns[a], nns[b], crossOverAmount);
@@ -317,6 +321,11 @@ namespace SimServer {
             for (int i = keepCount; i < totalCount; i++) {
                 if (Utils.Random01Double() < mutationProbability) {
                     nns[i].Mutate(speciminMutationProbability, speciminMutationAmount);
+                }
+            }
+            for (int i = 0; i < keepCount; i++) {
+                if (Utils.Random01Double() < mutationProbability) {
+                    nns[i].Mutate(speciminMutationProbability, speciminMutationAmount * 0.5);
                 }
             }
 
@@ -384,6 +393,9 @@ namespace SimServer {
 
                 GeneticNNUpdates();
 
+                // Tell the simulation to reset all drones
+                Networking.SendStringToNetworkStream(Networking.SimStream, resetRequestJSON.ToString());
+
                 Thread.Yield();
             }
         }
@@ -442,10 +454,10 @@ namespace SimServer {
             }
         }
 
-        public static void CrossOver(NNGroupData a, NNGroupData b, double crossOverProbability) {
-            foreach (string nnKey in a.nns.Keys) {
-                if (b.nns.ContainsKey(nnKey)) {
-                    NNData.CrossOver(a.nns[nnKey], b.nns[nnKey], crossOverProbability);
+        public static void CrossOver(NNGroupData from, NNGroupData to, double crossOverProbability) {
+            foreach (string nnKey in from.nns.Keys) {
+                if (to.nns.ContainsKey(nnKey)) {
+                    NNData.CrossOver(from.nns[nnKey], to.nns[nnKey], crossOverProbability);
                 }
             }
         }

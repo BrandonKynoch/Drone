@@ -26,9 +26,9 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         int sensor_n_size = 6;
         int sensor_n_shape[] = {300, 210, 150, 110, 80, 40};
         int sensor_n_activations[] = {
-            ACTIVATION_SIGMOID,
-            ACTIVATION_SIGMOID,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_RELU,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
         };
@@ -45,10 +45,12 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->rotation_neural);
     } else {
         // File does not exist
-        int rotation_n_size = 4;
-        int rotation_n_shape[] = {40, 40, 30, 20};
+        int rotation_n_size = 6;
+        int rotation_n_shape[] = {40, 40, 40, 40, 30, 20};
         int rotation_n_activations[] = {
-            ACTIVATION_SIGMOID,
+            ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_RELU,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
         };
@@ -69,8 +71,8 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         int distance_n_size = 4;
         int distance_n_shape[] = {50, 40, 30, 20};
         int distance_n_activations[] = {
-            ACTIVATION_SIGMOID,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_RELU,
+            ACTIVATION_RELU,
             ACTIVATION_SIGMOID
         };
         drone->distance_neural = init_matrices_from_network_design(distance_n_size, distance_n_shape, distance_n_activations);
@@ -87,11 +89,12 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->velocity_neural);
     } else {
         // File does not exist
-        int velocity_n_size = 4;
-        int velocity_n_shape[] = {50, 40, 30, 20};
+        int velocity_n_size = 5;
+        int velocity_n_shape[] = {50, 50, 40, 30, 20};
         int velocity_n_activations[] = {
-            ACTIVATION_SIGMOID,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_RELU,
             ACTIVATION_SIGMOID
         };
         drone->velocity_neural = init_matrices_from_network_design(velocity_n_size, velocity_n_shape, velocity_n_activations);
@@ -108,11 +111,12 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->combine_neural);
     } else {
         // File does not exist
-        int combine_n_size = 6;
-        int combine_n_shape[] = {100, 90, 80, 80, 80, 4};
+        int combine_n_size = 7;
+        int combine_n_shape[] = {100, 100, 100, 100, 100, 100, 4};
         int combine_n_activations[] = {
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_SIGMOID,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_RELU,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID,
             ACTIVATION_SIGMOID
