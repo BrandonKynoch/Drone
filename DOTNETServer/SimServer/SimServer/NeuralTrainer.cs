@@ -393,9 +393,6 @@ namespace SimServer {
 
                 GeneticNNUpdates();
 
-                // Tell the simulation to reset all drones
-                Networking.SendStringToNetworkStream(Networking.SimStream, resetRequestJSON.ToString());
-
                 Thread.Yield();
             }
         }
