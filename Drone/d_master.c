@@ -263,6 +263,8 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     if (drone->ticker % ROTATION_NEURAL_SET_TICKER_STRIDE) {
         drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x;
         drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y;
+        // TODO: Implement Z rotation as delta rotation
+
         // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z;
         timebuffer_increment(drone->rotation_time_buffer);
         timebuffer_copy_corrected(drone->rotation_time_buffer, drone_data.rotation_neural->input_layer);

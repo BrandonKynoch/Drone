@@ -1548,10 +1548,10 @@ MonoBehaviour:
   dronePrefab: {fileID: 1399146370127915898, guid: 8c727ff7c1e863d4ca34ec990a21883d, type: 3}
   spawnTransform: {fileID: 1666220899}
   distanceFitnessScaler: 0.118
-  rotationFitnessScaler: 1.333
-  smoothnessFitnessScaler: 0.703
+  rotationFitnessScaler: 1.78
+  smoothnessFitnessScaler: 0.6
   airborneFitnessScaler: 1.303
-  velocityFitnessScaler: 0.492
+  velocityFitnessScaler: 0.9
   obstacleAvoidanceScaler: 0.661
 --- !u!1001 &1660060617
 PrefabInstance:

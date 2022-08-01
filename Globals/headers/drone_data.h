@@ -18,7 +18,7 @@
 
 
 #define TARGET_TICK_DURATION 32000 // Used to keep constant refresh rate in main loop (VSync) (Target time per itteration in milliseconds)
-#define ROTATION_NEURAL_SET_TICKER_STRIDE 3
+#define ROTATION_NEURAL_SET_TICKER_STRIDE 1
 #define DISTANCE_NEURAL_SET_TICKER_STRIDE 6 // Only set dist_to_target_buffer (timebuffer) every n ticks
 #define VELOCITY_NEURAL_SET_TICKER_STRIDE 3
 

@@ -11,7 +11,7 @@ start_new_drone() {
 make clean
 make
 
-for i in {1..11}
+for i in {1..15}
 do
     start_new_drone &
 done

@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define WEIGHT_INIT_MIN_VAL -1.0
-#define WEIGHT_INIT_MAX_VAL 1.0
+#define WEIGHT_INIT_MIN_VAL -0.5
+#define WEIGHT_INIT_MAX_VAL 0.5
 
-#define BIAS_INIT_MIN_VAL -1.0
-#define BIAS_INIT_MAX_VAL 1.0
+#define BIAS_INIT_MIN_VAL -0.5
+#define BIAS_INIT_MAX_VAL 0.5
 
 // ############################################################################
 // #######      INITIALIZATION      ###########################################
@@ -24,12 +24,12 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         int sensor_n_size = 6;
-        int sensor_n_shape[] = {300, 210, 150, 110, 80, 40};
+        int sensor_n_shape[] = {150, 100, 65, 40, 30, 20};
         int sensor_n_activations[] = {
-            ACTIVATION_RELU,
             ACTIVATION_LEAKY_RELU,
-            ACTIVATION_RELU,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_SIGMOID
         };
         drone->sensor_neural = init_matrices_from_network_design(sensor_n_size, sensor_n_shape, sensor_n_activations);
@@ -46,12 +46,12 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         int rotation_n_size = 6;
-        int rotation_n_shape[] = {40, 40, 40, 40, 30, 20};
+        int rotation_n_shape[] = {60, 40, 25, 14, 8, 4};
         int rotation_n_activations[] = {
-            ACTIVATION_RELU,
             ACTIVATION_LEAKY_RELU,
-            ACTIVATION_RELU,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_SIGMOID
         };
         drone->rotation_neural = init_matrices_from_network_design(rotation_n_size, rotation_n_shape, rotation_n_activations);
@@ -68,11 +68,12 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->distance_neural);
     } else {
         // File does not exist
-        int distance_n_size = 4;
-        int distance_n_shape[] = {50, 40, 30, 20};
+        int distance_n_size = 5;
+        int distance_n_shape[] = {40, 25, 14, 7, 3};
         int distance_n_activations[] = {
-            ACTIVATION_RELU,
-            ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_SIGMOID
         };
         drone->distance_neural = init_matrices_from_network_design(distance_n_size, distance_n_shape, distance_n_activations);
@@ -90,11 +91,11 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
     } else {
         // File does not exist
         int velocity_n_size = 5;
-        int velocity_n_shape[] = {50, 50, 40, 30, 20};
+        int velocity_n_shape[] = {50, 30, 18, 10, 6};
         int velocity_n_activations[] = {
-            ACTIVATION_RELU,
             ACTIVATION_LEAKY_RELU,
-            ACTIVATION_RELU,
+            ACTIVATION_LEAKY_RELU,
+            ACTIVATION_LEAKY_RELU,
             ACTIVATION_SIGMOID
         };
         drone->velocity_neural = init_matrices_from_network_design(velocity_n_size, velocity_n_shape, velocity_n_activations);
@@ -111,14 +112,13 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->combine_neural);
     } else {
         // File does not exist
-        int combine_n_size = 7;
-        int combine_n_shape[] = {100, 100, 100, 100, 100, 100, 4};
+        int combine_n_size = 6;
+        int combine_n_shape[] = {33, 30, 30, 30, 30, 4};
         int combine_n_activations[] = {
-            ACTIVATION_LEAKY_RELU,
-            ACTIVATION_SIGMOID,
-            ACTIVATION_RELU,
-            ACTIVATION_SIGMOID,
-            ACTIVATION_SIGMOID,
+            ACTIVATION_SWISH,
+            ACTIVATION_SWISH,
+            ACTIVATION_SWISH,
+            ACTIVATION_SWISH,
             ACTIVATION_SIGMOID
         };
         drone->combine_neural = init_matrices_from_network_design(combine_n_size, combine_n_shape, combine_n_activations);
@@ -367,6 +367,8 @@ double apply_activation(double val, int activation) {
             return (val > 0) ? val : val * 0.1;
         case ACTIVATION_SIGMOID:
             return 1.0 / (1.0 + exp2(-val));
+        case ACTIVATION_SWISH:
+            return val * (1.0 / (1.0 + exp2(-val)));
     }
     return -1;
 }

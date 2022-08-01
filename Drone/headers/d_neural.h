@@ -18,6 +18,7 @@
 #define ACTIVATION_RELU 0x0
 #define ACTIVATION_LEAKY_RELU 0x1
 #define ACTIVATION_SIGMOID 0x2
+#define ACTIVATION_SWISH 0x3
 
 // Note: this network data is never freed anywhere
 struct neural_data {
