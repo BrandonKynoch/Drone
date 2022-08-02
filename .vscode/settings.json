@@ -22,6 +22,7 @@
         "d_neural.h": "c",
         "globals.h": "c",
         "d_networking.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "time_buffer.h": "c"
     }
 }

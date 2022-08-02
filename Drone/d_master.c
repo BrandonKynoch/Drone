@@ -153,7 +153,7 @@ void drone_logic_loop() {
                 feed_forward_full_network(&drone_data);
 
                 // Set motors from output
-                motor_output_from_controller(
+                calculate_motor_output_from_controller(
                     &drone_data,
                     drone_data.combine_neural->output_layer[0],
                     drone_data.combine_neural->output_layer[1],
@@ -161,6 +161,11 @@ void drone_logic_loop() {
                     drone_data.combine_neural->output_layer[3]
                 );
 
+                calculate_motor_output_autopilot_correction(
+                    &drone_data,
+                    drone_data.combine_neural->output_layer[4] * 0.9 // Ensure that auto pilot doesn't fully take over
+                );
+                
                 printf("\n\n\n\n");
                 print_motor_output(&drone_data);
                 break;
@@ -262,7 +267,7 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     /// ROTATION DATA ////////////////////////////////////////
     if (drone->ticker % ROTATION_NEURAL_SET_TICKER_STRIDE) {
         drone->rotation_time_buffer->buffer[0] = drone_data.rotation_x;
-        drone->rotation_time_buffer->buffer[1] = drone_data.rotation_y;
+        drone->rotation_time_buffer->buffer[1] = drone_data.rotation_z;
         // TODO: Implement Z rotation as delta rotation
 
         // drone->rotation_time_buffer->buffer[2] = drone_data.rotation_z;
@@ -296,7 +301,7 @@ void set_NN_input_from_sensor_data(struct drone_data* drone) {
     /// VELOCITY DATA ////////////////////////////////////////
 }
 
-void motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {
+void calculate_motor_output_from_controller(struct drone_data* drone, double x_in, double y_in, double limit_scaler, double power_scaler) {
     // Remap values from    0 - 1      to      -1 - 1
     double x_out = (2 * x_in) - 1;
     double y_out = (2 * y_in) - 1;
@@ -334,6 +339,53 @@ double compute_motor_output_from_offset(double direction_x, double direction_y, 
 
 double compute_motor_output_from_scalers(double m_in, double m_mean, double power_scaler, double limit_scaler) {
     return power_scaler * (m_in - (m_mean * limit_scaler));
+}
+
+void calculate_motor_output_autopilot_correction(struct drone_data* drone, double amount) {
+    if (amount < 0.01) {
+        return; // Avoid unnecessary computation
+    }
+
+    double prev_fl = drone_data.m_fl;
+    double prev_fr = drone_data.m_fr;
+    double prev_br = drone_data.m_br;
+    double prev_bl = drone_data.m_bl;
+
+    double power = (drone->sensor_bottom - (drone->sensor_top * 0.2)) * 0.1 + 0.21;
+    power = clamp(power, -1, 1);
+
+    // Multiply by 2 first so that 90 degrees is equal to output of 1 instead of 180 being 1
+    double y = -drone->rotation_x * 2;
+    double x = drone->rotation_z * 2;
+
+    float direction_dist = sqrt(pow(x, 2) + pow(y, 2));
+    double limit = (direction_dist - 0.15) / 1.4;
+    limit = clamp(limit, 0, 1);
+
+    power += (direction_dist * 0.5); // Compensate for limit scaler
+    power = clamp(power, -1, 1);
+
+    x = clamp(x, 0, 1);
+    y = clamp(y, 0, 1);
+    
+    // remap to 0-1 range
+    x = (x + 1) / 2;
+    y = (y + 1) / 2;
+
+    power = (power + 1) / 2;
+
+    calculate_motor_output_from_controller(
+        drone,
+        x,
+        y,
+        limit,
+        power
+    );
+
+    drone->m_fl = custom_lerp(prev_fl, drone->m_fl, amount);
+    drone->m_fr = custom_lerp(prev_fr, drone->m_fr, amount);
+    drone->m_br = custom_lerp(prev_br, drone->m_br, amount);
+    drone->m_bl = custom_lerp(prev_bl, drone->m_bl, amount);
 }
 
 void motor_output(struct drone_data* drone) {
@@ -401,7 +453,7 @@ void assign_double_from_json(struct json_object* json_in, const char* field_name
 
 void test_motor_controller() {
     printf("Center full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0.5, // X_in
         0.5, // Y_in
@@ -412,7 +464,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Center upsidedown full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0.5, // X_in
         0.5, // Y_in
@@ -423,7 +475,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Resting\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0.5, // X_in
         0.5, // Y_in
@@ -434,7 +486,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Forward full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0.5, // X_in
         1, // Y_in
@@ -445,7 +497,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Forward full rotational\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0.5, // X_in
         1, // Y_in
@@ -457,7 +509,7 @@ void test_motor_controller() {
 
 
     printf("Right full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         1, // X_in
         0.5, // Y_in
@@ -468,7 +520,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Left full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0, // X_in
         0.5, // Y_in
@@ -479,7 +531,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Back full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         0.5, // X_in
         0, // Y_in
@@ -490,7 +542,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Front right full force\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         1, // X_in
         1, // Y_in
@@ -501,7 +553,7 @@ void test_motor_controller() {
     printf("\n\n");
 
     printf("Front right full rotational\n");
-    motor_output_from_controller(
+    calculate_motor_output_from_controller(
         &drone_data,
         1, // X_in
         1, // Y_in

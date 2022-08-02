@@ -237,7 +237,9 @@ public class Drone : MonoBehaviour, IEqualityComparer {
         if (!IsInContact || rb.velocity.magnitude > 0.02f) {
             if (!IsInContact) {
                 // ax^2 + c
-                heightFitness += (Utilities.ClampMin((20 + (-1.3f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f) * Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
+                float currentFrameHeightFitness = Utilities.ClampMin((20 + (-1.3f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f;
+                currentFrameHeightFitness = (currentFrameHeightFitness / Mathf.Max(0.01f, rb.velocity.y)) / 100;
+                heightFitness += currentFrameHeightFitness * Time.deltaTime * DroneServerHandler.StaticInstance.airborneFitnessScaler;
             }
 
             if (!dData.upsideDown) {
@@ -253,8 +255,9 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
 
             if (!IsInContact) {
-                float distToTarget = (float)data.distToTarget;
-                distFitness -= (distToTarget / initialDistFromTarget) * Time.deltaTime * DroneServerHandler.StaticInstance.distanceFitnessScaler;
+                //float distToTarget = (float)data.distToTarget;
+                //distFitness -= (distToTarget / initialDistFromTarget) * Time.deltaTime * DroneServerHandler.StaticInstance.distanceFitnessScaler;
+                distFitness += (new Vector3(rb.velocity.x, 0, rb.velocity.z)).magnitude * Time.deltaTime * DroneServerHandler.StaticInstance.distanceFitnessScaler;
 
                 float currentVelocityFitness = (rb.velocity.magnitude > MAX_VELOCITY) ? rb.velocity.magnitude - MAX_VELOCITY : 0;
                 velocityFitness -= currentVelocityFitness * Time.deltaTime * DroneServerHandler.StaticInstance.velocityFitnessScaler;

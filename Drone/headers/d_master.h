@@ -4,6 +4,7 @@
 #include <d_networking.h>
 #include <d_neural.h>
 #include <globals.h>
+#include <utilities.h>
 
 #include "time_buffer.h"
 
@@ -24,7 +25,7 @@ void set_NN_input_from_sensor_data(struct drone_data* drone);
 
 // Convert vector direction (x_in, y_in) & limit_scaler & power_scaler to 4 motor output values
 // Used to convert output layer of neural network to motor values
-void motor_output_from_controller(
+void calculate_motor_output_from_controller(
     struct drone_data* drone,
     double x_in,
     double y_in,
@@ -42,6 +43,8 @@ double compute_motor_output_from_offset(double direction_x, double direction_y, 
 //      - power_scaler :: Determines the amplitude of motor output
 //      - limit_scaler :: Determines the lower bound, and therefore the range of motor outputs
 double compute_motor_output_from_scalers(double m_in, double m_mean, double power_scaler, double limit_scaler);
+
+void calculate_motor_output_autopilot_correction(struct drone_data* drone, double amount);
 
 // Set drone motor json either send message to simulation or write to gpio pins
 void motor_output(struct drone_data* drone);

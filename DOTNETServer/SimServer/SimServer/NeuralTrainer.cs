@@ -381,6 +381,10 @@ namespace SimServer {
                 Thread.Yield();
             }
 
+            if (Networking.USE_FAKE_SIM) {
+                return;
+            }
+
             sessionStarted = true;
 
             while (true) {

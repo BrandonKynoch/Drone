@@ -7,6 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
+ 
 # GNU Make 3.81
 # Copyright (C) 2006  Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.
@@ -16,7 +17,7 @@ cd Drone && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/D
 # This program built for i386-apple-darwin11.3.0
  
 
-# Make data base, printed on Mon Aug  1 18:56:29 2022
+# Make data base, printed on Tue Aug  2 18:53:48 2022
 
 # Variables
 
@@ -65,7 +66,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.1046ZQ3fWv/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.aFO0XL1An4/Listeners
 # makefile (from `makefile', line 5)
 headers_dir = ./headers
 # automatic
@@ -175,7 +176,7 @@ MAKELEVEL := 1
 # environment
 LANG = C
 # environment
-VSCODE_PID = 8175
+VSCODE_PID = 32733
 # variable set hash-table stats:
 # Load=78/1024=8%, Rehash=0, Collisions=2/135=1%
 
@@ -326,10 +327,10 @@ output: obj/d_master.o obj/d_networking.o obj/d_neural.o ../Globals/obj/drone_da
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Mon Aug  1 18:56:29 2022
+# Finished Make data base on Tue Aug  2 18:53:48 2022
 
 
-# Make data base, printed on Mon Aug  1 18:56:29 2022
+# Make data base, printed on Tue Aug  2 18:53:48 2022
 
 # Variables
 
@@ -364,7 +365,7 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.1046ZQ3fWv/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.aFO0XL1An4/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
@@ -419,9 +420,6 @@ MallocNanoZone = 0
 MAKEFLAGS = Rrqp
 # environment
 MFLAGS = -Rrqp
- 
-make: *** [all] Error 1
-
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -451,7 +449,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 8175
+VSCODE_PID = 32733
 # variable set hash-table stats:
 # Load=58/1024=6%, Rehash=0, Collisions=1/92=1%
 
@@ -536,6 +534,8 @@ makefile:
 # strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
 # strcache free: total = 4087 / max = 4087 / min = 4087 / avg = 4087
 
-# Finished Make data base on Mon Aug  1 18:56:29 2022
+# Finished Make data base on Tue Aug  2 18:53:48 2022
 
  
+make: *** [all] Error 1
+

@@ -112,6 +112,10 @@ public class DroneServerHandler : MonoBehaviour {
         CalculateFittestDrone();
 
         isInTimeoutFromCorruptPacket = Time.time < staticInstance.corruptPacketTimeout;
+
+        if (Input.GetKeyDown(KeyCode.R)) {
+            ResetAllDrones();
+        }
     }
 
     private void OnApplicationQuit() {

@@ -24,7 +24,7 @@ namespace SimServer {
         private const Int32 DRONE_CONNECTIONS_SOCKET_PORT = 8060;
 
 
-        private const string FAKE_SIM_RESPONSE = "{\"opcode\":4,\"id\":0,\"motorOutputs\":[0.0,0.0,0.0,0.0],\"circleSensorData\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"sensorTop\":0.0,\"sensorBottom\":0.0,\"fitness\":0.0}";
+        private const string FAKE_SIM_RESPONSE = "{\"opcode\":4,\"id\":0,\"motorOutputs\":[0.0,0.0,0.0,0.0],\"circleSensorData\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"sensorTop\":0.0,\"sensorBottom\":0.0,\"fitness\":0.0, \"rotationX\":0.0, \"rotationY\":0.0, \"rotationZ\":0.0}";
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// SIMULATION VARIABLES ///////////////////////////////////////////////
