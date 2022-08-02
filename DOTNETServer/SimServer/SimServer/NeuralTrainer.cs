@@ -17,6 +17,7 @@ namespace SimServer {
 
         private const double EPOCH_RUN_TIME = 12;   // Time for a single epoch to execute in seconds
         private const int SUPER_EVOLUTION_CYCLE = 15; // Super evolution every n epochs
+        private const int SUPER_COLLECTION_CYCLE = 10; // Every n super evolutions, collect best drones from previous super evolutions without performing any evolution
         /// CONSTANTS //////////////////////////////////////////////////////////
 
         /// TRAINING DATA //////////////////////////////////////////////////////
@@ -157,31 +158,34 @@ namespace SimServer {
                 // Copy files over to target folder for new epoch
                 string[] previousNNs = Directory.GetDirectories(previousTrainingDir.ToString());
 
+                bool isSuperCollection = firstIteration < 0 && (currentEpoch % (SUPER_EVOLUTION_CYCLE * SUPER_COLLECTION_CYCLE) == 0);
+
                 if (!isSuperEvolution) {
                     // Normal evolution
                     CopyNNFolders(previousTrainingDir.ToString(), currentTrainingDir.ToString(), overwrite: true);
                 } else {
                     // Super evolution
-                    string[] epochDirectories = Directory.GetDirectories(sessionTrainingDir.ToString());
-                    List<Utils.FileData> epochDirs = Utils.ExtractFileData(epochDirectories);
-                    epochDirs.Sort();
-                    epochDirs.Reverse();
-                    for (int i = 1; i < SUPER_EVOLUTION_CYCLE + 1; i++) { // Start at index 1 so that we don't copy elements from/to same dir
-                        CopyNNFolders(epochDirs.ElementAt(i).fullFilePath, currentTrainingDir.ToString(), overwrite: false);
-                    }
-                    CullNNS(currentTrainingDir.ToString(), Master.GetDroneCount);
-                    for (int i = 1; i < SUPER_EVOLUTION_CYCLE; i++) {
-                        Directory.Delete(epochDirs.ElementAt(i).fullFilePath, true);
+                    PerformSuperEvolution(true, currentTrainingDir, SUPER_EVOLUTION_CYCLE);
+
+                    if (isSuperCollection) {
+                        previousTrainingDir = currentTrainingDir;
+                        currentEpoch += SUPER_EVOLUTION_CYCLE;
+                        currentTrainingDir = Directory.CreateDirectory(sessionTrainingDir.ToString() + "/" + currentEpoch.ToString() + " SUPER COLLECTION");
+                        PerformSuperEvolution(false, currentTrainingDir, SUPER_COLLECTION_CYCLE);
                     }
                 }
 
 
                 // Execute genetic algorithm here
-                if (firstIteration < 0 && (!Networking.StaticInstance.isResettingNetwork || isSuperEvolution)) {
-                    EvolveDirectoryContents(currentTrainingDir.ToString());
+                if (!isSuperCollection) {
+                    if (firstIteration < 0 && (!Networking.StaticInstance.isResettingNetwork || isSuperEvolution)) {
+                        EvolveDirectoryContents(currentTrainingDir.ToString());
+                    } else {
+                        firstIteration--;
+                        Console.WriteLine("\n\nSkipping evolution on current epoch...\n\n");
+                    }
                 } else {
-                    firstIteration--;
-                    Console.WriteLine("\n\nSkipping evolution on current epoch...\n\n");
+                    Console.WriteLine("\n\nSUPER COLLECTION !!!\n\n");
                 }
 
                 // MARK: TODO: Check that number of agents matches number of files
@@ -338,6 +342,33 @@ namespace SimServer {
                 ngd.WriteToFile();
             }
             Console.WriteLine(" Finished");
+        }
+
+        private void PerformSuperEvolution(bool deleteEpochsAfter, DirectoryInfo targetFolder, int epochCollectionCount) {
+            string[] epochDirectories = Directory.GetDirectories(sessionTrainingDir.ToString());
+            List<Utils.FileData> epochDirs = Utils.ExtractFileData(epochDirectories);
+            epochDirs.Sort();
+            epochDirs.Reverse();
+
+            for (int i = 1; i < Math.Min(epochDirs.Count, epochCollectionCount + 1); i++) {
+                if (epochDirs.ElementAt(i).fullFilePath.Equals(targetFolder)) {
+                    continue;
+                }
+
+                CopyNNFolders(epochDirs.ElementAt(i).fullFilePath, targetFolder.ToString(), overwrite: false);
+            }
+
+            CullNNS(targetFolder.ToString(), Master.GetDroneCount);
+
+            if (deleteEpochsAfter) {
+                for (int i = 1; i < Math.Min(epochDirs.Count, epochCollectionCount); i++) {
+                    if (epochDirs.ElementAt(i).fullFilePath.Equals(targetFolder)) {
+                        continue;
+                    }
+
+                    Directory.Delete(epochDirs.ElementAt(i).fullFilePath, true);
+                }
+            }
         }
 
 

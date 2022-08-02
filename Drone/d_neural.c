@@ -112,10 +112,9 @@ void init_all_neural_data_in_dir(const char* enclosing_dir, struct drone_data* d
         init_neural_data_from_file(file, &drone->combine_neural);
     } else {
         // File does not exist
-        int combine_n_size = 6;
-        int combine_n_shape[] = {33, 30, 30, 30, 30, 4};
+        int combine_n_size = 5;
+        int combine_n_shape[] = {33, 30, 30, 30, 4};
         int combine_n_activations[] = {
-            ACTIVATION_SWISH,
             ACTIVATION_SWISH,
             ACTIVATION_SWISH,
             ACTIVATION_SWISH,
