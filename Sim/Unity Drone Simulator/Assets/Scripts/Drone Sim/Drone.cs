@@ -38,7 +38,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
 
     /// Fitness Vars /////////////////////////////////////////
     private const float IDEAL_HEIGHT = 1.1f;
-    private const float MAX_VELOCITY = 1f;
+    private const float MAX_VELOCITY = 0.2f;
 
     private float heightFitness = 0;
     private float rotationFitness = 0;
@@ -234,7 +234,7 @@ public class Drone : MonoBehaviour, IEqualityComparer {
             return; // Drone is invalidated if it has flown through the roof
         }
 
-        if (!IsInContact || rb.velocity.magnitude > 0.02f) {
+        if (!IsInContact || (rb.velocity.magnitude > 0.02f && distFromGround > 0.4f)) {
             if (!IsInContact) {
                 // ax^2 + c
                 float currentFrameHeightFitness = Utilities.ClampMin((20 + (-1.3f * Mathf.Pow(IDEAL_HEIGHT - distFromGround, 2))), 0) / 20f;

@@ -1547,12 +1547,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dronePrefab: {fileID: 1399146370127915898, guid: 8c727ff7c1e863d4ca34ec990a21883d, type: 3}
   spawnTransform: {fileID: 1666220899}
-  distanceFitnessScaler: 0.118
-  rotationFitnessScaler: 1.78
-  smoothnessFitnessScaler: 0.6
-  airborneFitnessScaler: 1.303
-  velocityFitnessScaler: 0.9
-  obstacleAvoidanceScaler: 0.661
+  distanceFitnessScaler: 0.036
+  rotationFitnessScaler: 2
+  smoothnessFitnessScaler: 1.841
+  airborneFitnessScaler: 1.069
+  velocityFitnessScaler: 0.757
+  obstacleAvoidanceScaler: 0.471
 --- !u!1001 &1660060617
 PrefabInstance:
   m_ObjectHideFlags: 0

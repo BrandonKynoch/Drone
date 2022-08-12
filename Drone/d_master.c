@@ -315,8 +315,8 @@ void calculate_motor_output_from_controller(struct drone_data* drone, double x_i
         y_out = y_out / v_length;
     }
 
-    x_out = x_out * fabs(x_out);
-    y_out = y_out * fabs(y_out);
+    x_out = x_out;// * fabs(x_out);
+    y_out = y_out;// * fabs(y_out);
 
     // Convert
     drone->m_fl = compute_motor_output_from_offset(x_out, y_out, -1, 1);

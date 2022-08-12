@@ -18,7 +18,6 @@ cc -o output  obj/d_master.o  obj/d_networking.o  obj/d_neural.o  ../Globals/obj
 make[1]: Leaving directory `/Users/brandonkynoch/Desktop/Projects/Drone/Drone'
 cd ..
 cd Server && /Library/Developer/CommandLineTools/usr/bin/make clean && /Library/Developer/CommandLineTools/usr/bin/make
- 
 make[1]: Entering directory `/Users/brandonkynoch/Desktop/Projects/Drone/Server'
 rm -r obj
 mkdir obj
